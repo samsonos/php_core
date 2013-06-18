@@ -1,1 +1,3 @@
-SamsonPHP - Module based framework
+SamsonPHP
+
+SamsonPHP - Module based PHP framework
