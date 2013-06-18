@@ -10,4 +10,5 @@ class System extends CompressableModule
 	protected $id = 'core';
 	protected $author = 'Vitaly Iegorov';
 	protected $version = '1.1.1';
+	protected $requirements = array( 'php' => '>=5.2.4' );
 }

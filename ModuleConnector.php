@@ -120,18 +120,52 @@ class ModuleConnector extends Module implements iModuleConnector
 	{		
 		// Переберем все связи модуля
 		foreach ( $this->requirements as $module => $version ) 
-		{			
-			// Если не указана версия модуля - правильно получим имя модуля
-			if( !isset( $module{0} ) ) $module = $version;		
+		{		
+			// Поумолчания установим такое отношение по версии модуля
+			$version_sign = '>=';
+			
+			// Если не указана версия модуля - правильно получим имя модуля и установим версию
+			if( !isset( $module{0} ) ) { $module = $version; $version = '0.0.1'; }	
+
+			// Определим версию и знаки
+			if( preg_match( '/\s*((?<sign>\>\=|\<\=\>|\<)*(?<version>.*))\s*/iu', $version, $matches ))
+			{
+				$version_sign = isset($matches['sign']{0}) ? $matches['sign'] : $version_sign;
+				$version = $matches['version'];
+			}
 
 			// Получим регистро не зависимое имя модуля
-			$_module = mb_strtolower( $module, 'UTF-8' );				
+			$_module = mb_strtolower( $module, 'UTF-8' );
 			
+			trace($_module.'-'.$version.$version_sign.Module::$instances[ $_module ]->version);
+			
+			// Если это касательно самого PHP
+			if( $_module == 'php' )
+			{
+				if( !version_compare( phpversion(), $version, $version_sign ) )
+				{
+					return e( 'Версия PHP ниже требуемой ## - ##', E_SAMSON_FATAL_ERROR, array( phpversion(), $version ) );
+				}
+			}				
 			// Проверим загружен ли требуемый модуль в ядро
-			if( ! isset( Module::$instances[ $_module ] ) )
+			else if( !isset( Module::$instances[ $_module ] ) )
 			{
 				return e( 'Ошибка загрузки модуля(##) в ядро - Не найден связазанный модуль(##)', E_SAMSON_FATAL_ERROR, array( $this->id, $module) );
-			}			
+			}	
+			// Модуль определен сравним его версию
+			else if ( version_compare( $version, Module::$instances[ $_module ]->version, $version_sign ) === -1 ) 
+			{
+				return e( 'Ошибка загрузки модуля(##) в ядро - Версия связанного модуля(##) не подходит ## ## ##',
+						E_SAMSON_FATAL_ERROR,
+						array(
+								$this->id,
+								$_module,
+								$version,
+								$version_sign,
+								Module::$instances[ $_module ]->version
+						)
+				);
+			}	 		
 		}	
 		
 		// Вернем результат проверки модуля
