@@ -8,13 +8,9 @@ use Samson\ResourceCollector\ResourceCollector;
  * 
  * @package SamsonPHP
  * @author Vitaly Iegorov <vitalyiegorov@gmail.com> 
- * @version 4.5.5
  */
 final class Core implements iCore
-{	
-	/** Текущая версия фреймворка */
-	const VERSION = '5.1.1';
-	
+{		
 	/**
 	 * Стек загруженных в ядро РЕАЛЬНЫХ и ВИРТУАЛЬНЫЙ модулей
 	 * @var array
@@ -290,7 +286,7 @@ final class Core implements iCore
 		$template_html = str_ireplace( '</body>', $copyright.'</body>', $template_html );
 			
 		// Добавим в конец предложения по работе
-		$template_html .= '<!-- PHP фреймфорк SamsonPHP v '.Core::VERSION.' http:://samsonos.com  -->';
+		$template_html .= '<!-- PHP фреймфорк SamsonPHP http:://samsonos.com  -->';
 		$template_html .= '<!-- Нравится PHP/HTML, хочешь узнать много нового и зарабатывать на этом деньги? Пиши info@samsonos.com -->';
 		
 		return $template_html;
@@ -436,7 +432,7 @@ final class Core implements iCore
 		$class_name = basename($class);
 		
 		// Если мы знаем какой модуль загружается в данный моммент
-		if( isset( $this->loaded_module ) )
+		if( isset( $this->loaded_module ) && sizeof( $this->loaded_module ) )
 		{
 			// Найдем в списке файлов нужный нам по имени класса, так как мы незнаем
 			// структуру каталогов модуля поищем класс символьным поиском в списке всех файлов
@@ -450,11 +446,16 @@ final class Core implements iCore
 				foreach ( $files as $k => $file ) require_once( $file );				
 			}			
 		}	
+		// Загрузка класса ядра системы
+		else if( strpos( $class, 'Samson\Core\\' ) !== false ) require str_replace('Samson\Core\\', '', $class).'.php';	
 	}
 	
 	/** Конструктор */
 	public function __construct()
 	{			
+		// Установим обработчик автоматической загрузки классов
+		spl_autoload_register( array( $this, '__autoload'));
+		
 		// Установим полный путь к рабочей директории
 		$this->system_path = __SAMSON_CWD__.'/';		
 		
@@ -463,7 +464,7 @@ final class Core implements iCore
 		$this->module_stack = & Module::$instances;		
 			 
 		// Создадим главный системный модуль
-		new CompressableModule( 'system', __SAMSON_PATH__ );		
+		new System( 'system', __SAMSON_PATH__ );		
 		
 		// Добавим главный локальный модуль, установим путь к нему если это "удаленное" приложение
 		new CompressableModule( 'local', $this->system_path );
@@ -479,9 +480,6 @@ final class Core implements iCore
 			
 		// Выполним инициализацию конфигурации модулей загруженных в ядро
 		Config::load();
-
-		// Установим обработчик автоматической загрузки классов 
-		spl_autoload_register( array( $this, '__autoload'));
 	}
 	
 	/** Магический метод для десериализации объекта */

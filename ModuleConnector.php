@@ -133,9 +133,6 @@ class ModuleConnector extends Module implements iModuleConnector
 				return e( 'Ошибка загрузки модуля(##) в ядро - Не найден связазанный модуль(##)', E_SAMSON_FATAL_ERROR, array( $this->id, $module) );
 			}			
 		}	
-
-		// Если существует файл со списком подключаемых файлов модуля - загрузим его
-		//if( file_exists($this->path.'/include.php') ) require( $this->path.'/include.php' );	
 		
 		// Вернем результат проверки модуля
 		return TRUE;
