@@ -1,5 +1,5 @@
 <?php
-use Samson\Core\SamsonLocale;
+use samson\core\SamsonLocale;
 
 /**
  * Изменить регистр ключей массива, с поддержкой UNICODE

@@ -1,5 +1,5 @@
 <?php
-namespace Samson\Core;
+namespace samson\core;
 
 /**
  * Модуль системы поддерживающий сжатие
@@ -9,9 +9,9 @@ namespace Samson\Core;
  */
 class CompressableModule extends ModuleConnector implements iModuleCompressable
 {		
-	/** @see \Samson\Core\iModuleCompressable::beforeCompress() */
+	/** @see \samson\core\iModuleCompressable::beforeCompress() */
 	public function beforeCompress( & $obj = null, array & $code = null ){}
 	
-	/** @see \Samson\Core\iModuleCompressable::compress() */
+	/** @see \samson\core\iModuleCompressable::compress() */
 	public function afterCompress( & $obj = null, array & $code = null ){}
 }

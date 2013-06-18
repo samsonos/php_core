@@ -1,5 +1,5 @@
 <?php
-namespace Samson\Core;
+namespace samson\core;
 
 /**
  * Интерфейс определяющий возможность сжатия модуля 

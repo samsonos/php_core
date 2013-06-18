@@ -1,5 +1,5 @@
 <?php
-namespace Samson\Core;
+namespace samson\core;
 
 /**
  * Виды режимов конфигурация работы фреймворка
@@ -53,7 +53,7 @@ class Config
 		if( isset( $type ) ) self::$type = $type;
 		
 		// Получим загруженные в систему классы которые наследуют этот класс
-		foreach ( get_declared_classes() as $class ) if( in_array( 'Samson\Core\Config', class_parents($class)) ) 
+		foreach ( get_declared_classes() as $class ) if( in_array( 'samson\core\Config', class_parents($class)) ) 
 		{				
 			//trace('Создаем конфигурацию:'.$class);
 			

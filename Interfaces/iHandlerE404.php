@@ -1,5 +1,5 @@
 <?php
-namespace Samson\Core;
+namespace samson\core;
 
 /**
  * Специальный интерфейс для определения системного обработчика 404 ошибки

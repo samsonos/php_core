@@ -1,5 +1,5 @@
 <?php
-namespace Samson\Core;
+namespace samson\core;
 
 /** Стандартный путь к папке со словарями */
 define('__SAMSON_I18N_PATH', __SAMSON_APP_PATH.'/i18n' );

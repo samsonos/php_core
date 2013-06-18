@@ -1,5 +1,5 @@
 <?php 
-namespace Samson\Core;
+namespace samson\core;
 
 use Samson\ResourceCollector\ResourceCollector;
 
@@ -229,7 +229,7 @@ final class Core implements iCore
 				foreach ( array_diff( get_declared_classes(), $classes ) as $class ) 
 				{
 					// Если этот класс является потомком модуля
-					if( in_array( 'Samson\Core\ModuleConnector', class_parents( $class )))
+					if( in_array( 'samson\core\ModuleConnector', class_parents( $class )))
 					{								
 						// Создадим экземпляр класса для подключения модуля
 						$connector = new $class( $ci_id, $path, $params );
@@ -292,7 +292,7 @@ final class Core implements iCore
 		return $template_html;
 	}
 	
-	/** @see \Samson\Core\iCore::e404() */
+	/** @see \samson\core\iCore::e404() */
 	public function e404( $callable = null )
 	{
 		// Если передан аргумент функции то установим новый обработчик e404 
@@ -338,7 +338,7 @@ final class Core implements iCore
 		foreach ($this->module_stack as $id => $module )
 		{		
 			// Только внешние модули и их оригиналы
-			if( get_class($module) != 'Samson\Core\Module' && $module->id() == $id )
+			if( get_class($module) != 'samson\core\Module' && $module->id() == $id )
 			{
 				//elapsed('Initializing module: '.$id);
 				$module->init();
@@ -433,12 +433,12 @@ final class Core implements iCore
 		
 		// Если мы знаем какой модуль загружается в данный моммент
 		if( isset( $this->loaded_module ) && sizeof( $this->loaded_module ) )
-		{
+		{			
 			// Найдем в списке файлов нужный нам по имени класса, так как мы незнаем
 			// структуру каталогов модуля поищем класс символьным поиском в списке всех файлов
 			// модуля
 			if($files = preg_grep( '/\/'.$class_name.'\.php/', $this->loaded_module['files']))
-			{					
+			{				
 				// Проверим на однозначность
 				if( sizeof($files) > 1 ) return e('Невозможно определить файл для класса: ##', E_SAMSON_CORE_ERROR, $class );
 				
@@ -447,7 +447,7 @@ final class Core implements iCore
 			}			
 		}	
 		// Загрузка класса ядра системы
-		else if( strpos( $class, 'Samson\Core\\' ) !== false ) require str_replace('Samson\Core\\', '', $class).'.php';	
+		else if( strpos( $class, 'samson\core\\' ) !== false ) require str_replace('samson\core\\', '', $class).'.php';	
 	}
 	
 	/** Конструктор */

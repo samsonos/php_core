@@ -1,5 +1,5 @@
 <?php
-namespace Samson\Core;
+namespace samson\core;
 
 /**
  * Универсальный интерфейс для подключения модулей в ядро SamsonPHP

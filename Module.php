@@ -1,5 +1,5 @@
 <?php	
-namespace Samson\Core;
+namespace samson\core;
 
 /**
  * Модуль системы
@@ -289,7 +289,7 @@ class Module implements iModule, \ArrayAccess, iModuleViewable
 	public function __set( $field, $value = NULL )
 	{		
 		// Если передан класс который поддерживает представление для модуля
-		if( is_object( $field ) && in_array( 'Samson\Core\iModuleViewable', class_implements($field )))
+		if( is_object( $field ) && in_array( 'samson\core\iModuleViewable', class_implements($field )))
 		{					
 			// Сформируем регистро не зависимое имя класса для хранения его переменных в модуле
 			$class_name = is_string( $value ) ? $value : ''.mb_strtolower( basename(str_replace('\\', '/', get_class($field))), 'UTF-8' );

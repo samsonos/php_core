@@ -102,7 +102,7 @@ function & s()
 		// Если существует отпечаток ядра, загрузим его
 		if( isset( $GLOBALS["__CORE_SNAPSHOT"]) ) $_v = unserialize($GLOBALS["__CORE_SNAPSHOT"]);
 		// Создадим экземпляр
-		else $_v = new Samson\Core\Core();			
+		else $_v = new samson\core\Core();			
 	}
 		
 	// Вернем указатель на ядро системы
@@ -114,7 +114,7 @@ function & s()
  *
  * @return Error Класс для работы с ошибками и отладкой системы
  */
-function & error(){static $_error; return ( $_error = isset($_error) ? $_error : new \Samson\Core\Error());}
+function & error(){static $_error; return ( $_error = isset($_error) ? $_error : new \samson\core\Error());}
 
 // Создадим экземпляр класса
 error();
@@ -411,7 +411,7 @@ function output( $view, array $vars = NULL, $prefix = NULL )
  * URL(УРЛ) - Получить объект для работы с URL
  * @return URL Объект для работы с URL
  */
-function & url(){ static $_v; return ( $_v = isset($_v) ? $_v : new \Samson\Core\URL()); }
+function & url(){ static $_v; return ( $_v = isset($_v) ? $_v : new \samson\core\URL()); }
 
 /**
  * Построить полный URL с учетом относительного пути и вывести его в текущий поток вывода
@@ -486,7 +486,7 @@ function profiler()
  *
  * @see SamsonLocale::set()
  */
-function setlocales(){ \Samson\Core\SamsonLocale::set( func_get_args() ); }
+function setlocales(){ \samson\core\SamsonLocale::set( func_get_args() ); }
 
 /**
  * Установить/Получить текущую локализацию сайта
@@ -495,7 +495,7 @@ function setlocales(){ \Samson\Core\SamsonLocale::set( func_get_args() ); }
  * @param string $locale Значение локали
  * @return string Возвращает текущее значение локали сайта до момента вызова метода
  */
-function locale( $locale = NULL ){ return \Samson\Core\SamsonLocale::current( $locale ); }
+function locale( $locale = NULL ){ return \samson\core\SamsonLocale::current( $locale ); }
 
 /**
  * Специальная обертка для функции class_exists(), с учетом пространства имен

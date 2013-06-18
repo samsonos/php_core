@@ -1,5 +1,5 @@
 <?php
-namespace Samson\Core;
+namespace samson\core;
 
 /**
  * Модуль имеющий единственный свой экземпляр c расширенными возможностями 
@@ -48,7 +48,7 @@ class SingletonModule extends ModuleConnector
 	public function & duplicate( $id, $class_name = null )
 	{
 		// Вызовем родительский метод
-		return parent::duplicate( $id, '\Samson\Core\ModuleConnector' );
+		return parent::duplicate( $id, '\samson\core\ModuleConnector' );
 	}
 
 	/** Обработчик сериализации объекта */
