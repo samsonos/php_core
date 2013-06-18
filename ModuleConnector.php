@@ -17,13 +17,13 @@ class ModuleConnector extends Module implements iModuleConnector
 	protected $requirements = array();	
 		
 	/** Конструктор */
-	public function  __construct( $core_id, $path = NULL, array $params = NULL )
+	public function  __construct( $core_id = NULL, $path = NULL, array $params = NULL )
 	{	
 		// Установим путь
 		$this->path = $path;		
 		
 		// Установим имя модуля под которым модуль загружен в систему
-		$this->core_id = $core_id;	
+		$this->core_id = !isset( $core_id ) ? $this->id : $core_id;	
 
 		// Если для подключаемого модуля не выставлен идентификатор в описании класса
 		// установим переданный
@@ -135,25 +135,15 @@ class ModuleConnector extends Module implements iModuleConnector
 			}
 
 			// Получим регистро не зависимое имя модуля
-			$_module = mb_strtolower( $module, 'UTF-8' );
+			$_module = mb_strtolower( $module, 'UTF-8' );		
 			
-			trace($_module.'-'.$version.$version_sign.Module::$instances[ $_module ]->version);
-			
-			// Если это касательно самого PHP
-			if( $_module == 'php' )
-			{
-				if( !version_compare( phpversion(), $version, $version_sign ) )
-				{
-					return e( 'Версия PHP ниже требуемой ## - ##', E_SAMSON_FATAL_ERROR, array( phpversion(), $version ) );
-				}
-			}				
 			// Проверим загружен ли требуемый модуль в ядро
-			else if( !isset( Module::$instances[ $_module ] ) )
+			if( !isset( Module::$instances[ $_module ] ) )
 			{
 				return e( 'Ошибка загрузки модуля(##) в ядро - Не найден связазанный модуль(##)', E_SAMSON_FATAL_ERROR, array( $this->id, $module) );
 			}	
 			// Модуль определен сравним его версию
-			else if ( version_compare( $version, Module::$instances[ $_module ]->version, $version_sign ) === -1 ) 
+			else if ( version_compare( Module::$instances[ $_module ]->version, $version, $version_sign ) === false ) 
 			{
 				return e( 'Ошибка загрузки модуля(##) в ядро - Версия связанного модуля(##) не подходит ## ## ##',
 						E_SAMSON_FATAL_ERROR,

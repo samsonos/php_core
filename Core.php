@@ -462,7 +462,10 @@ final class Core implements iCore
 		// Свяжем коллекцию загруженных модулей в систему со статической коллекцией
 		// Созданных экземпляров класса типа "Модуль"
 		$this->module_stack = & Module::$instances;		
-			 
+
+		// Создадим специальный модуль для PHP
+		new PHP();
+		
 		// Создадим главный системный модуль
 		new System( 'system', __SAMSON_PATH__ );		
 		
