@@ -1,0 +1,42 @@
+/* ==================================================================== */
+/* Стандартные стили для вывода отладочных сообщений и ошибок в системе */
+/* ==================================================================== */
+
+@CHARSET "UTF-8";
+
+/* Резет CSS для одинакового отображения */
+html {	color: #000; background: #FFF;}
+body,div,dl,dt,dd,ul,ol,li,h1,h2,h3,h4,h5,h6,pre,code,form,fieldset,legend,input,button,textarea,p,
+blockquote,th,td { margin: 0; padding: 0; } li { list-style: none; }
+
+/* Ошибка */
+._core_error { clear:both; float:left; width:100%; font-size: 9pt; position:relative; z-index:99; background-color:  #F5E4E4; border-bottom:1px solid lightgray; line-height: 20px; color: black; }
+/* Отладочное сообщение */
+._core_error._core_debug { background-color: #fbfbfb; }
+/* Фатальная ошибка */
+._core_error._core_fatal_error { background-color: #FFC2A8; border-top:1px solid #FF0C29; border-bottom:1px solid #FF0C29; }
+
+/* Ожирнить текст фатальной ошибки */
+._core_error._core_fatal_error ._core_error_text { font-weight: bold; }
+/* Если это фатальная ошибка - показать стек вызовов */
+._core_error._core_fatal_error ._core_error_function ._core_error_stack { display: block; }
+
+/* Элементы ошибки */
+/* Ссылка на открытие ошибки в отладчике */
+._core_error ._core_error_link { float:left; margin-left:5px; color: blue; } 
+/* Общий стиль для блоков сообщения */
+._core_error span { float:left; margin-left:5px; }
+/* Тип ошибки */
+._core_error span._core_error_type { font-weight: bold; }
+/* Файл в котором произошла ошибка */
+._core_error span._core_error_file { }
+/* Строка файла с ошибкой */
+._core_error span._core_error_line { }
+/* Текст сообщения об ошибке */
+._core_error ul._core_error_text { float:left; margin-left: 5px; }       	
+/* Функция в которой была ошибка */
+._core_error ._core_error_function { float:left; cursor: pointer;  }
+/* Стек вызовов в виде списка */
+._core_error ._core_error_function ._core_error_stack { clear:both; display:none; }
+/* Отображение стека без javascript */
+._core_error ._core_error_function:hover ._core_error_stack { display:block; }
