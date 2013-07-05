@@ -455,7 +455,7 @@ final class Core implements iCore
 	{			
 		// Установим обработчик автоматической загрузки классов
 		spl_autoload_register( array( $this, '__autoload'));
-		
+				
 		// Установим полный путь к рабочей директории
 		$this->system_path = __SAMSON_CWD__.'/';		
 		
