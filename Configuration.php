@@ -84,11 +84,14 @@ class Config
 		// Переберем загруженные конфигурации модулей
 		foreach ( self::$data as $module => $cfg )
 		{
-			// Получим путь к модулю
-			$path = $cfg['__path'];
+			// Получим путь к модулю относительно системной папки 
+			$path = __DIR__.'/'.$cfg['__path'];
+					
+			// Если нет то попробуем относительно текущей папки
+			if( ! file_exists( $path )) $path = getcwd().'/'.$cfg['__path'];
 		
 			// Загрузим модуль в ядро системы если к нему указан путь
-			if( isset( $path{0} ) ) $core->load( $module, __DIR__.'/'.$path, $cfg );			
+			if( isset( $path{0} ) ) $core->load( $module, $path, $cfg );			
 		}
 	}
 	

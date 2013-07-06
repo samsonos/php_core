@@ -160,7 +160,7 @@ final class Core implements iCore
 		
 		// Если в систему загружена нужная конфигурация для загружаемого модуля - получим её
 		if( isset( Config::$data[ $ci_id ] ) ) $params = array_merge( Config::$data[ $ci_id ], $params );	
-		
+				
 		// Если мы еще не загрузили модуль в ядро
 		if( ! isset( $this->module_stack[ $ci_id ] ) )
 		{		
@@ -195,7 +195,7 @@ final class Core implements iCore
 					'path' 		=>	$path, 
 					'params'	=> $params, 
 					'files' 	=> FILE::dir( $path, 'php' )
-				);
+				);			
 				
 				// Получим список загруженных классов
 				$classes = get_declared_classes();
@@ -223,7 +223,7 @@ final class Core implements iCore
 					if( basename($file) == 'include.php' ) continue;					
 					// Просто подключи файл модуля
 					else require_once( $file );									
-				}	
+				}			
 				
 				// Получим список новых загруженных классов			
 				foreach ( array_diff( get_declared_classes(), $classes ) as $class ) 
@@ -233,7 +233,7 @@ final class Core implements iCore
 					{								
 						// Создадим экземпляр класса для подключения модуля
 						$connector = new $class( $ci_id, $path, $params );
-		
+					
 						// Получим родительский класс
 						$parent_class = get_parent_class( $connector );
 		
@@ -425,6 +425,7 @@ final class Core implements iCore
 		}
 	}
 	
+	//[PHPCOMPRESSOR(remove,start)]
 	/** Обработчик автоматической загрузки классов модулей */
 	public function __autoload ( $class )
 	{		
@@ -449,12 +450,15 @@ final class Core implements iCore
 		// Загрузка класса ядра системы
 		else if( strpos( $class, 'samson\core\\' ) !== false ) require str_replace('samson\core\\', '', $class).'.php';	
 	}
+	//[PHPCOMPRESSOR(remove,end)]
 	
 	/** Конструктор */
 	public function __construct()
 	{			
+		//[PHPCOMPRESSOR(remove,start)]
 		// Установим обработчик автоматической загрузки классов
 		spl_autoload_register( array( $this, '__autoload'));
+		//[PHPCOMPRESSOR(remove,end)]
 				
 		// Установим полный путь к рабочей директории
 		$this->system_path = __SAMSON_CWD__.'/';		

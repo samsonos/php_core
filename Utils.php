@@ -140,9 +140,16 @@ function debug_parse_markers( $pattern, array & $args = NULL )
  * Трассировка сообщения в поток вывода
  * Оберточная функция для echo с переходом но новую строку
  * 
- * @param string $text Текст для вывода
+ * @param string 	$text 		Текст для вывода
+ * @param boolean 	$totextarea	Выводить результат в textarea
  */
-function trace( $text = '' ){echo '' .print_a($text,TRUE).'<br>'."\n"; return FALSE; }
+function trace( $text = '', $totextarea = false )
+{
+	if( !$totextarea ) echo '' .print_a($text,TRUE).'<br>'."\n"; 
+	else echo '<textarea>'.print_r( $text,true).'</textarea>';
+	
+	return FALSE; 
+}
 
 function & debug_parse_args( array $args )
 {

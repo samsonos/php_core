@@ -21,10 +21,13 @@ if(!defined('__DIR__')) define( '__DIR__', dirname(__FILE__));
 define( '__SAMSON_PATH__', __DIR__.'/' );
 
 /** Получим текущий каталог веб-приложения */
-define('__SAMSON_CWD__', str_replace('\\', '/', getcwd() ) );
+define('__SAMSON_CWD__', str_ireplace('\\', '/', getcwd() ) );
 
 /** Получим путь к текущему веб-приложению относительно корня сайта */
-define('__SAMSON_BASE__', str_replace( $_SERVER['DOCUMENT_ROOT'], '', __SAMSON_CWD__ ).'/' );
+define('__SAMSON_BASE__', str_ireplace( $_SERVER['DOCUMENT_ROOT'], '', __SAMSON_CWD__ ).'/' );
+
+/** Объявим константу для раздели пути в namespace */
+define('__NS_SEPARATOR__', '\\');
 
 // Определим путь к корню
 $_path_to_root = '';
@@ -87,6 +90,7 @@ require('include.php');
 // Функции шорткаты(Shortcut) - для красоты и простоты кода системы
 //
 
+
 /**
  * System(Система) - Получить объект для работы с ядром системы
  * @return Core Ядро системы
@@ -100,7 +104,10 @@ function & s()
 	if( ! isset($_v) )
 	{
 		// Если существует отпечаток ядра, загрузим его
-		if( isset( $GLOBALS["__CORE_SNAPSHOT"]) ) $_v = unserialize($GLOBALS["__CORE_SNAPSHOT"]);
+		if( isset( $GLOBALS["__CORE_SNAPSHOT"]) ) 
+		{			
+			$_v = unserialize(base64_decode($GLOBALS["__CORE_SNAPSHOT"]));			
+		}
 		// Создадим экземпляр
 		else $_v = new samson\core\Core();			
 	}
@@ -498,18 +505,18 @@ function setlocales(){ \samson\core\SamsonLocale::set( func_get_args() ); }
 function locale( $locale = NULL ){ return \samson\core\SamsonLocale::current( $locale ); }
 
 /**
- * Специальная обертка для функции class_exists(), с учетом пространства имен
- * т.к. стандартный механизм проверяет только полный путь к классу
+ * Сформировать правильное имя класса с использованием namespace, если оно не указано
+ * Функция нужна для обратной совместимости с именами классов без NS
  * 
- * @see class_exists()
- * @param string $class_name 	Имя класса для проверки
- * @param string $namespace		Пространство имен которому принадлежит класс
- * @return boolean Существует ли данный класс
+ * @param string $class_name Имя класса для исправления
+ * @param string $ns		 Пространство имен которому принадлежит класс
+ * @return string Исправленное имя класса
  */
-function class_exists2( $class_name, $namespace = 'Samson\ActiveRecord\\')
-{
-	// Сформируем правильное имя класса
-	$class_name = ( $class_name{0} === '\\') ? $class_name : $namespace.$class_name;
-	
-	return class_exists( $class_name );
+// TODO: Автоматическая замена имени класса с namespace на "_"
+function ns_classname( $class_name, $ns = 'samson\activerecord' )
+{	
+	// Новые версии PHP
+	if( !isset($GLOBALS["__compressor_mode"]) ) return ( strpos($class_name, __NS_SEPARATOR__) !== false ) ? $class_name : $ns.__NS_SEPARATOR__.$class_name;
+	// Старые версии
+	else return basename(str_replace('/','\\',$class_name));
 }

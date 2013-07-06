@@ -95,7 +95,9 @@ function html_form_select_from_list( $list, $object_id = NULL )
  */
 function html_db_form_select_options( $entity_name, $db_obj = NULL, $name_attr = 'Name', $desc_attr = 'Description', $add_unselected = 'Не выбрано' )
 {
-	$entity_name = ( $entity_name{0} === '\\') ? $entity_name : '\Samson\ActiveRecord\\'.$entity_name;
+	// Сформируем правильное имя класса
+	$entity_name = ns_classname($entity_name,'samson\activerecord');	
+	
 	// Проверим существует ли указанная сущность
 	if( ! class_exists( $entity_name )) return FALSE;
 	
