@@ -30,7 +30,7 @@ interface iURL
 	 * @param boolean 	$return	Флаг получения значения закладки, если ничего не передано то выполняется
 	 * 							запись текущего URL-маршрута в закладку
 	 */
-	public function bookmark( $name, $return = false );
+	public function bookmark( $name = NULL, $return = false );
 	
 	/**
 	 * Построить "правильный" полный URL путь к ресурсу

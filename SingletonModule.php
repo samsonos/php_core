@@ -54,5 +54,5 @@ class SingletonModule extends ModuleConnector
 	/** Обработчик сериализации объекта */
 	public function __sleep(){	return array_merge( parent::__sleep(), array_keys(get_object_vars($this)));}
 	/** Обработчик десериализации объекта */
-	public function __wakeup(){ parent::__wakeup(); self::$_factory[ get_called_class() ] = $this; }
+	public function __wakeup(){	parent::__wakeup();	self::$_factory[ get_class($this) ] = $this; }
 }
