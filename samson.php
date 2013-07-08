@@ -93,7 +93,7 @@ require('include.php');
 
 /**
  * System(Система) - Получить объект для работы с ядром системы
- * @return Core Ядро системы
+ * @return samson\core\Core Ядро системы
  */
 function & s()
 {
@@ -370,6 +370,9 @@ function e( $error_msg = '', $error_code = E_USER_NOTICE, $args = NULL )
  */
 function output( $view, array $vars = NULL, $prefix = NULL )
 {		
+	return s()->render($view,$vars);
+	
+	/*
 	// Объявить ассоциативный массив переменных в данном контексте	
 	if( isset( $vars ) ) extract( $vars );
 		
@@ -412,6 +415,7 @@ function output( $view, array $vars = NULL, $prefix = NULL )
 	
 	// Вернем полученное представление если мы хоть что-то да получили, иначе NULL
 	return isset($html{0}) ? $html : NULL;
+	*/
 }
 
 /**
@@ -515,8 +519,12 @@ function locale( $locale = NULL ){ return \samson\core\SamsonLocale::current( $l
 // TODO: Автоматическая замена имени класса с namespace на "_"
 function ns_classname( $class_name, $ns = 'samson\activerecord' )
 {	
-	// Новые версии PHP
-	if( !isset($GLOBALS["__compressor_mode"]) ) return ( strpos($class_name, __NS_SEPARATOR__) !== false ) ? $class_name : $ns.__NS_SEPARATOR__.$class_name;
-	// Старые версии
+	// If core rendering model is NOT array loading
+	if( s()->render_mode != samson\core\iCore::RENDER_ARRAY ){ 
+		return ( strpos($class_name, __NS_SEPARATOR__) !== false ) ? $class_name : $ns.__NS_SEPARATOR__.$class_name;
+	}
+	// Array loading render model
 	else return basename(str_replace('/','\\',$class_name));
 }
+
+//elapsed('core included');

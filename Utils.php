@@ -250,7 +250,7 @@ function elapsed( $text = '' )
 {
 	// Переменная для сохранения последнего момента времени вызова данного метода
 	static $l = __SAMSON_T_STARTED__;
-		
+			
 	// Получим текущую отметку времени
 	$c = microtime(TRUE); 
 	//trace(number_format($c-__SAMSON_T_STARTED__,5).' - '.number_format($c-$l,5).' -- '.print_a($text,TRUE));

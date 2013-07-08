@@ -4,10 +4,36 @@ namespace samson\core;
 /**
  * Интерфейс для ядра системы
  * @author Vitaly Iegorov <vitalyiegorov@gmail.com>
- *
  */
 interface iCore
-{	
+{		
+	/** Standart algorithm for view rendering */
+	const RENDER_STANDART = 1;
+	/** View rendering algorithm from array of view pathes */
+	const RENDER_ARRAY = 2;
+	/** View rendering algorithm from array of view variables */
+	const RENDER_VARIABLE = 3;
+	
+	/** Render stack position for base renderer */
+	const RENDERER_BASE = 0;
+	
+	/**
+	 * Прорисовать файл представления
+	 * 
+	 * @param string 	$view_path Путь к файлу представления
+	 * @param array 	$view_data Коллекция данных для передачи в представление
+	 * @return string Обработанное прорисованное представление
+	 */
+	public function render( $view_path, array $view_data = array() );
+	
+	/**
+	 * Add template render function to render stack 
+	 * @param mixed $render_handler Pointer to render function
+	 * @param number $position Position in render stack to place render function
+	 * @return array If nothing passed returns current render handler stack
+	 */
+	public function renderer( $render_handler = null, $position = null );
+	
 	/**
 	 * Установить/Получить флаг ассинхронности вывода ответа системы
 	 * 

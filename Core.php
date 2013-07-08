@@ -1,8 +1,6 @@
 <?php 
 namespace samson\core;
 
-use Samson\ResourceCollector\ResourceCollector;
-
 /**
  * Ядро фреймворка SamsonPHP
  * 
@@ -11,11 +9,11 @@ use Samson\ResourceCollector\ResourceCollector;
  */
 final class Core implements iCore
 {		
-	/**
-	 * Стек загруженных в ядро РЕАЛЬНЫХ и ВИРТУАЛЬНЫЙ модулей
-	 * @var array
-	 */
+	/** Стек загруженных в ядро модулей */
 	public $module_stack = array();
+	
+	/** Стек обработчиков прорисовки */
+	public $render_stack = array();
 	
 	/** Указатель а обработчик 404 ошибки */
 	protected $e404 = null;
@@ -26,10 +24,7 @@ final class Core implements iCore
 	 */
 	protected $active = null;
 	
-	/**
-	 * Флаг вывода шаблона
- 	 * Используется для ассинхронных ответов без прорисовки шаблона
-	 */
+	/** Flag for outputting layout template, used for asynchronous requests */
 	protected $async = FALSE;	
 	
 	/** Главный шаблон системы */
@@ -37,9 +32,107 @@ final class Core implements iCore
 	
 	/** Путь к текущемуу Веб-приложению */
 	protected $system_path = '';
+	
+	/** Модификатор пути к представлениям, для шаблонизации представлений */
+	protected $view_path = '';
 
 	/** Данные о загружаемом в данный момент модуле */
 	protected $loaded_module = array();
+	
+	/** Режим работы с представлениями */
+	public $render_mode = self::RENDER_STANDART;
+			/** @see \samson\core\iCore::render() */
+	public function render( $__view, array $__data = array() )
+	{		
+		////elapsed('Start rendering '.$__view);
+		
+		// Объявить ассоциативный массив переменных в данном контексте
+		extract( $__data );	
+		
+		// Начать вывод в буффер
+		ob_start();
+		
+		// Path to another template view, by default we are using default template folder path,
+		// for meeting first condition
+		$__template_view = $__view;
+		
+		// If another template folder defined 
+		if( isset($this->view_path{0}) )
+		{
+			// Modify standart view path with another template 
+			$template_view = str_replace( __SAMSON_VIEW_PATH.'/', __SAMSON_VIEW_PATH.'/'.$this->view_path.'/', $template_view );
+		}
+		
+		// Depending on core view rendering model
+		switch ( $this->render_mode )
+		{
+			// Standart algorithm for view rendering
+			case self::RENDER_STANDART: 
+				// Trying to find another template path, by default it's an default template path
+				if( file_exists( $__template_view ) ) include( $__template_view ); 
+				// If another template wasn't found - we will use default template path
+				else if( file_exists( $__view ) ) include( $__view );
+				// Error no template view was found 
+				else e('Cannot render view(##,##) - file doesn\'t exists', E_SAMSON_RENDER_ERROR, array( $__view, $this->view_path ) );
+			break; 
+			
+			// View rendering algorithm form array of view pathes 
+			case self::RENDER_ARRAY:				
+				// Collection of view pathes
+				$views = & $GLOBALS['__compressor_files'];
+				// Trying to find another template path, by default it's an default template path
+				if( isset($views[ $__template_view ]) && file_exists( $views[ $__template_view ] ) ) include( $views[ $__template_view ] );
+				// If another template wasn't found - we will use default template path
+				else if( isset($views[ $__view ]) && file_exists( $views[ $__view ] ) ) include( $views[ $__view ] );
+				// Error no template view was found
+				else e('Cannot render view(##,##) - file doesn\'t exists', E_SAMSON_RENDER_ERROR, array( $views[ $__view ], $this->view_path ) );			
+			break;
+			
+			// View rendering algorithm from array of view variables
+			case self::RENDER_VARIABLE:
+				// Collection of views
+				$views = & $GLOBALS['__compressor_files'];
+				// Trying to find another template path, by default it's an default template path
+				if( isset($views[ $__template_view ])) eval(' ?>'.$views[ $__template_view ].'<?php ');
+				// If another template wasn't found - we will use default template path
+				else if( isset($views[ $__view ])) eval(' ?>'.$views[ $__view ].'<?php ');
+				// Error no template view was found
+				else e('Cannot render view(##,##) - view variable not found', E_SAMSON_RENDER_ERROR, array( $__view, $this->view_path ) );			
+			break;
+		}
+		
+		// Получим данные из буффера вывода
+		$html = ob_get_contents();
+		
+		// Очистим буффер
+		ob_end_clean();
+		
+		// Iterating throw render stack, with one way template processing
+		foreach ( $this->render_stack as & $renderer )
+		{
+			// Выполним одностороннюю обработку шаблона
+			$html = call_user_func( $renderer, $html, $__data );
+		}		
+		
+		////elapsed('End rendering '.$__view);
+		
+		return $html ;
+	}
+	
+	/** @see \samson\core\iCore::renderer() */
+	public function renderer( $render_handler = null, $position = null )
+	{
+		// If nothing passed just return current render stack
+		if( !func_num_args() ) return $this->render_stack;
+		// If we have an argument, check if its a function
+		else if( is_callable( $render_handler ) )
+		{
+			// Insert new renderer at the end of the stack
+			array_push( $this->render_stack, $render_handler ); 
+		}
+		// Error
+		else return e('Argument(##) passed for render function not callable', E_SAMSON_CORE_ERROR, $render_handler );
+	}
 	 
 	/**	@see iCore::async() */
 	public function async( $async = NULL )
@@ -155,11 +248,16 @@ final class Core implements iCore
 	/** @see iCore::load() */
 	public function load( $id, $path = NULL, $params = array() )
 	{			
+		//elapsed('--------------------------------');
+		//elapsed('Start loading module '.$id);
+		
 		// Получим регистро не зависимый идентификатор модуля
 		$ci_id = mb_strtolower( $id, 'UTF-8' );	
 		
 		// Если в систему загружена нужная конфигурация для загружаемого модуля - получим её
 		if( isset( Config::$data[ $ci_id ] ) ) $params = array_merge( Config::$data[ $ci_id ], $params );	
+		
+		//elapsed(' --Config loading finished');
 				
 		// Если мы еще не загрузили модуль в ядро
 		if( ! isset( $this->module_stack[ $ci_id ] ) )
@@ -168,7 +266,7 @@ final class Core implements iCore
 			if( ($path === 'local') || (!isset( $path )) )
 			{						
 				// Создадим локальный модуль
-				$module = new CompressableModule( $ci_id, $this->system_path, $params  );				
+				$module = new CompressableLocalModule( $ci_id, $this->system_path, $params  );				
 				
 				// Сохраним путь к файлу модели
 				$model_path = $this->system_path.__SAMSON_MODEL_PATH.'/'.$ci_id.'.php';
@@ -181,6 +279,8 @@ final class Core implements iCore
 				
 				// Подключим файл контроллера если он существует
 				if( file_exists( $controller_path ) ) require $controller_path;
+				
+				//elapsed(' --Creating local module instance finished');
 			}			
 			// Путь к модулю задан - считаем его внешний			
 			else 
@@ -195,7 +295,9 @@ final class Core implements iCore
 					'path' 		=>	$path, 
 					'params'	=> $params, 
 					'files' 	=> FILE::dir( $path, 'php' )
-				);			
+				);		
+
+				//elapsed(' --Getting module structure finished');
 				
 				// Получим список загруженных классов
 				$classes = get_declared_classes();
@@ -219,17 +321,21 @@ final class Core implements iCore
 					// Пропустим папку представлений
 					if( strpos( $file, __SAMSON_VIEW_PATH.'/' )  ) continue;
 					
+					////elapsed(' --Loading file: '.$file);
+					
 					// Совместимость со старыми модулями
 					if( basename($file) == 'include.php' ) continue;					
 					// Просто подключи файл модуля
 					else require_once( $file );									
-				}			
+				}		
+
+				//elapsed(' --Include file loading finished');
 				
 				// Получим список новых загруженных классов			
 				foreach ( array_diff( get_declared_classes(), $classes ) as $class ) 
 				{
 					// Если этот класс является потомком модуля
-					if( in_array( 'samson\core\ModuleConnector', class_parents( $class )))
+					if( in_array( ns_classname('ExternalModule','samson\core'), class_parents( $class )))
 					{								
 						// Создадим экземпляр класса для подключения модуля
 						$connector = new $class( $ci_id, $path, $params );
@@ -238,7 +344,7 @@ final class Core implements iCore
 						$parent_class = get_parent_class( $connector );
 		
 						// Проверим родительский класс
-						if( $parent_class !== 'ModuleConnector' )
+						if( $parent_class !== ns_classname('ExternalModule','samson\core') )
 						{					
 							// Переберем загруженные в систему модули
 							foreach ( $this->module_stack as & $m )
@@ -251,9 +357,13 @@ final class Core implements iCore
 						// Прекратим поиски
 						break;
 					}
-				}				
+				}
+
+				//elapsed(' --Creating module instance finished');
 			}		
 		}
+		
+		//elapsed('end loading module '.$id);
 		
 		// Продожим "ЦЕПИРОВАНИЕ"
 		return $this;
@@ -264,15 +374,10 @@ final class Core implements iCore
 		// Добавим путь к ресурсам для браузера
 		$head_html = "\n".'<base href="'.url()->base().'">';
 		// Добавим отметку времени для JavaScript
-		$head_html .= "\n".'<script type="text/javascript">var __SAMSONPHP_STARTED = new Date().getTime();</script>';
-		
-		// Соберем "правильно" все CSS ресурсы модулей
-		$head_html .= "\n".'<link type="text/css" rel="stylesheet" href="'.$css_url.'">';
-		// Соберем "правильно" все JavaScript ресурсы модулей
-		$head_html .= "\n".'<script type="text/javascript" src="'.$js_url.'"></script>';
+		$head_html .= "\n".'<script type="text/javascript">var __SAMSONPHP_STARTED = new Date().getTime();</script>';		
 		
 		// Добавим поддержку HTML для старых IE
-		$head_html .= "\n".'<!--[if lt IE 9]>';
+		$head_html .= "\n".'<!--[if lt IE 9]>'; 
 		$head_html .= "\n".'<script src="//html5shim.googlecode.com/svn/trunk/html5.js"></script>';
 		$head_html .= "\n".'<![endif]-->';
 			
@@ -298,7 +403,9 @@ final class Core implements iCore
 		// Если передан аргумент функции то установим новый обработчик e404 
 		if( func_num_args() ) 
 		{
-			$this->e404 = $callable;
+			// Check e404 handler
+			if( !is_callable( $callable ) ) return e('E404 handler is not valid', E_SAMSON_CORE_ERROR ); 
+			else $this->e404 = $callable;
 			
 			// Продолжим цепирование
 			return $this;
@@ -329,6 +436,8 @@ final class Core implements iCore
 	/**	@see iCore::start() */
 	public function start( $default )
 	{			
+		//elapsed('Start routing');
+		
 		//[PHPCOMPRESSOR(remove,start)]				
 		// Проинициализируем оставшиеся конфигурации и подключим внешние модули по ним
 		Config::init($this);					
@@ -338,12 +447,15 @@ final class Core implements iCore
 		foreach ($this->module_stack as $id => $module )
 		{		
 			// Только внешние модули и их оригиналы
-			if( get_class($module) != 'samson\core\Module' && $module->id() == $id )
-			{
-				//elapsed('Initializing module: '.$id);
+			if( method_exists( $module, 'init') && $module->id() == $id )
+			{			
+				////elapsed('Start - Initializing module: '.$id);
 				$module->init();
+				////elapsed('End - Initializing module: '.$id);
 			}
-		}	
+		}
+
+		////elapsed('End initing modules');
 		
 		// Результат выполнения действия модуля
 		$module_loaded = A_FAILED;
@@ -373,14 +485,16 @@ final class Core implements iCore
 		// Если мы не выполнили ни одного контроллера, обработаем ошибку 404
 		if( $module_loaded === A_FAILED ) $module_loaded = $this->e404();			
 
+		////elapsed('Start outputing');
+		
 		// Сюда соберем весь вывод системы
-		$template_html = '';
+		$template_html = '';		
 	
 		// Если вывод разрешен - выведем шаблон на экран
 		if( ! $this->async && ($module_loaded !== A_FAILED) )
-		{				
-			// Сгенерируем шаблон представления
-			$template_html = output( $this->template_path, m()->toView() );
+		{					
+			// Прорисуем главный шаблон
+			$template_html = $this->render( $this->template_path, $this->active->toView() );
 			
 			// Подготовим HTML код для заполнения шапки шаблона
 			$head_html = '';
@@ -391,7 +505,7 @@ final class Core implements iCore
 				
 			//[PHPCOMPRESSOR(remove,start)]		
 			// Сгенерируем необходимые элементы в HTML шаблоне
-			$template_html = $this->generate_template( $template_html, ResourceCollector::$collected['css'][ 'url' ], ResourceCollector::$collected['js'][ 'url' ] );
+			$template_html = $this->generate_template( $template_html, '','');
 			//[PHPCOMPRESSOR(remove,end)]
 			
 			// Добавим специальную системную комманду для инициализации фреймворка в JavaScript
@@ -409,6 +523,8 @@ final class Core implements iCore
 		
 		// Выведем все что мы на генерили
 		echo $template_html;	
+		
+		////elapsed('End routing');
 	}
 	
 	/** Инициализировать ядро */
@@ -428,7 +544,7 @@ final class Core implements iCore
 	//[PHPCOMPRESSOR(remove,start)]
 	/** Обработчик автоматической загрузки классов модулей */
 	public function __autoload ( $class )
-	{		
+	{			
 		// Получим имя самого класса
 		$class_name = basename($class);
 		
@@ -448,7 +564,7 @@ final class Core implements iCore
 			}			
 		}	
 		// Загрузка класса ядра системы
-		else if( strpos( $class, 'samson\core\\' ) !== false ) require str_replace('samson\core\\', '', $class).'.php';	
+		else if( strpos( $class, 'samson\core\\' ) !== false ) require str_replace('samson\core'.__NS_SEPARATOR__, '', $class).'.php';	
 	}
 	//[PHPCOMPRESSOR(remove,end)]
 	
@@ -474,10 +590,10 @@ final class Core implements iCore
 		new System( 'system', __SAMSON_PATH__ );		
 		
 		// Добавим главный локальный модуль, установим путь к нему если это "удаленное" приложение
-		new CompressableModule( 'local', $this->system_path );
+		new CompressableLocalModule( 'local', $this->system_path );
 	
 		// Создадим специальный модуль для вывода представление		
-		new Module( '_output', $this->system_path );
+		new LocalModule( '_output', $this->system_path );
 	
 		// Временно установим указатель на единственный модуль системы
 		$this->active = & $this->module_stack[ '_output' ];		
@@ -493,5 +609,5 @@ final class Core implements iCore
 	public function __wakeup(){	$this->active = & $this->module_stack['local']; }
 	
 	/** Магический метод для сериализации объекта */
-	public function __sleep(){ return array( 'module_stack', 'e404' ); }
+	public function __sleep(){ return array( 'module_stack', 'e404', 'render_mode', /*'render_stack',*/ 'view_path' ); }
 }

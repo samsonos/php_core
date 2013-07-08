@@ -22,6 +22,8 @@ define( 'E_SAMSON_CMS_ERROR', 996 );
 define( 'E_SAMSON_AUTH_ERROR', 995 );
 /** Ошибка в компрессоре системы */
 define( 'E_SAMSON_SNAPSHOT_ERROR', 994 );
+/** Ошибка в компрессоре системы */
+define( 'E_SAMSON_RENDER_ERROR', 993 );
 
 //
 // Коды для отладочных сообщений
@@ -226,6 +228,7 @@ class Error
 			case E_CORE_ERROR:					$error_type = 'Ошибка ядра PHP'; $error_css='_core_fatal_error';	break;
 			case E_SAMSON_FATAL_ERROR:			$error_type = 'Фатальная ошибка SamsonPHP'; $error_css='_core_fatal_error';	break;
 			case E_SAMSON_SNAPSHOT_ERROR:		$error_type = 'Ошибка создания отпечатка SamsonPHP'; break;
+			case E_SAMSON_RENDER_ERROR:			$error_type = 'SamsonPHP rendering error'; break;
 			case E_PARSE:						$error_type = 'Ошибка парсинга'; $error_css='_core_fatal_error';	break;
 			case E_COMPILE_ERROR:				$error_type = 'Ошибка компиляции'; $error_css='_core_fatal_error';	break;
 			case E_USER_ERROR: 					$error_type = 'Пользовательская ошибка'; 	break;
