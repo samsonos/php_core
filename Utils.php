@@ -2,6 +2,18 @@
 use samson\core\SamsonLocale;
 
 /**
+ * Get only folder structure from path.
+ * If file name specified in path it will be removed, if no
+ * filename in path - nothing will happen
+ * 
+ * @return string Folder structure 
+ */
+function pathname( $path )
+{
+	return str_replace( basename($path), '', $path ); 
+}
+
+/**
  * Изменить регистр ключей массива, с поддержкой UNICODE
  * 
  * @param array $arr	Массив для преобразования ключей

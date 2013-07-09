@@ -47,6 +47,12 @@ define('__SAMSON_ROOT__', $_path_to_root );
 /** Зафиксируем правильный слеш ля путей фреймворка */
 define('__SAMSON_PATH_SLASH__', (PHP_OS=='Linux'?'/':'\\'));
 
+/** Путь к папке где находятся кеш системы */
+define('__SAMSON_CACHE_PATH','cache');
+
+/** Путь к файлу с глобальными данными модуля */
+define( '__SAMSON_GLOBAL_FILE', 'global.php' );
+
 /** Путь к папке где находятся файлы системы */
 define('__SAMSON_APP_PATH','app');
 
@@ -331,9 +337,10 @@ function ism( $name ){ return (m()->id() == $name); };
  * @param string 	$error_msg	Текст ошибки
  * @param numeric 	$error_code	Код ошибки
  * @param mixed 	$args		Специальные "жетоны" для вставки в текст ошибки
+ * @param mixed 	$ret_val	Value that must be returned by the function
  * @return boolean FALSE для остановки работы функции или условия
  */
-function e( $error_msg = '', $error_code = E_USER_NOTICE, $args = NULL )
+function e( $error_msg = '', $error_code = E_USER_NOTICE, $args = NULL, & $ret_val = false )
 {	
 	// Сохраним указатель на класс в память
 	static $_e; 
@@ -348,7 +355,9 @@ function e( $error_msg = '', $error_code = E_USER_NOTICE, $args = NULL )
 	if( isset( $args ) ) $error_msg = debug_parse_markers( $error_msg, $args );
 	
 	// Вызовем обработчик ошибки, передадим правильный указатель
-	return error()->handler( $error_code, $error_msg, NULL, NULL, NULL, debug_backtrace() );	
+	error()->handler( $error_code, $error_msg, NULL, NULL, NULL, debug_backtrace() );
+
+	return $ret_val;
 }
 
 /**
@@ -524,7 +533,7 @@ function ns_classname( $class_name, $ns = 'samson\activerecord' )
 		return ( strpos($class_name, __NS_SEPARATOR__) !== false ) ? $class_name : $ns.__NS_SEPARATOR__.$class_name;
 	}
 	// Array loading render model
-	else return basename(str_replace('/','\\',$class_name));
+	else return basename(str_replace('\\','/',$class_name));
 }
 
 //elapsed('core included');

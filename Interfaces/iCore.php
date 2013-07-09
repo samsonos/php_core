@@ -7,15 +7,13 @@ namespace samson\core;
  */
 interface iCore
 {		
+	/* Rendering models */
 	/** Standart algorithm for view rendering */
 	const RENDER_STANDART = 1;
 	/** View rendering algorithm from array of view pathes */
 	const RENDER_ARRAY = 2;
 	/** View rendering algorithm from array of view variables */
 	const RENDER_VARIABLE = 3;
-	
-	/** Render stack position for base renderer */
-	const RENDERER_BASE = 0;
 	
 	/**
 	 * Прорисовать файл представления
@@ -83,13 +81,22 @@ interface iCore
 	 * @param string 	$path	Путь к физическому расположению модуля, если не передан, то загружаемый модуль считается локальным
 	 * @param array  	$params	Коллекция параметров для инициализации модуля
 	 * @return iCore Объект ядра для "цепирования"
+	 * @deprecated Use iCore::load2() instead
 	 */
 	public function load( $id, $path = NULL, $params = NULL );
+	
+	/**
+	 * Load module into the framework core
+	 *
+	 * @param string 	$path	Path to module for loading	 
+	 * @return iCore Self reference for chaining
+	 */
+	public function load2( $path = NULL );
 
 	/**
-	 * Выгрузить модуль из ядра системы
+	 * Unload module from framework core 
 	 * 
-	 * @param string $id Идентификатор модуля
+	 * @param string $id Module identifier
 	 */
 	public function unload( $id );
 	
@@ -102,6 +109,7 @@ interface iCore
 	 * @param string $id 		Имя уже загруженного модуля в системе
 	 * @param string $new_id 	Имя для скопированного(дублированного) модуля
 	 * @return iCore Объект ядра для "цепирования"
+	 * @deprecated Just use m( module_name )->render(action_name)
 	 */
 	public function duplicate( $id, $new_id );
 	

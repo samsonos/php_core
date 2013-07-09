@@ -218,7 +218,7 @@ class Module implements iModule, \ArrayAccess, iModuleViewable
 		$class = isset( $class_name ) ? $class_name : get_class( $this );
 		
 		// Создадим новый модуль этого класса
-		$m = new $class( $id, $this->path ); 
+		$m = new $class( $id, $this->path, $this->data ); 
 		
 		// Установим ему идентификатор оригинала для доступа к файлам
 		$m->id = $this->id; 
@@ -242,7 +242,7 @@ class Module implements iModule, \ArrayAccess, iModuleViewable
 		// Установим идентификатор модуля, если он еще не задан
 		$this->id = ! isset( $this->id{0} ) ? $id : $this->id;
 		
-		//elapsed('Регистрирование модуля системы: '.$this->id.'('.$this->core_id.')');
+		//elapsed('Регистрирование модуля системы: '.$this->id.'('.$this->core_id.') with '.sizeof($params).' params');
 		
 		// Установим путь к "отдаленному" модулю
 		$this->path( $path );		

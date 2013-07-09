@@ -12,7 +12,7 @@ namespace samson\core;
  * @author Vitaly Iegorov <vitalyiegorov@gmail.com> 
  * @version 0.1
  */
-class SingletonModule extends ModuleConnector
+class SingletonModule extends ExternalModule
 {
 	/**
 	 * Коллекция экземпляров классов 
@@ -20,11 +20,15 @@ class SingletonModule extends ModuleConnector
 	 */
 	private static $_factory = array();	
 	
-	/** @return SingletonModule */
-	public static function getInstance()
-	{
+	/**
+	 * @param $class Classname for getting instance
+	 * @return SingletonModule 
+	 */
+	public static function getInstance( $class = null )
+	{		
 		// Получим класс из которого был вызван метод
-		$class = get_called_class();
+		$class = isset( $class ) ? $class : 
+			function_exists('get_called_class') ? get_called_class() : e('Classname not specified', E_SAMSON_FATAL_ERROR);
 		
 		// Вернем единственный экземпляр
 		return self::$_factory[ $class ];
@@ -34,7 +38,7 @@ class SingletonModule extends ModuleConnector
 	public function __construct( $core_id, $path = NULL, array $params = NULL )
 	{		
 		// Получим имя класса
-		$class = get_called_class();
+		$class = get_class( $this );
 			
 		// Проверка на Singleton
 		if( !isset(self::$_factory[ $class ]) ) self::$_factory[ $class ] = $this;

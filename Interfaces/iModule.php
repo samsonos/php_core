@@ -172,6 +172,7 @@ interface iModule
 	 * @param string $class_name 	Имя класса для создаваемого модуля
 	 * 
 	 * @return ModuleConnector Указаетель на дупликат текущего модуля
+	 * @deprecated Use clone instead
 	 */
 	public function & duplicate( $id, $class_name = null );
 }

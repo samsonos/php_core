@@ -9,10 +9,19 @@ namespace samson\core;
  */
 final class Core implements iCore
 {		
+	/** Module pathes loaded stack */
+	protected $load_path_stack = array();
+	
+	/** Scanned module resources */
+	public $load_resources = array();
+	
+	/** Modules to be loaded stack */
+	public $load_stack = array();
+	
 	/** Стек загруженных в ядро модулей */
 	public $module_stack = array();
 	
-	/** Стек обработчиков прорисовки */
+	/** Render handlers stack */
 	public $render_stack = array();
 	
 	/** Указатель а обработчик 404 ошибки */
@@ -41,6 +50,142 @@ final class Core implements iCore
 	
 	/** Режим работы с представлениями */
 	public $render_mode = self::RENDER_STANDART;
+	
+	/** Class loader */
+	public function __autoload2 ( $class )
+	{
+		// Simple method - trying to find class by classname 
+		//if($files = preg_grep( '/\/'.$class_name.'\.php/', $this->load_stack['files']));
+	}
+	
+	/** @see \samson\core\iCore::load2() */
+	public function load2( $path = NULL )
+	{
+		//elapsed('Start loading module from '.$path);
+		
+		// Check for module location
+		if( !file_exists( $path ) ) return e( 'loading module from ## - path doesn\'t exists',E_SAMSON_CORE_ERROR,$path, $this );
+		
+		// If this module is not queued for loading
+		if( ! isset( $this->load_path_stack[ $path ] ) )
+		{
+			// Save this path entry 
+			$this->load_path_stack[ $path ] = '';
+			
+			// Let's fix collection of loaded classes 
+			$classes = get_declared_classes();
+			
+			// Create loading queue entry with path as a key until we will know actual module identifier located there 
+			$ls = array();		
+			
+			// Collection for gathering all resources located at module path, grouped by extension
+			$ls['resources'] = array();
+			$ls['controllers'] = array();
+			$ls['models'] = array();
+			$ls['views'] = array();
+			$ls['php'] = array();
+			
+			// Make pointer for pithiness
+			$resources = & $ls['resources'];
+			
+			// Recursively scan module folders for resources 
+			foreach (File::dir( $path ) as $resource )
+			{
+				// No cache folders
+				if( strpos( $resource, '/'.__SAMSON_CACHE_PATH.'/') === false )
+				{
+					// Get extension as resource type
+					$rt = pathinfo( $resource, PATHINFO_EXTENSION );
+			
+					// Check if resource type array cell created
+					if( !isset( $resources[ $rt ] ) ) $resources[ $rt ] = array();
+			
+					// Save resource file path to appropriate collection and fix possible slash issues to *nix format
+					$resources[ $rt ][] = str_replace( array('\\\\','//','\\'), '/', $resource );
+				}
+			}		
+
+			// Combine module resources with global resources collection
+			$this->load_resources = array_merge_recursive( $this->load_resources, $resources );
+			
+			// If module contains PHP resources - lets distribute them to specific collections 
+			if( isset( $resources[ 'php' ] )) foreach ( $resources[ 'php' ] as $php ) 
+			{				
+				// Controllers, models and global files must be required immediately 
+				// because they can consist of just functions, no lazy load available
+				if( strpos( $php, __SAMSON_CONTOROLLER_PATH ) ) require( $ls['controllers'][] = $php);				
+				else if ( strpos( $php, __SAMSON_GLOBAL_FILE ) ) require( $ls['php'][] = $php );
+				else if ( strpos( $php, __SAMSON_MODEL_PATH ) ) require( $ls['models'][] = $php);
+				// Views and other php files will load only when needed
+				else if ( strpos( $php, __SAMSON_VIEW_PATH ) ) 	$ls[ $path ]['views'][] = $php;
+				// Regular php file			
+				else 
+				{
+					$ls['php'][] = $php;					
+					
+					// We must require regular files and wait to find iModule class ancestor declaration
+					require( $php );
+					
+					// If we have new class declared after requiring
+					if( sizeof($new_classes = array_diff( get_declared_classes(), $classes )))
+					{
+						// Save new loaded classes list						
+						$classes = get_declared_classes();					
+
+						// Iterate new declared classes
+						foreach ( $new_classes as $class_name ) 
+						{
+							// If this is ExternalModule ancestor
+							if( in_array( ns_classname('ExternalModule','samson\core'), class_parents( $class_name )))
+							{								
+								// Create object
+								$connector = new $class_name( null, $path );
+								
+								// Cache module id
+								$id = $connector->id();
+								
+								$ls['classname'] = $class_name;
+								
+								// If we have configuration data ready for this module - load it
+								if( isset( Config::$data[ $id ] ) ) $connector->set( Config::$data[ $id ] );																
+								 
+								// Получим родительский класс
+								$parent_class = get_parent_class( $connector );
+								
+								// Проверим родительский класс
+								if( $parent_class !== ns_classname('ExternalModule','samson\core') )
+								{
+									// Переберем загруженные в систему модули
+									foreach ( $this->module_stack as & $m )
+									{
+										// Если в систему был загружен модуль с родительским классом
+										if( get_class($m) == $parent_class ) $connector->parent = & $m;
+									}
+								}
+								
+								// Rewrite this path entry for future purposes
+								$this->load_path_stack[ $path ] = $class_name;
+								
+								// Save module data to load stack
+								$this->load_stack[ $id ] = & $ls;
+																
+								// End top loop - we have found what we needed
+								break 2;
+							}
+						}
+					}				
+					
+				}
+			}	
+
+			//elapsed('End loading module from '.$path);
+			
+			//trace($this->load_stack,true);
+			//trace($this->load_resources,true);			
+			
+			return $this;
+		}
+	}
 			/** @see \samson\core\iCore::render() */
 	public function render( $__view, array $__data = array() )
 	{		
@@ -193,11 +338,13 @@ final class Core implements iCore
 			
 	/**	@see iCore::module() */
 	public function & module( & $_module = NULL )
-	{					
+	{		
+		$ret_val = null;
+		
 		// Ничего не передано - вернем текущуй модуль системы
-		if( !isset($_module) && isset( $this->active ) ) return $this->active;	
+		if( !isset($_module) && isset( $this->active ) ) $ret_val = $this->active;	
 		// Если уже передан какой-то модуль - просто вернем его
-		else if( is_object( $_module ) ) return $_module;
+		else if( is_object( $_module ) ) $ret_val = $_module;
 		// Если передано имя модуля	
 		else
 		{
@@ -205,11 +352,13 @@ final class Core implements iCore
 			$_module = mb_strtolower( $_module, 'UTF-8' );			
 			
 			// Если передано имя модуля то попытаемся его найти в стеке модулей
-			if( isset( $this->module_stack[ $_module ] ) ) return $this->module_stack[ $_module ];			
+			if( isset( $this->module_stack[ $_module ] ) ) $ret_val = $this->module_stack[ $_module ];			
 		}		
 		
 		// Ничего не получилось вернем ошибку
-		return e('Не возможно получить модуль(##) системы', E_SAMSON_CORE_ERROR, array( $_module ) );
+		if( $ret_val === null ) e('Не возможно получить модуль(##) системы', E_SAMSON_CORE_ERROR, array( $_module ) );
+		
+		return $ret_val;
 	}
 	
 	/** @see iCore::duplicate() */
@@ -255,7 +404,7 @@ final class Core implements iCore
 		$ci_id = mb_strtolower( $id, 'UTF-8' );	
 		
 		// Если в систему загружена нужная конфигурация для загружаемого модуля - получим её
-		if( isset( Config::$data[ $ci_id ] ) ) $params = array_merge( Config::$data[ $ci_id ], $params );	
+		if( isset( Config::$data[ $ci_id ] ) ) $params = array_merge( Config::$data[ $ci_id ], $params );
 		
 		//elapsed(' --Config loading finished');
 				
@@ -336,7 +485,7 @@ final class Core implements iCore
 				{
 					// Если этот класс является потомком модуля
 					if( in_array( ns_classname('ExternalModule','samson\core'), class_parents( $class )))
-					{								
+					{							
 						// Создадим экземпляр класса для подключения модуля
 						$connector = new $class( $ci_id, $path, $params );
 					
@@ -465,10 +614,12 @@ final class Core implements iCore
 			
 		// Если не задано имя модуля, установим модуль по умолчанию
 		if( ! isset( $module_name{0} ) ) $module_name = $default;	
+		
+		//elapsed('Trying to get '.$module_name.' controller');
 	
 		// Если модуль был успешно загружен и находится в стеке модулей ядра
 		if( isset( $this->module_stack[ $module_name ] ) )
-		{		
+		{				
 			// Установим требуемый модуль как текущий
 			$this->active = & $this->module_stack[ $module_name ];			
 			
@@ -479,7 +630,9 @@ final class Core implements iCore
 			$this->duplicate( $module_name, '_output' );				
 
 			// Попытаемся выполнить действие модуля указанное в URL, переданим тип HTTP запроса
-			$module_loaded = $this->active->action( url()->method() );				
+			$module_loaded = $this->active->action( url()->method() );
+
+			//elapsed('Preforming '.$module_name.'::'.url()->method().' controller action');
 		}
 	
 		// Если мы не выполнили ни одного контроллера, обработаем ошибку 404
@@ -541,10 +694,10 @@ final class Core implements iCore
 		}
 	}
 	
-	//[PHPCOMPRESSOR(remove,start)]
+	//[PHPCOMPRESSOR(remove,start)]	
 	/** Обработчик автоматической загрузки классов модулей */
 	public function __autoload ( $class )
-	{			
+	{	
 		// Получим имя самого класса
 		$class_name = basename($class);
 		
@@ -573,6 +726,7 @@ final class Core implements iCore
 	{			
 		//[PHPCOMPRESSOR(remove,start)]
 		// Установим обработчик автоматической загрузки классов
+		spl_autoload_register( array( $this, '__autoload2'));
 		spl_autoload_register( array( $this, '__autoload'));
 		//[PHPCOMPRESSOR(remove,end)]
 				
