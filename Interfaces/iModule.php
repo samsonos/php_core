@@ -73,23 +73,6 @@ interface iModule
 	public function core_id();
 	
 	/**
-	 * Manipulate view data collection pointer 
-	 * 
-	 * Module saves all view data that has been set to a specific view in appropriate
-	 * view data collection entry. By default module creates vied data entry - VD_POINTER_DEF,
-	 * and until any call of iModule::view() or iModule::output(), all data that is iModule::set(),
-	 * is stored to that location. 
-	 * 
-	 * On the first call of iModule::view() or iModule::output(), this method changes the view data
-	 * pointer to actual relative view path, and copies(actually just sets view data pointer) all view
-	 * data setted before to new view data pointer. This guarantees backward compatibility and gives
-	 * opportunity not to set the view path before settiing view data to it.  
-	 * 
-	 * @param string $view_path Path to view
-	 */
-	public function & view_data( $view_path );
-	
-	/**
 	 * Установить/Получить относительный путь к файлам данного модуля
 	 *
 	 * @param string $value Значение пути к файлам модуля для установки
@@ -127,7 +110,18 @@ interface iModule
 	public function action( $method_name = NULL );
 	
 	/**
-	 * Установка путь к файлу представления модуля
+	 * Set current view path and manipulate view data collection pointer 
+	 * 
+	 * Module saves all view data that has been set to a specific view in appropriate
+	 * view data collection entry. By default module creates vied data entry - VD_POINTER_DEF,
+	 * and until any call of iModule::view() or iModule::output(), all data that is iModule::set(),
+	 * is stored to that location. 
+	 * 
+	 * On the first call of iModule::view() or iModule::output(), this method changes the view data
+	 * pointer to actual relative view path, and copies(actually just sets view data pointer) all view
+	 * data setted before to new view data pointer. This guarantees backward compatibility and gives
+	 * opportunity not to set the view path before settiing view data to it.  
+	 * 	 
 	 * 
 	 * @param string $value	Путь к файлу представлению
 	 * @return iModule Указатель на текущий модуль для цепирования
