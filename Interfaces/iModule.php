@@ -126,7 +126,7 @@ interface iModule
 	 * @param string $value	Путь к файлу представлению
 	 * @return iModule Указатель на текущий модуль для цепирования
 	 */
-	public function view( $value );
+	public function view( $view_path );
 	
 	/**
 	 * Установить/Получить HTML представление модуля

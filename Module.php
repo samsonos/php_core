@@ -77,35 +77,38 @@ class Module implements iModule, \ArrayAccess, iModuleViewable
 	}
 	
 	/** @see iModule::view() */
-	public function view( $value )
+	public function view( $view_path )
 	{		
 		// Доставим расширение файла если его нет
-		if( strpos( $value, '.php' ) === FALSE ) $value .= '.php';
+		if( strpos( $view_path, '.php' ) === FALSE ) $view_path .= '.php';
 			
-		// Подставим путь к представлениям модуля
-		$this->view_path = __SAMSON_VIEW_PATH.'/'.$value;	
+		// Build path to default view folder
+		$view_path = __SAMSON_VIEW_PATH.'/'.$view_path;	
 
 		// Create new entry in view data collection
-		if( !isset( $this->view_data[ $this->view_path ] ) ) 
+		if( !isset( $this->view_data[ $view_path ] ) ) 
 		{				
 			// If view data pointer is set to default view data entry			
 			if( $this->data === $this->view_data[ self::VD_POINTER_DEF ] )
 			{
 				// Pointer first view entry to it
-				$this->view_data[ $this->view_path ] = array_merge( array(), $this->view_data[ self::VD_POINTER_DEF ] );				
+				$this->view_data[ $view_path ] = array_merge( array(), $this->view_data[ self::VD_POINTER_DEF ] );				
 			}
 			// Create new view data entry
-			else $this->view_data[ $this->view_path ] = array(); 						
+			else $this->view_data[ $view_path ] = array(); 						
 			
 			//elapsed($this->core_id.' - Changing VD_POINTER to '.$view_path.' with '.sizeof($this->view_data[ self::VD_POINTER_DEF ]).' params' );
 		}
+		
+		// Set current view path
+		$this->view_path = $view_path;
 		
 		// Change view data pointer to appropriate view data entry
 		$this->data = & $this->view_data[ $this->view_path ];
 			
 		// Продолжим цепирование
 		return $this;
-	}
+	}	
 	
 	/**	@see iModule::output() */
 	public function output( $view_path = null, array $data = null )
@@ -115,17 +118,25 @@ class Module implements iModule, \ArrayAccess, iModuleViewable
 		
 		// If view path not specified - use current view path
 		if( !isset( $view_path ) && isset( $this->view_path{0} ) ) $view_path = $this->view_path;
-
-		// No view specified - ignore rendering
-		if( !isset( $view_path {0})) return '';
-				
-		// Доставим расширение файла если его нет
-		if( strpos( $view_path, '.php' ) === FALSE ) $view_path .= '.php';
+		// Direct rendering of specific view
+		else
+		{			
+			// Add extension if nessesary
+			if( strpos( $view_path, '.php' ) === FALSE ) $view_path .= '.php';
+			
+			//[PHPCOMPRESSOR(remove,start)]
+			// If view does not exists, try standart location, for backward compatibility
+			if( !file_exists( $this->path.$view_path )) $view_path = __SAMSON_VIEW_PATH.'/'.$view_path;
+			//[PHPCOMPRESSOR(remove,end)]
+			
+			$this->view_data[ $view_path ] = array_merge( array(), $this->view_data[$this->view_path] ); 
+			
+			// Change view data pointer to appropriate view data entry
+			$this->data = & $this->view_data[ $view_path ];		
+		}
 		
-		//[PHPCOMPRESSOR(remove,start)]
-		// If view does not exists, try standart location, for backward compatibility 
-		if( !file_exists( $this->path.$view_path )) $view_path = __SAMSON_VIEW_PATH.'/'.$view_path;
-		//[PHPCOMPRESSOR(remove,end)]
+		// No view specified - ignore rendering
+		if( !isset( $view_path {0})) return '';				
 
 		// Временно изменим текущий модуль системы
 		$old = s()->active( $this );
@@ -142,7 +153,7 @@ class Module implements iModule, \ArrayAccess, iModuleViewable
 		// If we have only one element - it is a default enty - delete it
 		if( sizeof($this->view_data) == 1 ) $this->view_data[ self::VD_POINTER_DEF ] = array();	
 		// Delete current view data entry 
-		else unset( $this->view_data[ $view_path ] );	
+		else unset( $this->view_data[ $view_path ] );
 		
 		// Switch internal array pointer to last element
 		end( $this->view_data );
@@ -278,7 +289,7 @@ class Module implements iModule, \ArrayAccess, iModuleViewable
 	public function __construct( $id, $path = NULL, array $params = NULL )
 	{		
 		// Set up default view data pointer
-		$this->data = & $this->view_data[ self::VD_POINTER_DEF ];
+		$this->view_data[ self::VD_POINTER_DEF ] = & $this->data;
 		
 		// Установим идентификатор модуля
 		$this->core_id = $id;				
@@ -353,7 +364,14 @@ class Module implements iModule, \ArrayAccess, iModuleViewable
 	/** Обработчик сериализации объекта */
 	public function __sleep(){	return array( 'core_id', 'id', 'view_path', 'view_html', 'data', 'path' );	}
 	/** Обработчик десериализации объекта */
-	public function __wakeup(){ self::$instances[ $this->core_id ] = & $this; }
+	public function __wakeup()
+	{
+		// Fill global instances  
+		self::$instances[ $this->core_id ] = & $this;
+
+		// Set up default view data pointer
+		$this->view_data[ self::VD_POINTER_DEF ] = & $this->data;
+	}
 	
 	/** Группа методов для доступа к аттрибутам в виде массива */
 	public function offsetSet( $offset, $value ){ $this->__set( $offset, $value ); }
