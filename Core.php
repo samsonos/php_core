@@ -176,9 +176,8 @@ final class Core implements iCore
 						// If this is ExternalModule ancestor
 						if( in_array( ns_classname('ExternalModule','samson\core'), class_parents( $class_name )))
 						{
-							$ns = pathname( $class_name );				
-						
 							// Save namespace module data to load stack
+							$ns = pathname( $class_name );				
 							$this->load_stack[ $ns ] = & $ls;
 				
 							// Create object
@@ -189,6 +188,7 @@ final class Core implements iCore
 							$ls['namespace'] = $ns;
 							
 							// Module check
+							if( !isset($id{0})) e('Module from ## has doens not have identifier', E_SAMSON_CORE_ERROR, $path );
 							if( $ns != strtolower($ns)) e('Module ## has incorrect namespace ## - it must be lowercase', E_SAMSON_CORE_ERROR, array($id,$ns) );
 							if( !isset($ns{0}) ) e('Module ## has no namespace', E_SAMSON_CORE_ERROR,  $id, $ns );
 				

@@ -36,7 +36,7 @@ class Module implements iModule, \ArrayAccess, iModuleViewable
 	/** Pointer to view data enty */
 	protected $data = null;	
 	
-	/** Collection of data for view rendering, fill default pointer */
+	/** Collection of data for view rendering, filled with default pointer */
 	public $view_data = array( self::VD_POINTER_DEF => array() );	
 	
 	
@@ -86,22 +86,22 @@ class Module implements iModule, \ArrayAccess, iModuleViewable
 		$this->view_path = __SAMSON_VIEW_PATH.'/'.$value;	
 
 		// Create new entry in view data collection
-		if( !isset( $this->view_data[ $view_path ] ) ) 
+		if( !isset( $this->view_data[ $this->view_path ] ) ) 
 		{				
 			// If view data pointer is set to default view data entry			
 			if( $this->data === $this->view_data[ self::VD_POINTER_DEF ] )
 			{
 				// Pointer first view entry to it
-				$this->view_data[ $view_path ] = array_merge( array(), $this->view_data[ self::VD_POINTER_DEF ] );				
+				$this->view_data[ $this->view_path ] = array_merge( array(), $this->view_data[ self::VD_POINTER_DEF ] );				
 			}
 			// Create new view data entry
-			else $this->view_data[ $view_path ] = array(); 						
+			else $this->view_data[ $this->view_path ] = array(); 						
 			
 			//elapsed($this->core_id.' - Changing VD_POINTER to '.$view_path.' with '.sizeof($this->view_data[ self::VD_POINTER_DEF ]).' params' );
 		}
 		
 		// Change view data pointer to appropriate view data entry
-		$this->data = & $this->view_data[ $view_path ];
+		$this->data = & $this->view_data[ $this->view_path ];
 			
 		// Продолжим цепирование
 		return $this;
@@ -135,7 +135,7 @@ class Module implements iModule, \ArrayAccess, iModuleViewable
 		
 		// Очистим само представление
 		$this->view_html = '';
-		
+			
 		// If we have only one element - it is a default enty - delete it
 		if( sizeof($this->view_data) == 1 ) $this->view_data[ self::VD_POINTER_DEF ] = array();	
 		// Delete current view data entry 
@@ -148,8 +148,8 @@ class Module implements iModule, \ArrayAccess, iModuleViewable
 		$this->view_path = key( $this->view_data );
 		
 		// Change view data pointer
-		$this->data = & $this->view_data[ $this->view_path ];		
-		
+		$this->data = & $this->view_data[ $this->view_path ];	
+	
 		// Вернем результат прорисовки
 		return $out;
 	}	
@@ -168,7 +168,7 @@ class Module implements iModule, \ArrayAccess, iModuleViewable
 
 			// Ввостановим предыдущий текущий модуль контролера
 			s()->active( $old );				
-		}		
+		}			
 		
 		// Прорисуем представление и выведем его в текущий поток вывода
 		echo $this->output( $this->view_path );	
