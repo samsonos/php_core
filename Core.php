@@ -51,44 +51,55 @@ final class Core implements iCore
 	/** Режим работы с представлениями */
 	public $render_mode = self::RENDER_STANDART;
 	
-	/** Class loader */
-	public function __autoload2 ( $class )
-	{
-		// Simple method - trying to find class by classname 
-		//if($files = preg_grep( '/\/'.$class_name.'\.php/', $this->load_stack['files']));
+	/**  
+	 * Automatic class loader based onlazy loading from load_stack
+	 * based on class namespace data
+	 */
+	private function __autoload2 ( $class )
+	{	
+		$ns = nsname( $class );	
+		if( isset( $this->load_stack[ $ns ] ) )
+		{
+			// Pointer to namespace data entry
+			$ls = & $this->load_stack[ $ns ];			
+			$class_name = classname( $class );
+
+			// Simple method - trying to find class by classname
+			if( $files = preg_grep( '/\/'.$class_name.'\.php/', $ls['php']))
+			{
+				// Проверим на однозначность
+				if( sizeof($files) > 1 ) return e('Cannot autoload class ##, too many files matched ##', E_SAMSON_CORE_ERROR, array($class,$files) );
+				
+				// Require lastarray element
+				require( end($files) );
+			}
+		}		
 	}
 	
-	/** @see \samson\core\iCore::load2() */
-	public function load2( $path = NULL )
+	public function resources( & $path, & $ls = array() )
 	{
-		//elapsed('Start loading module from '.$path);
+		$path = normalizepath( $path );
 		
 		// Check for module location
 		if( !file_exists( $path ) ) return e( 'loading module from ## - path doesn\'t exists',E_SAMSON_CORE_ERROR,$path, $this );
-		
+				
 		// If this module is not queued for loading
 		if( ! isset( $this->load_path_stack[ $path ] ) )
 		{
-			// Save this path entry 
-			$this->load_path_stack[ $path ] = '';
-			
-			// Let's fix collection of loaded classes 
-			$classes = get_declared_classes();
-			
-			// Create loading queue entry with path as a key until we will know actual module identifier located there 
-			$ls = array();		
-			
+			// Save this path entry
+			$this->load_path_stack[ $path ] = '';				
+						
 			// Collection for gathering all resources located at module path, grouped by extension
 			$ls['resources'] = array();
 			$ls['controllers'] = array();
 			$ls['models'] = array();
 			$ls['views'] = array();
 			$ls['php'] = array();
-			
+				
 			// Make pointer for pithiness
 			$resources = & $ls['resources'];
-			
-			// Recursively scan module folders for resources 
+				
+			// Recursively scan module folders for resources
 			foreach (File::dir( $path ) as $resource )
 			{
 				// No cache folders
@@ -96,95 +107,123 @@ final class Core implements iCore
 				{
 					// Get extension as resource type
 					$rt = pathinfo( $resource, PATHINFO_EXTENSION );
-			
+						
 					// Check if resource type array cell created
 					if( !isset( $resources[ $rt ] ) ) $resources[ $rt ] = array();
-			
+						
 					// Save resource file path to appropriate collection and fix possible slash issues to *nix format
-					$resources[ $rt ][] = str_replace( array('\\\\','//','\\'), '/', $resource );
+					$resources[ $rt ][] = normalizepath( $resource );
 				}
-			}		
-
+			}
+		
 			// Combine module resources with global resources collection
 			$this->load_resources = array_merge_recursive( $this->load_resources, $resources );
 			
-			// If module contains PHP resources - lets distribute them to specific collections 
-			if( isset( $resources[ 'php' ] )) foreach ( $resources[ 'php' ] as $php ) 
+			// If module contains PHP resources - lets distribute them to specific collections
+			if( isset( $resources[ 'php' ] )) foreach ( $resources[ 'php' ] as $php )
 			{				
-				// Controllers, models and global files must be required immediately 
-				// because they can consist of just functions, no lazy load available
-				if( strpos( $php, __SAMSON_CONTOROLLER_PATH ) ) require( $ls['controllers'][] = $php);				
-				else if ( strpos( $php, __SAMSON_GLOBAL_FILE ) ) require( $ls['php'][] = $php );
-				else if ( strpos( $php, __SAMSON_MODEL_PATH ) ) require( $ls['models'][] = $php);
+				if( strpos( $php, __SAMSON_CONTOROLLER_PATH ) ) $ls['controllers'][] = $php;				
+				else if ( strpos( $php, __SAMSON_MODEL_PATH ) ) $ls['models'][] = $php;
 				// Views and other php files will load only when needed
-				else if ( strpos( $php, __SAMSON_VIEW_PATH ) ) 	$ls[ $path ]['views'][] = $php;
-				// Regular php file			
-				else 
-				{
-					$ls['php'][] = $php;					
-					
-					// We must require regular files and wait to find iModule class ancestor declaration
-					require( $php );
-					
-					// If we have new class declared after requiring
-					if( sizeof($new_classes = array_diff( get_declared_classes(), $classes )))
-					{
-						// Save new loaded classes list						
-						$classes = get_declared_classes();					
+				else if ( strpos( $php, __SAMSON_VIEW_PATH ) ) 	$ls['views'][] = $php;
+				// Regular php file
+				else $ls['php'][] = $php;
+			}
+			
+			// Save path resources data
+			$this->load_path_stack[ $path ] = & $ls;
+			
+			// New data
+			return true;
+		}
+		
+		// Cached data
+		return false;
+	}
+	
+	/** @see \samson\core\iCore::load2() */
+	public function load2( $path = NULL )
+	{	
+		//elapsed('Start loading from '.$path);
+		
+		// If we han't scanned resources at this path
+		if( $this->resources( $path, $ls ) )
+		{			
+			// Let's fix collection of loaded classes 
+			$classes = get_declared_classes();	
 
-						// Iterate new declared classes
-						foreach ( $new_classes as $class_name ) 
-						{
-							// If this is ExternalModule ancestor
-							if( in_array( ns_classname('ExternalModule','samson\core'), class_parents( $class_name )))
-							{								
-								// Create object
-								$connector = new $class_name( null, $path );
-								
-								// Cache module id
-								$id = $connector->id();
-								
-								$ls['classname'] = $class_name;
-								
-								// If we have configuration data ready for this module - load it
-								if( isset( Config::$data[ $id ] ) ) $connector->set( Config::$data[ $id ] );																
-								 
-								// Получим родительский класс
-								$parent_class = get_parent_class( $connector );
-								
-								// Проверим родительский класс
-								if( $parent_class !== ns_classname('ExternalModule','samson\core') )
-								{
-									// Переберем загруженные в систему модули
-									foreach ( $this->module_stack as & $m )
-									{
-										// Если в систему был загружен модуль с родительским классом
-										if( get_class($m) == $parent_class ) $connector->parent = & $m;
-									}
-								}
-								
-								// Rewrite this path entry for future purposes
-								$this->load_path_stack[ $path ] = $class_name;
-								
-								// Save module data to load stack
-								$this->load_stack[ $id ] = & $ls;
-																
-								// End top loop - we have found what we needed
-								break 2;
-							}
-						}
-					}				
+			// Controllers, models and global files must be required immediately
+			// because they can consist of just functions, no lazy load available
+			if(file_exists($path.__SAMSON_GLOBAL_FILE))	require($path.__SAMSON_GLOBAL_FILE);		
+			foreach ($ls['controllers'] as $php) require($php);
+			foreach ($ls['models'] as $php) require($php);
+			
+			// Iterate only php files
+			foreach ( $ls['php'] as $php) 
+			{
+				// We must require regular files and wait to find iModule class ancestor declaration
+				require( $php );
 					
+				// If we have new class declared after requiring
+				if( sizeof($new_classes = array_diff( get_declared_classes(), $classes )))
+				{
+					// Save new loaded classes list
+					$classes = get_declared_classes();
+				
+					// Iterate new declared classes
+					foreach ( $new_classes as $class_name )
+					{
+						// If this is ExternalModule ancestor
+						if( in_array( ns_classname('ExternalModule','samson\core'), class_parents( $class_name )))
+						{
+							$ns = pathname( $class_name );				
+						
+							// Save namespace module data to load stack
+							$this->load_stack[ $ns ] = & $ls;
+				
+							// Create object
+							$connector = new $class_name( null, $path );
+								
+							$id = $connector->id();
+							$ls['classname'] = $class_name;
+							$ls['namespace'] = $ns;
+							
+							// Module check
+							if( $ns != strtolower($ns)) e('Module ## has incorrect namespace ## - it must be lowercase', E_SAMSON_CORE_ERROR, array($id,$ns) );
+							if( !isset($ns{0}) ) e('Module ## has no namespace', E_SAMSON_CORE_ERROR,  $id, $ns );
+				
+							// If we have configuration data ready for this module - load it
+							if( isset( Config::$data[ $id ] ) ) $connector->set( Config::$data[ $id ] );
+								
+							// Trying to find parent class for connecting to it to use View/Controller inheritance
+							$parent_class = get_parent_class( $connector );
+							if( $parent_class !== ns_classname('ExternalModule','samson\core') )
+							{
+								// Переберем загруженные в систему модули
+								foreach ( $this->module_stack as & $m )
+								{
+									// Если в систему был загружен модуль с родительским классом
+									if( get_class($m) == $parent_class ) $connector->parent = & $m;
+								}
+							}
+				
+							// End top loop - we have found what we needed
+							break 2;
+						}
+					}
 				}
-			}	
+			}
 
 			//elapsed('End loading module from '.$path);
 			
 			//trace($this->load_stack,true);
 			//trace($this->load_resources,true);			
-			
-			return $this;
 		}
+		// Another try to load same path
+		else e('Path ## has all ready been loaded', E_SAMSON_CORE_ERROR, $path );
+		
+		// Chaining
+		return $this;
 	}
 			/** @see \samson\core\iCore::render() */
 	public function render( $__view, array $__data = array() )
@@ -371,10 +410,10 @@ final class Core implements iCore
 		if( isset( $this->module_stack[ $ci_id ] ) )
 		{			
 			// Получим регистро не зависимый идентификатор клонируемого модуля
-			$nci_id = mb_strtolower( $new_id, 'UTF-8' );			
+			$nci_id = mb_strtolower( $new_id, 'UTF-8' );	
 			
 			// Создадим дубликат модуля
-			$this->module_stack[ $nci_id ] = & $this->module_stack[ $ci_id ]->duplicate( $nci_id );	
+			$this->module_stack[ $nci_id ] = & $this->module_stack[ $ci_id ]->duplicate( $nci_id );
 			
 			// Продолжим цепирование
 			return $this;
@@ -584,7 +623,7 @@ final class Core implements iCore
 	
 	/**	@see iCore::start() */
 	public function start( $default )
-	{			
+	{					
 		//elapsed('Start routing');
 		
 		//[PHPCOMPRESSOR(remove,start)]				

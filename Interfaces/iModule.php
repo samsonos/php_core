@@ -33,46 +33,25 @@ define( 'MOD_DELETE_CONTROLLER', 239 );
  */
 interface iModule
 {
-	/**
-	 * Тип ресурса JavaScript
-	 * @var string
-	 */
-	const RES_JAVASCRIPT = 'js';
+	/** Identifier for default view data entry */
+	const VD_POINTER_DEF = '';
 	
-	/**
-	 * Тип ресурса CSS
-	 * @var string
-	 */
-	const RES_CSS = 'css';
-	
-	/**
-	 * Идентификатор указывающий на использование базового контроллера модуля
-	 */
+	/** Идентификатор указывающий на использование базового контроллера модуля */
 	const BASE_CONTROLLER = MOD_BASE_CONTROLLER;
 	
-	/**
-	 * Идентификатор указывающий на использование универсального контроллера модуля
-	 */
+	/** Идентификатор указывающий на использование универсального контроллера модуля */
 	const UNI_CONTROLLER = MOD_UNI_CONTROLLER;
 	
-	/**
-	 * Идентификатор указывающий на использование контроллера GET модуля
-	 */
+	/** Идентификатор указывающий на использование контроллера GET модуля */
 	const GET_CONTROLLER = MOD_GET_CONTROLLER;
 	
-	/**
-	 * Идентификатор указывающий на использование контроллера POST модуля
-	 */
+	/** Идентификатор указывающий на использование контроллера POST модуля */
 	const POST_CONTROLLER = MOD_POST_CONTROLLER;
 	
-	/**
-	 * Идентификатор указывающий на использование контроллера PUT модуля
-	 */
+	/** Идентификатор указывающий на использование контроллера PUT модуля */
 	const PUT_CONTROLLER = MOD_PUT_CONTROLLER;
 	
-	/**
-	 * Идентификатор указывающий на использование контроллера DELETE модуля
-	 */
+	/** Идентификатор указывающий на использование контроллера DELETE модуля */
 	const DELETE_CONTROLLER = MOD_DELETE_CONTROLLER;
 	
 	/**
@@ -92,6 +71,23 @@ interface iModule
 	 * @return string Идентификатор модуля под которым он был загружен в систему
 	 */
 	public function core_id();
+	
+	/**
+	 * Manipulate view data collection pointer 
+	 * 
+	 * Module saves all view data that has been set to a specific view in appropriate
+	 * view data collection entry. By default module creates vied data entry - VD_POINTER_DEF,
+	 * and until any call of iModule::view() or iModule::output(), all data that is iModule::set(),
+	 * is stored to that location. 
+	 * 
+	 * On the first call of iModule::view() or iModule::output(), this method changes the view data
+	 * pointer to actual relative view path, and copies(actually just sets view data pointer) all view
+	 * data setted before to new view data pointer. This guarantees backward compatibility and gives
+	 * opportunity not to set the view path before settiing view data to it.  
+	 * 
+	 * @param string $view_path Path to view
+	 */
+	public function & view_data( $view_path );
 	
 	/**
 	 * Установить/Получить относительный путь к файлам данного модуля

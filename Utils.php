@@ -3,6 +3,7 @@ use samson\core\SamsonLocale;
 
 /**
  * Get only folder structure from path.
+ * Function can also be used for getting namespace withou classname
  * If file name specified in path it will be removed, if no
  * filename in path - nothing will happen
  * 
@@ -10,8 +11,44 @@ use samson\core\SamsonLocale;
  */
 function pathname( $path )
 {
-	return str_replace( basename($path), '', $path ); 
+	// If win or NS path with slash('\')
+	if( ($p = strrpos( $path, __NS_SEPARATOR__ )) === false )
+	{
+		// Get position on last *nix slash
+		$p = strrpos( $path, '/' );
+	}
+		
+	// Cut unnessesary part of the path 
+	return substr( $path, 0, $p ); 
 }
+
+/**
+ * Normalize path to *nix style with slash('/'), removing
+ * double slashes
+ * 
+ * @param string $path Path to be normalized
+ * @return mixed Normalized path
+ */
+function normalizepath( $path ){ return str_replace( array('\\\\','//','\\'), '/', $path );}
+
+/**
+ * Return only class name without namespace
+ * @param string $class_name class name
+ * @return string class name without namespace
+ */
+function classname( $class_name )
+{
+	if( ($p = strrpos( $class_name, __NS_SEPARATOR__ )) !== false ) $class_name = substr( $class_name, $p + 1 );
+	 
+	return $class_name;
+}
+
+/**
+ * Return only namespace name from class name
+ * @param string $class_name class name
+ * @return string Namespace name
+ */
+function nsname( $class_name ){ return substr( $class_name, 0, strrpos( $class_name, __NS_SEPARATOR__ ));}
 
 /**
  * Изменить регистр ключей массива, с поддержкой UNICODE

@@ -27,14 +27,17 @@ class Module implements iModule, \ArrayAccess, iModuleViewable
 	/** Версия модуля */
 	protected $version = '0.0.1';
 	
-	/** Путь к представлению по умолчанию */
-	protected $view_path = '';
+	/** Path to view for rendering, also key to $view_data entry */
+	protected $view_path = self::VD_POINTER_DEF;
 	
 	/** Код HTML представление модуля */
 	protected $view_html = '';
 	
-	/** Коллекция параметров для представления */
-	protected $data = array();	
+	/** Pointer to view data enty */
+	protected $data = null;	
+	
+	/** Collection of data for view rendering, fill default pointer */
+	protected $view_data = array( self::VD_POINTER_DEF => array() );	
 	
 	
 	/**	@see iModule::title() */
@@ -80,10 +83,29 @@ class Module implements iModule, \ArrayAccess, iModuleViewable
 		if( strpos( $value, '.php' ) === FALSE ) $value .= '.php';
 			
 		// Подставим путь к представлениям модуля
-		$this->view_path = __SAMSON_VIEW_PATH.'/'.$value;
+		$this->view_path = __SAMSON_VIEW_PATH.'/'.$value;	
+
+		// Manipulate view data pointer
+		$this->view_data( $this->view_path );
 			
 		// Продолжим цепирование
 		return $this;
+	}
+	
+	/** @see \samson\core\iModule::view_data() */
+	public function & view_data( $view_path )
+	{
+		// Create new entry in view data collection
+		if( !isset( $this->view_data[ $view_path ] ) )
+		{
+			// If there was set some data without specifying the view, consider that it was for this view
+			$this->view_data[ $view_path ] = & $this->view_data[ self::VD_POINTER_DEF ];
+			
+			//elapsed($this->core_id.' - Changing VD_POINTER to '.$view_path.' with '.sizeof($this->view_data[ self::VD_POINTER_DEF ]).' params' );
+		}
+		
+		// Change view data pointer to appropriate view data entry
+		return ($this->data = & $this->view_data[ $view_path ]);
 	}
 	
 	/**	@see iModule::output() */
@@ -98,14 +120,17 @@ class Module implements iModule, \ArrayAccess, iModuleViewable
 			// Доставим расширение файла если его нет
 			if( strpos( $view_path, '.php' ) === FALSE ) $view_path .= '.php';
 			
+			// If view does not exists, try standart location, for backward compatibility 
+			if( !file_exists( $this->path.$view_path )) $view_path = __SAMSON_VIEW_PATH.'/'.$view_path;
+			
+			// Manipulate view data pointer
+			$this->view_data( $view_path );
+			
 			// Временно изменим текущий модуль системы
 			$old = s()->active( $this );
-			
-			// Если переданы дополнительные данные для представления - добавим их
-			if( isset( $data ) ) $this->data = array_merge( $this->data, $data );			
-			
+				
 			// Прорисуем представление модуля
-			$out .= output( $this->path.$view_path, $this->data, 'VIEW' );
+			$out .= output( $this->path.$view_path, $this->data );
 			
 			// Вернем на место текущий модуль системы
 			s()->active( $old );
@@ -216,10 +241,11 @@ class Module implements iModule, \ArrayAccess, iModuleViewable
 	{ 		
 		// Получим класс текущего модуля
 		$class = isset( $class_name ) ? $class_name : get_class( $this );
-		
+
 		// Создадим новый модуль этого класса
-		$m = new $class( $id, $this->path, $this->data ); 
-		
+		$m = new $class( $id, $this->path/*, $this->data*/ ); 
+		// Cannot pass data because data has id of original module, and that id will be overwritten
+	
 		// Установим ему идентификатор оригинала для доступа к файлам
 		$m->id = $this->id; 
 		
@@ -236,6 +262,9 @@ class Module implements iModule, \ArrayAccess, iModuleViewable
 	 */
 	public function __construct( $id, $path = NULL, array $params = NULL )
 	{		
+		// Set up default view data pointer
+		$this->data = & $this->view_data[ self::VD_POINTER_DEF ];
+		
 		// Установим идентификатор модуля
 		$this->core_id = $id;				
 		
@@ -251,11 +280,10 @@ class Module implements iModule, \ArrayAccess, iModuleViewable
 		if( isset($params) ) foreach ( $params as $k => $v ) $this->$k = $v;		
 		
 		// Установим идентификатор модуля в коллекцию перенных модуля
-		$this->data['id'] = $this->id;				
-		
-		// Запишем создаваемый класс в статическую коллекцию
-		self::$instances[ $this->core_id ] 	= & $this;
-		self::$instances[ $this->id ] 		= & $this;
+		$this->data['id'] = $this->id;	
+	
+		// Запишем создаваемый класс в статическую коллекцию		
+		self::$instances[ $this->id ] = & $this;
 	}		
 	
 	/** Обработчик уничтожения объекта */
@@ -289,10 +317,10 @@ class Module implements iModule, \ArrayAccess, iModuleViewable
 	public function __set( $field, $value = NULL )
 	{		
 		// Если передан класс который поддерживает представление для модуля
-		if( is_object( $field ) && in_array( 'samson\core\iModuleViewable', class_implements($field )))
+		if( is_object( $field ) && in_array( ns_classname('iModuleViewable','samson\core'), class_implements($field )))
 		{					
 			// Сформируем регистро не зависимое имя класса для хранения его переменных в модуле
-			$class_name = is_string( $value ) ? $value : ''.mb_strtolower( basename(str_replace('\\', '/', get_class($field))), 'UTF-8' );
+			$class_name = is_string( $value ) ? $value : ''.mb_strtolower( classname(get_class($field)), 'UTF-8' );
 					
 			// Добавим ссылку на сам объект в представление
 			$this->data[ $class_name ] = & $field;

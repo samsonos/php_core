@@ -533,7 +533,7 @@ function ns_classname( $class_name, $ns = 'samson\activerecord' )
 		return ( strpos($class_name, __NS_SEPARATOR__) !== false ) ? $class_name : $ns.__NS_SEPARATOR__.$class_name;
 	}
 	// Array loading render model
-	else return basename(str_replace('\\','/',$class_name));
+	else return classname( $class_name );
 }
 
 //elapsed('core included');

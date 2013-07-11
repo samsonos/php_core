@@ -37,10 +37,15 @@ class ExternalModule extends Module implements iExternalModule
 		//[PHPCOMPRESSOR(remove,start)]
 		// Создадим конфигурацию для composer
 		$this->composer();
-		//[PHPCOMPRESSOR(remove,end)]
+		//[PHPCOMPRESSOR(remove,end)]		
 	
 		// Выполним проверку модуля - Вызовем родительский конструктор
-		if( $this->prepare() ) parent::__construct( $this->core_id, $path, $params );
+		if( $this->prepare() ) 
+		{
+			self::$instances[ $this->core_id ] 	= & $this;
+			
+			parent::__construct( $this->core_id, $path, $params );
+		}
 	}
 	
 	/** @see Module::duplicate() */
@@ -50,7 +55,7 @@ class ExternalModule extends Module implements iExternalModule
 		$m = parent::duplicate( $id, $class_name );
 	
 		// Привяжем родительский модуль к дубликату
-		$m->parent = & $this->parent;
+		$m->parent = & $this->parent;		
 	
 		// Вернем дубликат
 		return $m;
@@ -139,6 +144,7 @@ class ExternalModule extends Module implements iExternalModule
 			// Проверим загружен ли требуемый модуль в ядро
 			if( !isset( Module::$instances[ $_module ] ) )
 			{
+				trace( array_keys(Module::$instances) );
 				return e( 'Ошибка загрузки модуля(##) в ядро - Не найден связазанный модуль(##)', E_SAMSON_FATAL_ERROR, array( $this->id, $module) );
 			}
 			// Модуль определен сравним его версию
