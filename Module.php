@@ -119,8 +119,10 @@ class Module implements iModule, \ArrayAccess, iModuleViewable
 		// Доставим расширение файла если его нет
 		if( strpos( $view_path, '.php' ) === FALSE ) $view_path .= '.php';
 		
+		//[PHPCOMPRESSOR(remove,start)]
 		// If view does not exists, try standart location, for backward compatibility 
 		if( !file_exists( $this->path.$view_path )) $view_path = __SAMSON_VIEW_PATH.'/'.$view_path;
+		//[PHPCOMPRESSOR(remove,end)]
 		
 		//elapsed( $this->core_id.' - Outputting view: '.$view_path);
 				
@@ -149,6 +151,8 @@ class Module implements iModule, \ArrayAccess, iModuleViewable
 		
 		// Change view data pointer
 		$this->data = & $this->view_data[ $this->view_path ];	
+		
+		//trace($out,true);
 	
 		// Вернем результат прорисовки
 		return $out;
@@ -169,6 +173,8 @@ class Module implements iModule, \ArrayAccess, iModuleViewable
 			// Ввостановим предыдущий текущий модуль контролера
 			s()->active( $old );				
 		}			
+		
+		//trace('rendering '.$this->id.'('.$this->view_path.')');
 		
 		// Прорисуем представление и выведем его в текущий поток вывода
 		echo $this->output( $this->view_path );	

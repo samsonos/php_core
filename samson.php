@@ -160,7 +160,7 @@ function & m( $module = NULL )
  * 
  * @return iModule Указатель на виртуальный модуль "LOCAL" ядра системы
  */
-function & mout(){ $m = '_output'; return s()->module( $m );  }
+function & mout(){ return m();  }
 
 /**
  * View variable( Переменная представления ) - Вывести значение переменной представления

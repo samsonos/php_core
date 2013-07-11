@@ -403,6 +403,8 @@ final class Core implements iCore
 	/** @see iCore::duplicate() */
 	public function duplicate( $id, $new_id )
 	{
+		//e('Module duplicating is deprecated adn would not be supported in future versions', E_SAMSON_CORE_ERROR);
+		
 		// Получим регистро не зависимый идентификатор модуля
 		$ci_id = mb_strtolower( $id, 'UTF-8' );
 		
