@@ -114,7 +114,10 @@ class Module implements iModule, \ArrayAccess, iModuleViewable
 		$out = $this->view_html;
 		
 		// If view path not specified - use current view path
-		if( !isset( $view_path ) && isset( $this->view_path{0} ) ) $view_path = $this->view_path;		
+		if( !isset( $view_path ) && isset( $this->view_path{0} ) ) $view_path = $this->view_path;
+
+		// No view specified - ignore rendering
+		if( !isset( $view_path {0})) return '';
 				
 		// Доставим расширение файла если его нет
 		if( strpos( $view_path, '.php' ) === FALSE ) $view_path .= '.php';
@@ -123,14 +126,12 @@ class Module implements iModule, \ArrayAccess, iModuleViewable
 		// If view does not exists, try standart location, for backward compatibility 
 		if( !file_exists( $this->path.$view_path )) $view_path = __SAMSON_VIEW_PATH.'/'.$view_path;
 		//[PHPCOMPRESSOR(remove,end)]
-		
-		//elapsed( $this->core_id.' - Outputting view: '.$view_path);
-				
+
 		// Временно изменим текущий модуль системы
 		$old = s()->active( $this );
 			
 		// Прорисуем представление модуля
-		$out .= output( $this->path.$view_path, $this->data );
+		$out .= s()->render( $this->path.$view_path, $this->data );
 		
 		// Вернем на место текущий модуль системы
 		s()->active( $old );
