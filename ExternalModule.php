@@ -99,7 +99,7 @@ class ExternalModule extends Module implements iExternalModule
 	 *
 	 * @see Module::output()
 	 */
-	public function output( $view_path, array $data = null )
+	public function output( $view_path = null )
 	{
 		// Если этот класс не прямой наследник класса "Подключаемого Модуля"
 		if( isset($this->parent) )

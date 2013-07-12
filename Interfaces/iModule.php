@@ -85,7 +85,7 @@ interface iModule
 	 *
 	 * @param string $view_path Путь к представлению относительно расположения данного модуля
 	 */
-	public function output( $view_path );
+	public function output( $view_path = null );
 	
 	/**
 	 * Выполнить прорисовку данного модуля

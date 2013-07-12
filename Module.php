@@ -111,7 +111,7 @@ class Module implements iModule, \ArrayAccess, iModuleViewable
 	}	
 	
 	/**	@see iModule::output() */
-	public function output( $view_path = null, array $data = null )
+	public function output( $view_path = null )
 	{			
 		// Установим HTML представление модуля для вывода
 		$out = $this->view_html;
