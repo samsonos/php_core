@@ -41,6 +41,9 @@ if( $_SERVER['DOCUMENT_ROOT'] != __SAMSON_CWD__ )
 	$_path_to_root = implode( '', $__count ? array_fill( 0, $__count, '../') : array());
 }
 
+/** Flag that this script runs from remote app */
+define( '__SAMSON_REMOTE_APP', __SAMSON_CWD__ !== $_SERVER['DOCUMENT_ROOT'] );
+
 /** Относительный путь от текущего веб-приложения к корневой папке веб-сайта */
 define('__SAMSON_ROOT__', $_path_to_root );
 

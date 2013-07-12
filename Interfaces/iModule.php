@@ -36,6 +36,9 @@ interface iModule
 	/** Identifier for default view data entry */
 	const VD_POINTER_DEF = '';
 	
+	/** Pointer to plain html entry in view data entry */
+	const VD_HTML = '__html__';
+	
 	/** Идентификатор указывающий на использование базового контроллера модуля */
 	const BASE_CONTROLLER = MOD_BASE_CONTROLLER;
 	

@@ -295,7 +295,7 @@ final class Core implements iCore
 		foreach ( $this->render_stack as & $renderer )
 		{
 			// Выполним одностороннюю обработку шаблона
-			$html = call_user_func( $renderer, $html, $__data );
+			$html = call_user_func( $renderer, $html, $__data, $this->active );
 		}		
 		
 		////elapsed('End rendering '.$__view);

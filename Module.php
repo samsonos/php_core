@@ -59,7 +59,7 @@ class Module implements iModule, \ArrayAccess, iModuleViewable
 		$view_data = array_merge( $this->data, get_object_vars( $this ) );
 
 		// Remove plain HTML from view data
-		unset( $view_data['html'] );
+		unset( $view_data[ self::VD_HTML ] );
 		
 		return $view_data;
 	}
@@ -79,7 +79,7 @@ class Module implements iModule, \ArrayAccess, iModuleViewable
 		// Если передан параметр то установим его
 		if( func_num_args() )
 		{ 	
-			$this->data[ 'html' ] = $value;
+			$this->data[ self::VD_HTML ] = $value;
 			
 			return $this; 
 		}
@@ -141,14 +141,14 @@ class Module implements iModule, \ArrayAccess, iModuleViewable
 			$this->view_data[ $view_path ] = array_merge( array(), $this->view_data[ $this->view_path ] ); 
 				
 			// When direct outputting don't copy plain html			
-			unset($this->view_data[ $view_path ]['html']);		
+			unset($this->view_data[ $view_path ][ self::VD_HTML ]);		
 				
 			// Change view data pointer to appropriate view data entry
 			$this->data = & $this->view_data[ $view_path ];	
 		}		
 	
 		// Output data
-		$out = isset($this->data['html']) ? $this->data['html'] : '';		
+		$out = isset($this->data[ self::VD_HTML ]) ? $this->data[ self::VD_HTML ] : '';		
 		
 		// If view path specified
 		if( isset( $view_path {0}) && ($view_path != __SAMSON_VIEW_PATH.'/.php'))
