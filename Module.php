@@ -56,7 +56,12 @@ class Module implements iModule, \ArrayAccess, iModuleViewable
 	public function toView( $prefix = NULL, array $restricted = array() )
 	{
 		// Get all module data variables
-		return array_merge( $this->data, get_object_vars( $this ) );		
+		$view_data = array_merge( $this->data, get_object_vars( $this ) );
+
+		// Remove plain HTML from view data
+		unset( $view_data['html'] );
+		
+		return $view_data;
 	}
 	
 	/** @see iModule::path() */
