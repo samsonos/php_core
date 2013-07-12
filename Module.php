@@ -37,7 +37,7 @@ class Module implements iModule, \ArrayAccess, iModuleViewable
 	protected $data = null;	
 	
 	/** Collection of data for view rendering, filled with default pointer */
-	public $view_data = array( self::VD_POINTER_DEF => array() );	
+	public $view_data = array( self::VD_POINTER_DEF => array( 'html' => '' ) );	
 	
 	
 	/**	@see iModule::title() */
@@ -55,7 +55,8 @@ class Module implements iModule, \ArrayAccess, iModuleViewable
 	/** @see iModuleViewable::toView() */
 	public function toView( $prefix = NULL, array $restricted = array() )
 	{
-		return array_merge( $this->data, get_object_vars( $this ) );
+		// Get all module data variables
+		return array_merge( $this->data, get_object_vars( $this ) );		
 	}
 	
 	/** @see iModule::path() */
@@ -71,9 +72,14 @@ class Module implements iModule, \ArrayAccess, iModuleViewable
 	public function html( $value = NULL )
 	{
 		// Если передан параметр то установим его
-		if( func_num_args() ){ $this->view_html = $value; return $this; }
+		if( func_num_args() )
+		{ 	
+			$this->data[ 'html' ] = $value;
+			
+			return $this; 
+		}
 		// Вернем значение текущего представления модели
-		else return $this->view_html;
+		else return $this->data[ 'html' ];
 	}
 	
 	/** @see iModule::view() */
@@ -112,15 +118,12 @@ class Module implements iModule, \ArrayAccess, iModuleViewable
 	
 	/**	@see iModule::output() */
 	public function output( $view_path = null )
-	{			
-		// Установим HTML представление модуля для вывода
-		$out = $this->view_html;
-		
-		// If view path not specified - use current view path
-		if( !isset( $view_path ) && isset( $this->view_path{0} ) ) $view_path = $this->view_path;
-		// Direct rendering of specific view
-		else
-		{			
+	{					
+		// If view path not specified - use current correct view path
+		if( !isset( $view_path ) ) $view_path = $this->view_path;
+		// Direct rendering of specific view, not default view data entry
+		else if( $view_path !== self::VD_POINTER_DEF )
+		{						
 			// Add extension if nessesary
 			if( strpos( $view_path, '.php' ) === FALSE ) $view_path .= '.php';
 			
@@ -128,27 +131,37 @@ class Module implements iModule, \ArrayAccess, iModuleViewable
 			// If view does not exists, try standart location, for backward compatibility
 			if( !file_exists( $this->path.$view_path )) $view_path = __SAMSON_VIEW_PATH.'/'.$view_path;
 			//[PHPCOMPRESSOR(remove,end)]
-			
-			$this->view_data[ $view_path ] = array_merge( array(), $this->view_data[$this->view_path] ); 
-			
+		
+			// Copy current view data stack to new entry for direct output
+			$this->view_data[ $view_path ] = array_merge( array(), $this->view_data[ $this->view_path ] ); 
+				
+			// When direct outputting don't copy plain html			
+			unset($this->view_data[ $view_path ]['html']);		
+				
 			// Change view data pointer to appropriate view data entry
-			$this->data = & $this->view_data[ $view_path ];		
-		}
+			$this->data = & $this->view_data[ $view_path ];	
+		}		
+	
+		// Output data
+		$out = isset($this->data['html']) ? $this->data['html'] : '';		
 		
-		// No view specified - ignore rendering
-		if( !isset( $view_path {0})) return '';				
-
-		// Временно изменим текущий модуль системы
-		$old = s()->active( $this );
+		// If view path specified
+		if( isset( $view_path {0}) && ($view_path != __SAMSON_VIEW_PATH.'/.php'))
+		{	
+			// Временно изменим текущий модуль системы
+			$old = s()->active( $this );
+				
+			// Прорисуем представление модуля
+			$out .= s()->render( $this->path.$view_path, $this->data );
 			
-		// Прорисуем представление модуля
-		$out .= s()->render( $this->path.$view_path, $this->data );
-		
-		// Вернем на место текущий модуль системы
-		s()->active( $old );
-		
-		// Очистим само представление
-		$this->view_html = '';
+			// Вернем на место текущий модуль системы
+			s()->active( $old );	
+		}
+		// No plain HTML view data is set also
+		else if( !isset($out{0}) )
+		{ 
+			return e('Cannot render view for module ## - No view path or data has been set', E_SAMSON_CORE_ERROR, $this->id );
+		}
 			
 		// If we have only one element - it is a default enty - delete it
 		if( sizeof($this->view_data) == 1 ) $this->view_data[ self::VD_POINTER_DEF ] = array();	
@@ -164,8 +177,6 @@ class Module implements iModule, \ArrayAccess, iModuleViewable
 		// Change view data pointer
 		$this->data = & $this->view_data[ $this->view_path ];	
 		
-		//trace($out,true);
-	
 		// Вернем результат прорисовки
 		return $out;
 	}	
@@ -349,7 +360,7 @@ class Module implements iModule, \ArrayAccess, iModuleViewable
 			$class_name = is_string( $value ) ? $value : ''.mb_strtolower( classname(get_class($field)), 'UTF-8' );
 					
 			// Добавим ссылку на сам объект в представление
-			$this->data[ $class_name ] = & $field;
+			//$this->data[ $class_name ] = & $field;
 			
 			// Объединим текущую коллекцию параметров представления модуля с полями класса
 			$this->data = array_merge( $this->data, $field->toView( $class_name.'_' ) );

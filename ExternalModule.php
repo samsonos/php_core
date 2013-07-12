@@ -103,7 +103,7 @@ class ExternalModule extends Module implements iExternalModule
 	{
 		// Если этот класс не прямой наследник класса "Подключаемого Модуля"
 		if( isset($this->parent) )
-		{
+		{					
 			// Построим путь к представлению относительно текущего модуля
 			$path = $this->path.$view_path;
 				
@@ -116,7 +116,7 @@ class ExternalModule extends Module implements iExternalModule
 		}
 	
 		// Просто выполним родительский метод
-		return parent::output( $view_path, $data );
+		return parent::output( $view_path );
 	}
 	
 	/**	@see iModuleConnector::prepare() */
