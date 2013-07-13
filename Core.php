@@ -98,6 +98,8 @@ final class Core implements iCore
 	{
 		$path = normalizepath( $path.'/' );		
 		
+		//trace('Collecting resources from '.$path);
+		
 		// Check for module location
 		if( !file_exists( $path ) ) return e( 'loading module from ## - path doesn\'t exists',E_SAMSON_CORE_ERROR,$path, $this );
 				
@@ -200,12 +202,18 @@ final class Core implements iCore
 					{
 						// If this is ExternalModule ancestor
 						if( in_array( ns_classname('ExternalModule','samson\core'), class_parents( $class_name )))
-						{							
-							//elapsed('   -- Found iModule ancestor '.$class_name.' in '.$path);
-							
+						{														
 							// Save namespace module data to load stack
-							$ns = pathname( $class_name );				
-							$this->load_stack[ $ns ] = & $ls;
+							$ns = pathname( $class_name );
+							
+							// If no namespace specified consider classname as namespace
+							$ns = isset($ns{0}) ? $ns : $class_name;													
+							
+							// Check for namespace uniqueness 
+							if( !isset($this->load_stack[ $ns ])) $this->load_stack[ $ns ] = & $ls;
+							//else elapsed('   !! Found duplicate ns:'.$ns.' for class'.$class_name); 
+							
+							//elapsed('   -- Found iModule ancestor '.$class_name.'('.$ns.') in '.$path);
 				
 							// Create object
 							$connector = new $class_name( $path );						
@@ -621,31 +629,35 @@ final class Core implements iCore
 	/** Конструктор */
 	public function __construct()
 	{			
+		// Установим полный путь к рабочей директории
+		$this->system_path = __SAMSON_CWD__;
+		
 		// Get backtrace to define witch scipt initiated core creation
 		$db = debug_backtrace();
 		
 		// Get local web application path 
-		$this->system_path = normalizepath( pathname($db[1]['file']) );		
-		
+		$this->system_path = normalizepath( pathname($db[1]['file']) ).'/';	
+
+		// Build absolute path to local template
+		$this->template_path = $this->system_path.$this->template_path;
+				 
 		//[PHPCOMPRESSOR(remove,start)]
 		// Установим обработчик автоматической загрузки классов
 		spl_autoload_register( array( $this, '__autoload'));		
-		//[PHPCOMPRESSOR(remove,end)]
-				
-		// Установим полный путь к рабочей директории
-		$this->system_path = __SAMSON_CWD__;				
+		//[PHPCOMPRESSOR(remove,end)]						
 		
 		// Свяжем коллекцию загруженных модулей в систему со статической коллекцией
 		// Созданных экземпляров класса типа "Модуль"
 		$this->module_stack = & Module::$instances;		
 		
-		//$this->load2( __SAMSON_PATH__ );
+		// TODO: Сделать полноценную загрузку core и local через load
+		//$this->load2( __SAMSON_PATH__ );		
 	
 		// Создадим специальный модуль для PHP
 		new PHP();	
 		
 		// Load samson\core module
-		new System( __SAMSON_PATH__ );
+		new System( __SAMSON_PATH__ );		
 		
 		// Manually include system module to load stack
 		$path = __SAMSON_PATH__;
@@ -655,22 +667,22 @@ final class Core implements iCore
 			$ls['id'] = 'core';
 			$ls['classname'] = 'System';
 			$this->load_stack['samson\core'] = & $ls;
-		}
+		}		
 		
 		// Create local module and set it as active
 		$this->active = new CompressableLocalModule( 'local', $this->system_path );	
-				
+		
 		// Инициализируем локальные модуль
-		if( $this->resources( $this->system_path, $ls ))
+		if( $this->resources( $this->system_path, $ls2 ))
 		{			
 			// Manually include local module to load stack
-			$ls['namespace'] = '';
-			$ls['id'] = 'local';
-			$ls['classname'] = 'local';
-			$this->load_stack['local'] = & $ls;
+			$ls2['namespace'] = 'local';
+			$ls2['id'] = 'local';
+			$ls2['classname'] = 'local';
+			$this->load_stack['local'] = & $ls2;
 			
 			// Require local controllers 
-			foreach ( $ls['controllers'] as $controler ) 
+			foreach ( $ls2['controllers'] as $controler ) 
 			{
 				require( $controler );
 				
@@ -682,7 +694,7 @@ final class Core implements iCore
 			}
 			
 			// Require local models
-			foreach ( $ls['models'] as $model ) require( $model );
+			foreach ( $ls2['models'] as $model ) require( $model );
 		}	
 			
 		// Выполним инициализацию конфигурации модулей загруженных в ядро
