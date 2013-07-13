@@ -16,7 +16,7 @@ class Module implements iModule, \ArrayAccess, iModuleViewable
 	protected $path = '';
 	
 	/** Имя модуля под которым модуль загружен в ядро системы */
-	protected $core_id = '';
+	//protected $core_id = '';
 	
 	/** Настоящее имя модуля, идентифицируещее его физическую структуру */
 	protected $id = '';
@@ -34,7 +34,7 @@ class Module implements iModule, \ArrayAccess, iModuleViewable
 	protected $view_html = '';
 	
 	/** Pointer to view data enty */
-	protected $data = null;	
+	protected $data = array();	
 	
 	/** Collection of data for view rendering, filled with default pointer */
 	public $view_data = array( self::VD_POINTER_DEF => array( 'html' => '' ) );	
@@ -44,7 +44,7 @@ class Module implements iModule, \ArrayAccess, iModuleViewable
 	public function title( $title = NULL ){ return $this->set( 'title', $title ); }
 	
 	/**	@see iModule::core_id() */
-	public function core_id(){ return $this->core_id; }
+	public function core_id(){ return $this->id; }
 	
 	/**	@see iModule::id() */
 	public function id(){ return $this->id; }	
@@ -276,65 +276,38 @@ class Module implements iModule, \ArrayAccess, iModuleViewable
 		
 		// Вернем результат выполнения метода контроллера
 		return ! isset( $action_result ) ? A_SUCCESS : $action_result;		
-	}	
-	
-	/** @see iModule::duplicate() */
-	public function & duplicate( $id, $class_name = null )
-	{ 		
-		// Получим класс текущего модуля
-		$class = isset( $class_name ) ? $class_name : get_class( $this );
+	}		
 
-		// Создадим новый модуль этого класса
-		$m = new $class( $id, $this->path/*, $this->data*/ ); 
-		// Cannot pass data because data has id of original module, and that id will be overwritten
-	
-		// Установим ему идентификатор оригинала для доступа к файлам
-		$m->id = $this->id; 
-		
-		// Вернем созданный дубликат модуль
-		return $m; 
-	}
-	
 	/**
 	 * Конструктор 
 	 * 
 	 * @param string 	$id 	Уникальный идентификатор модуля описывающий его "физические" файлы	 
 	 * @param string 	$path 	Путь для модулей которые находиться отдельно от веб-приложения и системы
-	 * @param array 	$params	Коллекция параметров для модуля
 	 */
-	public function __construct( $id, $path = NULL, array $params = NULL )
+	public function __construct( $id, $path = NULL )
 	{		
 		// Set up default view data pointer
-		$this->view_data[ self::VD_POINTER_DEF ] = & $this->data;
+		$this->view_data[ self::VD_POINTER_DEF ] = & $this->data;		
 		
-		// Установим идентификатор модуля
-		$this->core_id = $id;				
+		// Set module identifier
+		$this->id = $id;
 		
-		// Установим идентификатор модуля, если он еще не задан
-		$this->id = ! isset( $this->id{0} ) ? $id : $this->id;
+		// Set path to module
+		$this->path( $path );						
 		
-		//elapsed('Регистрирование модуля системы: '.$this->id.'('.$this->core_id.') with '.sizeof($params).' params');
-		
-		// Установим путь к "отдаленному" модулю
-		$this->path( $path );		
-		
-		// Установим параметры модуля
-		if( isset($params) ) foreach ( $params as $k => $v ) $this->$k = $v;		
-		
-		// Установим идентификатор модуля в коллекцию перенных модуля
+		// Add to module identifier to view data stack
 		$this->data['id'] = $this->id;	
 	
-		// Запишем создаваемый класс в статическую коллекцию		
+		// Save this instance in static instances collection		
 		self::$instances[ $this->id ] = & $this;
+		
+		//elapsed('Registering module: '.$this->id.'('.$path.') );
 	}		
 	
 	/** Обработчик уничтожения объекта */
 	public function __destruct()
 	{
-		//trace('Уничтожение модуля:'.$this->id );
-		
-		// Очистим коллекцию загруженых модулей
-		unset( Module::$instances[ $this->core_id ] );
+		//trace('Уничтожение модуля:'.$this->id );				
 			
 		// Очистим коллекцию загруженых модулей
 		unset( Module::$instances[ $this->id ] );
@@ -363,10 +336,7 @@ class Module implements iModule, \ArrayAccess, iModuleViewable
 		{					
 			// Сформируем регистро не зависимое имя класса для хранения его переменных в модуле
 			$class_name = is_string( $value ) ? $value : ''.mb_strtolower( classname(get_class($field)), 'UTF-8' );
-					
-			// Добавим ссылку на сам объект в представление
-			//$this->data[ $class_name ] = & $field;
-			
+				
 			// Объединим текущую коллекцию параметров представления модуля с полями класса
 			$this->data = array_merge( $this->data, $field->toView( $class_name.'_' ) );
 		}		
@@ -378,12 +348,12 @@ class Module implements iModule, \ArrayAccess, iModuleViewable
 	}
 	
 	/** Обработчик сериализации объекта */
-	public function __sleep(){	return array( 'core_id', 'id', 'view_path', 'view_html', 'data', 'path' );	}
+	public function __sleep(){	return array( 'core_id', 'id', 'path' );	}
 	/** Обработчик десериализации объекта */
 	public function __wakeup()
 	{
 		// Fill global instances  
-		self::$instances[ $this->core_id ] = & $this;
+		self::$instances[ $this->id ] = & $this;
 
 		// Set up default view data pointer
 		$this->view_data[ self::VD_POINTER_DEF ] = & $this->data;

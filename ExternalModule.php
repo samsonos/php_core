@@ -16,36 +16,21 @@ class ExternalModule extends Module implements iExternalModule
 	protected $requirements = array();
 	
 	/** Конструктор */
-	public function  __construct( $core_id = NULL, $path = NULL, array $params = NULL )
-	{
-		// Установим путь
-		$this->path = $path;
-	
-		// Установим имя модуля под которым модуль загружен в систему
-		$this->core_id = !isset( $core_id ) ? $this->id : $core_id;
-	
-		// Если для подключаемого модуля не выставлен идентификатор в описании класса
-		// установим переданный
-		$this->id = isset( $this->id{0} ) ? $this->id : $core_id;
-			
-		// Установим параметры модуля
-		if( isset($params) ) foreach ( $params as $k => $v ) $this->$k = $v;
-	
-		// Установим идентификатор модуля в коллекцию перенных модуля
-		$this->data['id'] = $this->core_id;
-	
+	public function  __construct( $path = NULL )
+	{	
 		//[PHPCOMPRESSOR(remove,start)]
 		// Создадим конфигурацию для composer
 		$this->composer();
-		//[PHPCOMPRESSOR(remove,end)]		
+		//[PHPCOMPRESSOR(remove,end)]	
+
+		parent::__construct( $this->id, $path );
+	}
 	
-		// Выполним проверку модуля - Вызовем родительский конструктор
-		if( $this->prepare() ) 
-		{
-			self::$instances[ $this->core_id ] 	= & $this;
-			
-			parent::__construct( $this->core_id, $path, $params );
-		}
+	/** Обработчик сериализации объекта */
+	public function __sleep()
+	{
+		// Remove all unnessesary fields from serialization
+		return array_diff( array_keys( get_object_vars( $this )), array( 'core_id', 'view_path', 'view_html', 'data', 'view_data' ));
 	}
 	
 	/** @see Module::duplicate() */
@@ -59,10 +44,7 @@ class ExternalModule extends Module implements iExternalModule
 	
 		// Вернем дубликат
 		return $m;
-	}
-	
-	/** Обработчик сериализации объекта */
-	public function __sleep(){ return array_merge( array('parent'), parent::__sleep() ); }
+	}	
 	
 	/**
 	 * Перегружаем стандартное поведение выполнения действия контроллера

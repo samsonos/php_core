@@ -15,4 +15,3 @@
 function path( $path, iModule & $module = NULL ) {
 	$m = isset($module) ? $module : s()->module(); return $m->path().$path;
 }
-?>

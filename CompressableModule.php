@@ -6,6 +6,7 @@ namespace samson\core;
  *
  * @author Vitaly Iegorov <vitalyiegorov@gmail.com> 
  * @version 0.1
+ * @deprecated use CompressableExternalModule
  */
 class CompressableModule extends ModuleConnector implements iModuleCompressable
 {		

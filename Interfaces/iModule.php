@@ -157,14 +157,4 @@ interface iModule
 	 * @param mixed $value Значение переменной 
 	 */
 	public function set( $field, $value = NULL );
-	
-	/**
-	 * Создать дупликат для текущего модуля
-	 * 
-	 * @param string $id 			Идентификатор для дупликата модуля
-	 * @param string $class_name 	Имя класса для создаваемого модуля
-	 * @deprecated Use clone instead
-	 * @return ModuleConnector Указаетель на дупликат текущего модуля	 
-	 */
-	public function & duplicate( $id, $class_name = null );
 }
