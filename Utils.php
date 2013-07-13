@@ -29,7 +29,7 @@ function pathname( $path )
  * @param string $path Path to be normalized
  * @return mixed Normalized path
  */
-function normalizepath( $path ){ return str_replace( array('\\\\','//','\\'), '/', $path );}
+function normalizepath( $path ){ return str_replace( array('\\\\','///', '//','\\'), '/', $path );}
 
 /**
  * Return only class name without namespace

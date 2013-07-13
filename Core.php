@@ -55,7 +55,7 @@ final class Core implements iCore
 	 * Automatic class loader based onlazy loading from load_stack
 	 * based on class namespace data
 	 */
-	private function __autoload2 ( $class )
+	private function __autoload( $class )
 	{			
 		// Get just class name without ns
 		$class_name = classname( $class );
@@ -130,7 +130,7 @@ final class Core implements iCore
 					if( !isset( $resources[ $rt ] ) ) $resources[ $rt ] = array();
 						
 					// Save resource file path to appropriate collection and fix possible slash issues to *nix format
-					$resources[ $rt ][] = normalizepath( $resource );
+					$resources[ $rt ][] = normalizepath( $resource );				
 				}
 			}
 		
@@ -158,9 +158,9 @@ final class Core implements iCore
 		// Cached data
 		return false;
 	}
-	
-	/** @see \samson\core\iCore::load2() */
-	public function load2( $path = NULL )
+
+	/** @see \samson\core\iCore::load() */
+	public function load( $path = NULL )
 	{	
 		//elapsed('Start loading from '.$path);
 		
@@ -189,10 +189,11 @@ final class Core implements iCore
 				//elapsed('   -- Icluded '.$php.' from '.$path);
 					
 				// If we have new class declared after requiring
-				if( sizeof($new_classes = array_diff( get_declared_classes(), $classes )))
+				$n_classes = get_declared_classes();
+				if( sizeof($new_classes = array_diff( $n_classes, $classes )))
 				{
 					// Save new loaded classes list
-					$classes = get_declared_classes();
+					$classes = $n_classes;
 				
 					// Iterate new declared classes
 					foreach ( $new_classes as $class_name )
@@ -210,6 +211,7 @@ final class Core implements iCore
 							$connector = new $class_name( $path );						
 								
 							$id = $connector->id();
+							$ls['id'] = $id;
 							$ls['classname'] = $class_name;
 							$ls['namespace'] = $ns;			
 
@@ -446,135 +448,16 @@ final class Core implements iCore
 		// Если модуль загружен в ядро
 		if( isset($this->module_stack[ $_id ]) )
 		{	
+			// Get module instance
+			$m = & $this->module_stack[ $_id ];
+			
+			// Remove load stack data of this module 
+			$ns = nsname( get_class($m) );			
+			if( isset( $this->load_stack[ $ns ] )) unset($this->load_stack[ $ns ]);
+			
 			// Очистим коллекцию загруженых модулей
 			unset( $this->module_stack[ $_id ] );			
 		}		
-	}
-
-	/** @see iCore::load() */
-	public function load( $id, $path = NULL, $params = array() )
-	{		
-		return $this->load2( $path );
-		
-		//elapsed('----------------------');
-		//elapsed('Start loading module '.$id);
-		
-		// Получим регистро не зависимый идентификатор модуля
-		$ci_id = mb_strtolower( $id, 'UTF-8' );	
-		
-		// Если в систему загружена нужная конфигурация для загружаемого модуля - получим её
-		if( isset( Config::$data[ $ci_id ] ) ) $params = array_merge( Config::$data[ $ci_id ], $params );
-		
-		//elapsed(' --Config loading finished');
-				
-		// Если мы еще не загрузили модуль в ядро
-		if( ! isset( $this->module_stack[ $ci_id ] ) )
-		{		
-			// Если не указан путь к модулю - считаем что он локальный
-			if( ($path === 'local') || (!isset( $path )) )
-			{						
-				// Создадим локальный модуль
-				$module = new CompressableLocalModule( $ci_id, $this->system_path, $params  );				
-				
-				// Сохраним путь к файлу модели
-				$model_path = $this->system_path.__SAMSON_MODEL_PATH.'/'.$ci_id.'.php';
-				
-				// Подключим файл модели если он существует
-				if( file_exists( $model_path ) ) require $model_path;
-				
-				// Путь к файлу контроллера модуля
-				$controller_path = $this->system_path.__SAMSON_CONTOROLLER_PATH.'/'.$ci_id.'.php';
-				
-				// Подключим файл контроллера если он существует
-				if( file_exists( $controller_path ) ) require $controller_path;
-				
-				//elapsed(' --Creating local module instance finished');
-			}			
-			// Путь к модулю задан - считаем его внешний			
-			else 
-			{	
-				// Обязательно добавим в конец пути к модуля слеш для правильности формирования
-				// внутенних путей модуля
-				if( $path[ strlen($path) - 1 ] != '/' ) $path .= '/';
-				
-				// Получим аргументы функции как параметры загружаемого модуляы
-				$this->loaded_module = array( 
-					'id' 		=> $id, 
-					'path' 		=>	$path, 
-					'params'	=> $params, 
-					'files' 	=> FILE::dir( $path, 'php' )
-				);		
-
-				//elapsed(' --Getting module structure finished');
-				
-				// Получим список загруженных классов
-				$classes = get_declared_classes();
-			
-				// Совместимость со старыми модулями
-				if( file_exists( $path.'include.php') )
-				{
-					// Прочитаем старый файл подключения
-					$include = file_get_contents($path.'include.php');
-					
-					// Уберем из него все не нужное
-					$include = str_replace( array('<?php','<?','?>'), '', preg_replace('/(require|require_once)\s*[^;]*\;/', '', $include ));
-					
-					// Загрузим оставшиеся в систему
-					eval($include);
-				}
-
-				// Переберем все файлы модуля и подключим их
-				foreach ( $this->loaded_module['files'] as $file ) 
-				{					
-					// Пропустим папку представлений
-					if( strpos( $file, __SAMSON_VIEW_PATH.'/' )  ) continue;
-					
-					////elapsed(' --Loading file: '.$file);
-					
-					// Совместимость со старыми модулями
-					if( basename($file) == 'include.php' ) continue;					
-					// Просто подключи файл модуля
-					else require_once( $file );									
-				}		
-
-				//elapsed(' --Include file loading finished');
-				
-				// Получим список новых загруженных классов			
-				foreach ( array_diff( get_declared_classes(), $classes ) as $class ) 
-				{
-					// Если этот класс является потомком модуля
-					if( in_array( ns_classname('ExternalModule','samson\core'), class_parents( $class )))
-					{							
-						// Создадим экземпляр класса для подключения модуля
-						$connector = new $class( $ci_id, $path, $params );
-					
-						// Получим родительский класс
-						$parent_class = get_parent_class( $connector );
-		
-						// Проверим родительский класс
-						if( $parent_class !== ns_classname('ExternalModule','samson\core') )
-						{					
-							// Переберем загруженные в систему модули
-							foreach ( $this->module_stack as & $m )
-							{
-								// Если в систему был загружен модуль с родительским классом
-								if( get_class($m) == $parent_class ) $connector->parent = & $m;
-							}
-						}
-
-						// Прекратим поиски
-						break;
-					}
-				}
-
-				//elapsed(' --Creating module instance finished');
-			}		
-		}
-		
-		//elapsed('end loading module '.$id);
-		
-		// Продожим "ЦЕПИРОВАНИЕ"
-		return $this;
 	}		
 	
 	public function generate_template( $template_html, $css_url, $js_url )
@@ -742,6 +625,12 @@ final class Core implements iCore
 		$path = $this->path();
 		if( $this->resources( $path, $ls ))
 		{			
+			// Manually include local module to load stack
+			$ls['namespace'] = '';
+			$ls['id'] = 'local';
+			$ls['classname'] = 'local';
+			$this->load_stack['local'] = & $ls;
+			
 			// Require local controllers 
 			foreach ( $ls['controllers'] as $controler ) 
 			{
@@ -751,7 +640,7 @@ final class Core implements iCore
 				$local_module = basename( $controler, '.php' );
 					
 				// Create new local compressable module
-				new CompressableLocalModule( $local_module, $this->system_path );
+				new LocalModule( $local_module, $this->system_path );
 			}
 			
 			// Require local models
@@ -759,40 +648,12 @@ final class Core implements iCore
 		}	
 	}
 	
-	//[PHPCOMPRESSOR(remove,start)]	
-	/** Обработчик автоматической загрузки классов модулей */
-	public function __autoload ( $class )
-	{	
-		// Получим имя самого класса
-		$class_name = basename($class);
-		
-		// Если мы знаем какой модуль загружается в данный моммент
-		if( isset( $this->loaded_module ) && sizeof( $this->loaded_module ) )
-		{			
-			// Найдем в списке файлов нужный нам по имени класса, так как мы незнаем
-			// структуру каталогов модуля поищем класс символьным поиском в списке всех файлов
-			// модуля
-			if($files = preg_grep( '/\/'.$class_name.'\.php/', $this->loaded_module['files']))
-			{				
-				// Проверим на однозначность
-				if( sizeof($files) > 1 ) return e('Невозможно определить файл для класса: ##', E_SAMSON_CORE_ERROR, $class );
-				
-				// Получим путь к файлу и подключим нужный файл
-				foreach ( $files as $k => $file ) require_once( $file );				
-			}			
-		}	
-		// Загрузка класса ядра системы
-		else if( strpos( $class, 'samson\core\\' ) !== false ) require str_replace('samson\core'.__NS_SEPARATOR__, '', $class).'.php';	
-	}
-	//[PHPCOMPRESSOR(remove,end)]
-	
 	/** Конструктор */
 	public function __construct()
 	{			
 		//[PHPCOMPRESSOR(remove,start)]
 		// Установим обработчик автоматической загрузки классов
-		spl_autoload_register( array( $this, '__autoload2'));
-		//spl_autoload_register( array( $this, '__autoload'));
+		spl_autoload_register( array( $this, '__autoload'));		
 		//[PHPCOMPRESSOR(remove,end)]
 				
 		// Установим полный путь к рабочей директории
@@ -810,8 +671,18 @@ final class Core implements iCore
 		// Load samson\core module
 		new System( __SAMSON_PATH__ );
 		
+		// Manually include system module to load stack
+		$path = __SAMSON_PATH__;
+		if( $this->resources( $path, $ls ))
+		{	
+			$ls['namespace'] = 'samson\core';
+			$ls['id'] = 'core';
+			$ls['classname'] = 'System';
+			$this->load_stack['samson\core'] = & $ls;
+		}
+		
 		// Create local module and set it as active
-		$this->active = new CompressableLocalModule( 'local', $this->system_path );			
+		$this->active = new CompressableLocalModule( 'local', $this->system_path );	
 				
 		// Инициализируем локальные модуль
 		$this->init();

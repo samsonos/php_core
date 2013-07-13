@@ -15,9 +15,6 @@ class Module implements iModule, \ArrayAccess, iModuleViewable
 	/** Путь к подключаемому модулю */
 	protected $path = '';
 	
-	/** Имя модуля под которым модуль загружен в ядро системы */
-	//protected $core_id = '';
-	
 	/** Настоящее имя модуля, идентифицируещее его физическую структуру */
 	protected $id = '';
 	
@@ -43,7 +40,10 @@ class Module implements iModule, \ArrayAccess, iModuleViewable
 	/**	@see iModule::title() */
 	public function title( $title = NULL ){ return $this->set( 'title', $title ); }
 	
-	/**	@see iModule::core_id() */
+	/**
+	 * @deprecated use iModule::id() 
+	 * @return string
+	 */
 	public function core_id(){ return $this->id; }
 	
 	/**	@see iModule::id() */
@@ -68,7 +68,7 @@ class Module implements iModule, \ArrayAccess, iModuleViewable
 	public function path( $value = NULL )
 	{		
 		// Если передан параметр - установим его
-		if( func_num_args() ){ $this->path = $value; return $this; }		
+		if( func_num_args() ){ $this->path = normalizepath($value); return $this; }		
 		// Вернем относительный путь к файлам модуля
 		else return $this->path;
 	}
@@ -348,7 +348,7 @@ class Module implements iModule, \ArrayAccess, iModuleViewable
 	}
 	
 	/** Обработчик сериализации объекта */
-	public function __sleep(){	return array( 'core_id', 'id', 'path' );	}
+	public function __sleep(){	return array( 'id', 'path', 'author', 'version' );	}
 	/** Обработчик десериализации объекта */
 	public function __wakeup()
 	{

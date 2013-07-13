@@ -30,7 +30,7 @@ class ExternalModule extends Module implements iExternalModule
 	public function __sleep()
 	{
 		// Remove all unnessesary fields from serialization
-		return array_diff( array_keys( get_object_vars( $this )), array( 'core_id', 'view_path', 'view_html', 'data', 'view_data' ));
+		return array_diff( array_keys( get_object_vars( $this )), array( 'view_path', 'view_html', 'data', 'view_data' ));
 	}
 	
 	/** @see Module::duplicate() */

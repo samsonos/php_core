@@ -73,17 +73,6 @@ interface iCore
 	 * @return iModule Модуль системы 
 	 */
 	public function & module( & $module = NULL );	
-			
-	/**
-	 * Загрузить модуль системы в ядро
-	 * 
-	 * @param string 	$id		Имя загружаемого модуля в систему
-	 * @param string 	$path	Путь к физическому расположению модуля, если не передан, то загружаемый модуль считается локальным
-	 * @param array  	$params	Коллекция параметров для инициализации модуля
-	 * @return iCore Объект ядра для "цепирования"
-	 * @deprecated Use iCore::load2() instead
-	 */
-	public function load( $id, $path = NULL, $params = NULL );
 	
 	/**
 	 * Load module into the framework core
@@ -91,7 +80,7 @@ interface iCore
 	 * @param string 	$path	Path to module for loading	 
 	 * @return iCore Self reference for chaining
 	 */
-	public function load2( $path = NULL );
+	public function load( $path = NULL );
 
 	/**
 	 * Unload module from framework core 

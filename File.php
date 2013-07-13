@@ -123,7 +123,7 @@ class File
 	 * @param array		$restrict Коллекция папок которые необходимо пропускать
 	 * @return array Коллекция файлов в каталоге
 	 */
-	public static function dir( $path, $type = NULL, $modyfier = '', & $result = array(), $max_level = NULL, $level = 0, $restrict = array() )
+	public static function dir( $path, $type = NULL, $modyfier = '', & $result = array(), $max_level = NULL, $level = 0, $restrict = array( '.git','.svn','.settings') )
 	{
 		// Если установлено ограничение на глубину - выйдем
 		if( isset( $max_level ) && $level > $max_level ) return $result;
@@ -135,7 +135,7 @@ class File
 			while ( FALSE !== ( $entry = readdir( $handle ) ) )
 			{			
 				// Если это зарезервированные ресурсы - пропустим
-				if( $entry == '..' || $entry[0] == '.') continue;
+				if( $entry == '..' || $entry == '.') continue;
 				
 				// Если эта папка запрещена
 				if( in_array( $entry, $restrict ) ) continue;

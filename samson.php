@@ -21,34 +21,16 @@ if(!defined('__DIR__')) define( '__DIR__', dirname(__FILE__));
 define( '__SAMSON_PATH__', __DIR__.'/' );
 
 /** Получим текущий каталог веб-приложения */
-define('__SAMSON_CWD__', str_ireplace('\\', '/', getcwd() ) );
+define('__SAMSON_CWD__', str_ireplace('\\', '/', getcwd().'/' ) );
 
 /** Получим путь к текущему веб-приложению относительно корня сайта */
-define('__SAMSON_BASE__', str_ireplace( $_SERVER['DOCUMENT_ROOT'], '', __SAMSON_CWD__ ).'/' );
+define('__SAMSON_BASE__', str_ireplace( $_SERVER['DOCUMENT_ROOT'], '', __SAMSON_CWD__ ) );
 
 /** Объявим константу для раздели пути в namespace */
 define('__NS_SEPARATOR__', '\\');
 
-// Определим путь к корню
-$_path_to_root = '';
-// Если это "вложенное" веб-приложение
-if( $_SERVER['DOCUMENT_ROOT'] != __SAMSON_CWD__ )
-{
-	// Рассчитаем количество слешей в пути к корню сайта
-	$__count = substr_count( __SAMSON_BASE__, '/' ) - 1;
-	
-	// Сформируем относительный путь корневой папке
-	$_path_to_root = implode( '', $__count ? array_fill( 0, $__count, '../') : array());
-}
-
 /** Flag that this script runs from remote app */
 define( '__SAMSON_REMOTE_APP', __SAMSON_CWD__ !== $_SERVER['DOCUMENT_ROOT'] );
-
-/** Относительный путь от текущего веб-приложения к корневой папке веб-сайта */
-define('__SAMSON_ROOT__', $_path_to_root );
-
-/** Зафиксируем правильный слеш ля путей фреймворка */
-define('__SAMSON_PATH_SLASH__', (PHP_OS=='Linux'?'/':'\\'));
 
 /** Путь к папке где находятся кеш системы */
 define('__SAMSON_CACHE_PATH','cache');

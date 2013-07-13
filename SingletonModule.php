@@ -35,7 +35,7 @@ class SingletonModule extends ExternalModule
 	}
 	
 	/** Конструктор */
-	public function __construct( $core_id, $path = NULL, array $params = NULL )
+	public function __construct( $path = NULL )
 	{		
 		// Получим имя класса
 		$class = get_class( $this );
@@ -45,18 +45,9 @@ class SingletonModule extends ExternalModule
 		else e('Попытка создания дополнительного объекта для ##', E_SAMSON_FATAL_ERROR, __CLASS__ );
 		
 		// Вызовем родительский конструктор
-		parent::__construct( $core_id, $path, $params );
-	}
-	
-	/** @see Module::duplicate() */
-	public function & duplicate( $id, $class_name = null )
-	{
-		// Вызовем родительский метод
-		return parent::duplicate( $id, '\samson\core\ModuleConnector' );
-	}
+		parent::__construct( $path );
+	}	
 
-	/** Обработчик сериализации объекта */
-	public function __sleep(){	return array_merge( parent::__sleep(), array_keys(get_object_vars($this)));}
 	/** Обработчик десериализации объекта */
 	public function __wakeup(){	parent::__wakeup();	self::$_factory[ get_class($this) ] = $this; }
 }
