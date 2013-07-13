@@ -93,14 +93,14 @@ function & s()
 	
 	// Если переменная не определена - получим единственный экземпляр ядра	
 	if( ! isset($_v) )
-	{
+	{		
 		// Если существует отпечаток ядра, загрузим его
 		if( isset( $GLOBALS["__CORE_SNAPSHOT"]) ) 
 		{			
 			$_v = unserialize(base64_decode($GLOBALS["__CORE_SNAPSHOT"]));			
 		}
 		// Создадим экземпляр
-		else $_v = new samson\core\Core();			
+		else $_v = new samson\core\Core();		
 	}
 		
 	// Вернем указатель на ядро системы

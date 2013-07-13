@@ -25,4 +25,3 @@ interface iExternalModule
 	 */
 	public function init( array $params = array() );
 }
-?>

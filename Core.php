@@ -183,10 +183,10 @@ final class Core implements iCore
 			// Iterate only php files
 			foreach ( $ls['php'] as $php) 
 			{	
-				// We must require regular files and wait to find iModule class ancestor declaration
-				require_once( $php );
-				
 				//elapsed('   -- Icluded '.$php.' from '.$path);
+				
+				// We must require regular files and wait to find iModule class ancestor declaration
+				require_once( $php );			
 					
 				// If we have new class declared after requiring
 				$n_classes = get_declared_classes();
@@ -383,7 +383,7 @@ final class Core implements iCore
 	{ 			
 		// Если передан аргумент
 		if( func_num_args() )  
-		{						
+		{	
 			// Сформируем новый относительный путь к главному шаблону системы
 			$this->template_path = $path.$this->template_path;  
 	
@@ -616,48 +616,24 @@ final class Core implements iCore
 		echo $template_html;	
 		
 		////elapsed('End routing');
-	}
-	
-	/** Load local resources and modules */
-	private function init()
-	{			
-		// Gather local resources for this path once
-		$path = $this->path();
-		if( $this->resources( $path, $ls ))
-		{			
-			// Manually include local module to load stack
-			$ls['namespace'] = '';
-			$ls['id'] = 'local';
-			$ls['classname'] = 'local';
-			$this->load_stack['local'] = & $ls;
-			
-			// Require local controllers 
-			foreach ( $ls['controllers'] as $controler ) 
-			{
-				require( $controler );
-				
-				// Get local module name
-				$local_module = basename( $controler, '.php' );
-					
-				// Create new local compressable module
-				new LocalModule( $local_module, $this->system_path );
-			}
-			
-			// Require local models
-			foreach ( $ls['models'] as $model ) require( $model );
-		}	
-	}
+	}	
 	
 	/** Конструктор */
 	public function __construct()
 	{			
+		// Get backtrace to define witch scipt initiated core creation
+		$db = debug_backtrace();
+		
+		// Get local web application path 
+		$this->system_path = normalizepath( pathname($db[1]['file']) );		
+		
 		//[PHPCOMPRESSOR(remove,start)]
 		// Установим обработчик автоматической загрузки классов
 		spl_autoload_register( array( $this, '__autoload'));		
 		//[PHPCOMPRESSOR(remove,end)]
 				
 		// Установим полный путь к рабочей директории
-		$this->system_path = __SAMSON_CWD__.'/';		
+		$this->system_path = __SAMSON_CWD__;				
 		
 		// Свяжем коллекцию загруженных модулей в систему со статической коллекцией
 		// Созданных экземпляров класса типа "Модуль"
@@ -685,7 +661,29 @@ final class Core implements iCore
 		$this->active = new CompressableLocalModule( 'local', $this->system_path );	
 				
 		// Инициализируем локальные модуль
-		$this->init();
+		if( $this->resources( $this->system_path, $ls ))
+		{			
+			// Manually include local module to load stack
+			$ls['namespace'] = '';
+			$ls['id'] = 'local';
+			$ls['classname'] = 'local';
+			$this->load_stack['local'] = & $ls;
+			
+			// Require local controllers 
+			foreach ( $ls['controllers'] as $controler ) 
+			{
+				require( $controler );
+				
+				// Get local module name
+				$local_module = basename( $controler, '.php' );
+					
+				// Create new local compressable module
+				new LocalModule( $local_module, $this->system_path );
+			}
+			
+			// Require local models
+			foreach ( $ls['models'] as $model ) require( $model );
+		}	
 			
 		// Выполним инициализацию конфигурации модулей загруженных в ядро
 		Config::load();
