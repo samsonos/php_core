@@ -18,6 +18,9 @@ class ExternalModule extends Module implements iExternalModule
 	/** Конструктор */
 	public function  __construct( $path = NULL )
 	{	
+		// Module identifier not specified - set it to NameSpace\Classname
+		if( !isset( $this->id{0} )) $this->id = get_class($this);
+		
 		//[PHPCOMPRESSOR(remove,start)]
 		// Создадим конфигурацию для composer
 		$this->composer();
@@ -125,9 +128,8 @@ class ExternalModule extends Module implements iExternalModule
 				
 			// Проверим загружен ли требуемый модуль в ядро
 			if( !isset( Module::$instances[ $_module ] ) )
-			{
-				trace( array_keys(Module::$instances) );
-				return e( 'Ошибка загрузки модуля(##) в ядро - Не найден связазанный модуль(##)', E_SAMSON_FATAL_ERROR, array( $this->id, $module) );
+			{				
+				return e( 'Failed loading module(##) - Required module(##) not found', E_SAMSON_FATAL_ERROR, array( $this->id, $module) );
 			}
 			// Модуль определен сравним его версию
 			else if ( version_compare( Module::$instances[ $_module ]->version, $version, $version_sign ) === false )

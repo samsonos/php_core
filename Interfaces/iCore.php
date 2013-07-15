@@ -16,6 +16,15 @@ interface iCore
 	const RENDER_VARIABLE = 3;
 	
 	/**
+	 * Module resource manager, working gathering all resources from
+	 * specified path and arranging them by file extension
+	 *  
+	 * @param string 	$path 	Path to scan for module resources
+	 * @param array 	$ls		Returnable array of gathered resources
+	 */
+	public function resources( & $path, & $ls = array() );
+	
+	/**
 	 * Прорисовать файл представления
 	 * 
 	 * @param string 	$view_path Путь к файлу представления

@@ -30,7 +30,7 @@ define('__SAMSON_BASE__', str_ireplace( $_SERVER['DOCUMENT_ROOT'], '', __SAMSON_
 define('__NS_SEPARATOR__', '\\');
 
 /** Flag that this script runs from remote app */
-define( '__SAMSON_REMOTE_APP', __SAMSON_CWD__ !== $_SERVER['DOCUMENT_ROOT'] );
+define( '__SAMSON_REMOTE_APP', __SAMSON_CWD__ !== $_SERVER['DOCUMENT_ROOT'].'/' );
 
 /** Путь к папке где находятся кеш системы */
 define('__SAMSON_CACHE_PATH','cache');
@@ -142,7 +142,7 @@ function & m( $module = NULL )
  * системы. Эта функция является шорткатом вызова m('local')
  * 
  * @see m()
- * 
+ * @deprecated Use just m() thank's to new rendering model
  * @return iModule Указатель на виртуальный модуль "LOCAL" ядра системы
  */
 function & mout(){ return m();  }

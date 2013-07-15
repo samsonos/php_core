@@ -40,7 +40,7 @@ final class Core implements iCore
 	protected $template_path = __SAMSON_DEFAULT_TEMPLATE;
 	
 	/** Путь к текущемуу Веб-приложению */
-	protected $system_path = '';
+	protected $system_path = __SAMSON_CWD__;
 	
 	/** Модификатор пути к представлениям, для шаблонизации представлений */
 	protected $view_path = '';
@@ -56,44 +56,47 @@ final class Core implements iCore
 	 * based on class namespace data
 	 */
 	private function __autoload( $class )
-	{			
+	{	
 		// Get just class name without ns
 		$class_name = classname( $class );
 		// Get just ns without class name 
-		$ns = nsname( $class );	
+		$ns = nsname( $class );
 		
 		// System module
-		if( $ns == 'samson\core' ) return require( __SAMSON_PATH__.$class_name.'.php');
+		if( $ns == 'samson\core' ) return require ( __SAMSON_PATH__.$class_name.'.php');
 		// Other modules
 		else 
 		{
 			// If we have loaded path with this namespace
-			if( isset( $this->load_stack[ $ns ] ) ) $ls = & $this->load_stack[ $ns ];
-			// Try to get last path scanned from load_path_stack
+			if( isset( $this->load_stack[ $ns ] ) )	$ls = & $this->load_stack[ $ns ];
+			// Get last path scanned from load_path_stack for getting php files list,
+			// as we can be sure this condition is met on loading another php file in iCore::load()
 			else
 			{ 
 				end( $this->load_path_stack );
 				$ls = & $this->load_path_stack[ key( $this->load_path_stack ) ];
-			}	
-				
-			// If we have php files in this entry to search for
+			}			
+			
+			// If we have php files in this entry to search for needed class
 			if( isset($ls['php']) && sizeof($ls['php']) )
 			{
 				// Simple method - trying to find class by classname
-				if( $files = preg_grep( '/\/'.$class_name.'\.php/', $ls['php']))
+				if( $files = preg_grep( '/\/'.$class_name.'\.php/i', $ls['php']))
 				{
 					// Проверим на однозначность
 					if( sizeof($files) > 1 ) return e('Cannot autoload class(##), too many files matched ##', E_SAMSON_CORE_ERROR, array($class,$files) );
-					
+										
 					// Require lastarray element
 					return require( end($files) );
 				}
 			}		 
 			
+			// If we get here - no file has been required
 			e('Cannot autoload class(##), class not found', E_SAMSON_CORE_ERROR, $class );
 		}
 	}
 	
+	/** @see \samson\core\iCore::resources() */
 	public function resources( & $path, & $ls = array() )
 	{
 		$path = normalizepath( $path.'/' );		
@@ -184,11 +187,11 @@ final class Core implements iCore
 			
 			// Iterate only php files
 			foreach ( $ls['php'] as $php) 
-			{	
-				//elapsed('   -- Icluded '.$php.' from '.$path);
-				
+			{						
 				// We must require regular files and wait to find iModule class ancestor declaration
 				require_once( $php );			
+
+				//elapsed('   -- Icluded '.$php.' from '.$path);
 					
 				// If we have new class declared after requiring
 				$n_classes = get_declared_classes();
@@ -202,7 +205,7 @@ final class Core implements iCore
 					{
 						// If this is ExternalModule ancestor
 						if( in_array( ns_classname('ExternalModule','samson\core'), class_parents( $class_name )))
-						{														
+						{	
 							// Save namespace module data to load stack
 							$ns = pathname( $class_name );
 							
@@ -211,7 +214,7 @@ final class Core implements iCore
 							
 							// Check for namespace uniqueness 
 							if( !isset($this->load_stack[ $ns ])) $this->load_stack[ $ns ] = & $ls;
-							//else elapsed('   !! Found duplicate ns:'.$ns.' for class'.$class_name); 
+							else elapsed('   !! Found duplicate ns:'.$ns.' for class'.$class_name); 
 							
 							//elapsed('   -- Found iModule ancestor '.$class_name.'('.$ns.') in '.$path);
 				
@@ -223,12 +226,12 @@ final class Core implements iCore
 							$ls['classname'] = $class_name;
 							$ls['namespace'] = $ns;			
 
-							//elapsed('   -- Created instance of '.$class_name.' in '.$path);
+							//elapsed('   -- Created instance of '.$class_name.'('.$id.') in '.$path);
 							
 							// Module check
 							if( !isset($id{0})) e('Module from ## has doens not have identifier', E_SAMSON_CORE_ERROR, $path );
-							//if( $ns != strtolower($ns)) e('Module ## has incorrect namespace ## - it must be lowercase', E_SAMSON_CORE_ERROR, array($id,$ns) );
-							//if( !isset($ns{0}) ) e('Module ## has no namespace', E_SAMSON_CORE_ERROR,  $id, $ns );
+							if( $ns != strtolower($ns)) e('Module ## has incorrect namespace ## - it must be lowercase', E_SAMSON_CORE_ERROR, array($id,$ns) );
+							if( !isset($ns{0}) ) e('Module ## has no namespace', E_SAMSON_CORE_ERROR,  $id, $ns );
 											
 							// If module configuration loaded - set module params
 							if( isset( Config::$data[ $id ] ) ) foreach ( Config::$data[ $id ] as $k => $v) 
@@ -265,8 +268,7 @@ final class Core implements iCore
 						}
 					}
 				}
-			}
-
+			}		
 			//elapsed('End loading module from '.$path);				
 		}
 		// Another try to load same path
@@ -536,6 +538,7 @@ final class Core implements iCore
 	public function start( $default )
 	{					
 		//elapsed('Start routing');	
+		
 		//[PHPCOMPRESSOR(remove,start)]				
 		// Проинициализируем оставшиеся конфигурации и подключим внешние модули по ним
 		Config::init( $this );					
@@ -551,8 +554,7 @@ final class Core implements iCore
 				$module->init();
 				////elapsed('End - Initializing module: '.$id);
 			}
-		}
-
+		}	
 		////elapsed('End initing modules');
 		
 		// Результат выполнения действия модуля
@@ -560,7 +562,7 @@ final class Core implements iCore
 
 		// Получим идентификатор модуля из URL и сделаем идентификатор модуля регистро-независимым 
 		$module_name = mb_strtolower( url()->module(), 'UTF-8');		
-			
+				
 		// Если не задано имя модуля, установим модуль по умолчанию
 		if( ! isset( $module_name{0} ) ) $module_name = $default;	
 		
@@ -571,10 +573,7 @@ final class Core implements iCore
 		{				
 			// Установим требуемый модуль как текущий
 			$this->active = & $this->module_stack[ $module_name ];			
-			
-			// Определим класс текущего моуля
-			$module_class = get_class( $this->active );				
-
+		
 			// Попытаемся выполнить действие модуля указанное в URL, переданим тип HTTP запроса
 			$module_loaded = $this->active->action( url()->method() );
 
@@ -628,15 +627,12 @@ final class Core implements iCore
 	
 	/** Конструктор */
 	public function __construct()
-	{			
-		// Установим полный путь к рабочей директории
-		$this->system_path = __SAMSON_CWD__;
-		
+	{	
 		// Get backtrace to define witch scipt initiated core creation
-		$db = debug_backtrace();
+		$db = debug_backtrace();	
 		
-		// Get local web application path 
-		$this->system_path = normalizepath( pathname($db[1]['file']) ).'/';	
+		// Get local web application path for backtrace if available
+		if( isset($db[1]) ) $this->system_path = normalizepath( pathname($db[1]['file']) ).'/';	
 
 		// Build absolute path to local template
 		$this->template_path = $this->system_path.$this->template_path;

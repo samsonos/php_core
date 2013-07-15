@@ -95,7 +95,7 @@ class Config
 				if( ! file_exists( $path )) $path = normalizepath( getcwd().'/'.$cfg['__path']);
 			
 				// Загрузим модуль в ядро системы если к нему указан путь
-				if( file_exists( $path ) ) $core->load( $module, $path, $cfg );	
+				if( file_exists( $path ) ) $core->load( $path );	
 			}		
 		}
 	}
