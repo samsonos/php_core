@@ -10,7 +10,17 @@ body,div,dl,dt,dd,ul,ol,li,h1,h2,h3,h4,h5,h6,pre,code,form,fieldset,legend,input
 blockquote,th,td { margin: 0; padding: 0; } li { list-style: none; }
 
 /* Ошибка */
-._core_error { clear:both; float:left; width:100%; font-size: 9pt; position:relative; z-index:99; background-color:  #F5E4E4; border-bottom:1px solid lightgray; line-height: 20px; color: black; }
+._core_error { clear:both; float:left; width:100%; font-size: 9pt; position:relative; z-index:99; background-color:  #F5E4E4; border-bottom:1px solid lightgray; line-height: 20px; color: black;}
+
+/* Вынесим чекбокс за рамки экрана */
+._core_error_check_box {position:absolute; margin-left: -300px;}
+
+/* Лейбл для чекбокса */
+._core_error ._core_error_label {position:relative; display:block; width: 100%; cursor:pointer; min-height:20px; height:auto; }
+
+/* Отобразим все содержимое лейбла при отмеченном чекбоксе */
+._core_error_check_box:checked ~ ._core_error_label ._core_error_stack { display:block;}
+
 /* Отладочное сообщение */
 ._core_error._core_debug { background-color: #fbfbfb; }
 /* Фатальная ошибка */
@@ -37,6 +47,4 @@ blockquote,th,td { margin: 0; padding: 0; } li { list-style: none; }
 /* Функция в которой была ошибка */
 ._core_error ._core_error_function { float:left; cursor: pointer;  }
 /* Стек вызовов в виде списка */
-._core_error ._core_error_function ._core_error_stack { clear:both; display:none; }
-/* Отображение стека без javascript */
-._core_error ._core_error_function:hover ._core_error_stack { display:block; }
+._core_error ._core_error_function ._core_error_stack { clear:both; display:none; position: relative;}
