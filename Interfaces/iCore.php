@@ -22,7 +22,7 @@ interface iCore
 	 * @param string 	$path 	Path to scan for module resources
 	 * @param array 	$ls		Returnable array of gathered resources
 	 */
-	public function resources( & $path, & $ls = array() );
+	public function resources( & $path, & $ls = array(), & $files = null );
 	
 	/**
 	 * Прорисовать файл представления

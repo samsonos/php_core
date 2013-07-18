@@ -94,7 +94,7 @@ class Module implements iModule, \ArrayAccess, iModuleViewable
 		if( strpos( $view_path, '.php' ) === FALSE ) $view_path .= '.php';
 			
 		// Build path to default view folder
-		$view_path = __SAMSON_VIEW_PATH.'/'.$view_path;	
+		$view_path = __SAMSON_VIEW_PATH.$view_path;	
 
 		// Create new entry in view data collection
 		if( !isset( $this->view_data[ $view_path ] ) ) 
@@ -132,9 +132,10 @@ class Module implements iModule, \ArrayAccess, iModuleViewable
 			// Add extension if nessesary
 			if( strpos( $view_path, '.php' ) === FALSE ) $view_path .= '.php';
 			
+			if( strpos( $view_path, __SAMSON_VIEW_PATH ) === false ) $view_path = __SAMSON_VIEW_PATH.$view_path;			
 			//[PHPCOMPRESSOR(remove,start)]
 			// If view does not exists, try standart location, for backward compatibility
-			if( !file_exists( $this->path.$view_path )) $view_path = __SAMSON_VIEW_PATH.'/'.$view_path;
+			//if( !file_exists( $this->path.$view_path )) $view_path = __SAMSON_VIEW_PATH.'/'.$view_path;			
 			//[PHPCOMPRESSOR(remove,end)]
 		
 			// Copy current view data stack to new entry for direct output
@@ -301,7 +302,7 @@ class Module implements iModule, \ArrayAccess, iModuleViewable
 		// Save this instance in static instances collection		
 		self::$instances[ $this->id ] = & $this;
 		
-		//elapsed('Registering module: '.$this->id.'('.$path.') );
+		//elapsed('Registering module: '.$this->id.'('.$path.')' );
 	}		
 	
 	/** Обработчик уничтожения объекта */
@@ -348,7 +349,7 @@ class Module implements iModule, \ArrayAccess, iModuleViewable
 	}
 	
 	/** Обработчик сериализации объекта */
-	public function __sleep(){	return array( 'id', 'path', 'author', 'version' );	}
+	public function __sleep(){	return array( 'id', 'path', 'author', 'version', 'data' );	}
 	/** Обработчик десериализации объекта */
 	public function __wakeup()
 	{

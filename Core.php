@@ -97,7 +97,7 @@ final class Core implements iCore
 	}
 	
 	/** @see \samson\core\iCore::resources() */
-	public function resources( & $path, & $ls = array() )
+	public function resources( & $path, & $ls = array(), & $files = null )
 	{
 		$path = normalizepath( $path.'/' );		
 		
@@ -121,9 +121,12 @@ final class Core implements iCore
 				
 			// Make pointer for pithiness
 			$resources = & $ls['resources'];
-				
-			// Recursively scan module folders for resources
-			foreach (File::dir( $path ) as $resource )
+			
+			// Recursively scan module folders for resources if they not passed
+			$files = ! isset( $files ) ? File::dir( $path ) : $files;			
+		
+			// Iterate module files
+			foreach ( $files as $resource )
 			{
 				// No cache folders
 				if( strpos( $resource, '/'.__SAMSON_CACHE_PATH.'/') === false )
@@ -135,7 +138,7 @@ final class Core implements iCore
 					if( !isset( $resources[ $rt ] ) ) $resources[ $rt ] = array();
 						
 					// Save resource file path to appropriate collection and fix possible slash issues to *nix format
-					$resources[ $rt ][] = normalizepath( $resource );				
+					$resources[ $rt ][] = $resource;				
 				}
 			}
 		
@@ -145,7 +148,9 @@ final class Core implements iCore
 			// If module contains PHP resources - lets distribute them to specific collections
 			if( isset( $resources[ 'php' ] )) foreach ( $resources[ 'php' ] as $php )
 			{				
+				// Controllers
 				if( strpos( $php, __SAMSON_CONTOROLLER_PATH ) ) $ls['controllers'][] = $php;				
+				// Models
 				else if ( strpos( $php, __SAMSON_MODEL_PATH ) ) $ls['models'][] = $php;
 				// Views and other php files will load only when needed
 				else if ( strpos( $php, __SAMSON_VIEW_PATH ) ) 	$ls['views'][] = $php;
@@ -310,7 +315,7 @@ final class Core implements iCore
 				else if( file_exists( $__view ) ) include( $__view );
 				// Error no template view was found 
 				else e('Cannot render view(##,##) - file doesn\'t exists', E_SAMSON_RENDER_ERROR, array( $__view, $this->view_path ) );
-			break; 
+			break;			
 			
 			// View rendering algorithm form array of view pathes 
 			case self::RENDER_ARRAY:				
@@ -470,7 +475,7 @@ final class Core implements iCore
 		}		
 	}		
 	
-	public function generate_template( $template_html, $css_url, $js_url )
+	public function generate_template( $template_html )
 	{
 		// Добавим путь к ресурсам для браузера
 		$head_html = "\n".'<base href="'.url()->base().'">';
@@ -487,13 +492,14 @@ final class Core implements iCore
 		$template_html = str_ireplace( '<head>', '<head>'.$head_html, $template_html );
 		
 		// Так сказать - копирайт =)
-		$copyright = '<a style="display:none" target="_blank" href="http://samsonos.com" title="Сайт разработан SamsonOS">Сайт разработан SamsonOS</a>';
-		// Вставим указатель JavaScript ресурсы в конец HTML документа
-		$template_html = str_ireplace( '</body>', $copyright.'</body>', $template_html );
-			
+		$body_html = '<a style="display:none" target="_blank" href="http://samsonos.com" title="Сайт разработан SamsonOS">Сайт разработан SamsonOS</a>';
+		
 		// Добавим в конец предложения по работе
-		$template_html .= '<!-- PHP фреймфорк SamsonPHP http:://samsonos.com  -->';
-		$template_html .= '<!-- Нравится PHP/HTML, хочешь узнать много нового и зарабатывать на этом деньги? Пиши info@samsonos.com -->';
+		$body_html .= '<!-- PHP фреймфорк SamsonPHP http:://samsonos.com  -->';
+		$body_html .= '<!-- Нравится PHP/HTML, хочешь узнать много нового и зарабатывать на этом деньги? Пиши info@samsonos.com -->';
+		
+		// Вставим указатель JavaScript ресурсы в конец HTML документа
+		$template_html = str_ireplace( '</body>', $body_html.'</body>', $template_html );
 		
 		return $template_html;
 	}
@@ -543,10 +549,10 @@ final class Core implements iCore
 		// Проинициализируем оставшиеся конфигурации и подключим внешние модули по ним
 		Config::init( $this );					
 		//[PHPCOMPRESSOR(remove,end)]
-		
+			
 		// Проинициализируем НЕ ЛОКАЛЬНЫЕ модули
 		foreach ($this->module_stack as $id => $module )
-		{		
+		{	
 			// Только внешние модули и их оригиналы
 			if( method_exists( $module, 'init') && $module->id() == $id )
 			{			
@@ -567,10 +573,10 @@ final class Core implements iCore
 		if( ! isset( $module_name{0} ) ) $module_name = $default;	
 		
 		//elapsed('Trying to get '.$module_name.' controller');
-	
+		
 		// Если модуль был успешно загружен и находится в стеке модулей ядра
 		if( isset( $this->module_stack[ $module_name ] ) )
-		{				
+		{		
 			// Установим требуемый модуль как текущий
 			$this->active = & $this->module_stack[ $module_name ];			
 		
@@ -607,10 +613,18 @@ final class Core implements iCore
 			//[PHPCOMPRESSOR(remove,end)]
 			
 			// Добавим специальную системную комманду для инициализации фреймворка в JavaScript
-			$head_html .= '<script type="text/javascript">var __SAMSONPHP_STARTED = new Date().getTime();if(SamsonPHP){SamsonPHP._uri = "'.url()->text().'"; SamsonPHP._moduleID = "'.$this->active->id().'";SamsonPHP._url_base = "'.url()->base().'";SamsonPHP._locale = "'.locale().'";}</script>';			
+			$head_html .= '
+			<script type="text/javascript">
+			var __SAMSONPHP_STARTED = new Date().getTime();
+			if(SamsonPHP){
+				SamsonPHP._uri = "'.url()->text().'"; 
+				SamsonPHP._moduleID = "'.$this->active->id().'";
+				SamsonPHP._url_base = "'.url()->base().'";
+				SamsonPHP._locale = "'.locale().'";
+			}
+			</script>';			
 			
-			// Выполним вставку главного тега <base> от которого зависят все ссылки документа
-			// также подставим МЕТА-теги для текущего модуля и сгенерированный минифицированный CSS 
+			// Insert what we have generated
 			$template_html = str_ireplace( '</head>', $head_html.'</head>', $template_html );				
 			
 			// Профайлинг PHP
@@ -655,6 +669,8 @@ final class Core implements iCore
 		// Load samson\core module
 		new System( __SAMSON_PATH__ );		
 		
+		// TODO: Again module load not corresponds to local and system load functionality
+		
 		// Manually include system module to load stack
 		$path = __SAMSON_PATH__;
 		if( $this->resources( $path, $ls ))
@@ -666,10 +682,27 @@ final class Core implements iCore
 		}		
 		
 		// Create local module and set it as active
-		$this->active = new CompressableLocalModule( 'local', $this->system_path );	
+		$this->active = new CompressableLocalModule( 'local', $this->system_path );			
+				
+		// Search for remote web applications if this is local web application
+		$files = File::dir( $this->system_path );
+		foreach ( preg_grep('/\.htaccess/iu', $files) as $web_app_path )
+		{
+			// If path not to local web application
+			$web_app_path = pathname( $web_app_path ).'/';
+			if( $web_app_path != $this->system_path )
+			{
+				// Create copy of files collection
+				$_files = $files;
+				$files = array();
+					
+				// Save only local web application files
+				foreach ( $_files as $resource ) if( strpos( $resource, $web_app_path ) === false ) $files[] = $resource;
+			}
+		}
 		
 		// Инициализируем локальные модуль
-		if( $this->resources( $this->system_path, $ls2 ))
+		if( $this->resources( $this->system_path, $ls2, $files ))
 		{			
 			// Manually include local module to load stack
 			$ls2['namespace'] = 'local';
@@ -686,7 +719,7 @@ final class Core implements iCore
 				$local_module = basename( $controler, '.php' );
 					
 				// Create new local compressable module
-				new LocalModule( $local_module, $this->system_path );
+				new CompressableLocalModule( $local_module, $this->system_path );
 			}
 			
 			// Require local models

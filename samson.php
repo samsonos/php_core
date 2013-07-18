@@ -42,16 +42,16 @@ define( '__SAMSON_GLOBAL_FILE', 'global.php' );
 define('__SAMSON_APP_PATH','app');
 
 /** Путь к папке где находятся контроллеры системы */
-define('__SAMSON_CONTOROLLER_PATH', __SAMSON_APP_PATH.'/controller');
+define('__SAMSON_CONTOROLLER_PATH', __SAMSON_APP_PATH.'/controller/');
 
 /** Путь к папке где находятся модели системы */
-define('__SAMSON_MODEL_PATH', __SAMSON_APP_PATH.'/model');
+define('__SAMSON_MODEL_PATH', __SAMSON_APP_PATH.'/model/');
 
 /**  Путь к папке где находятся представления системы */
-define('__SAMSON_VIEW_PATH', __SAMSON_APP_PATH.'/view');
+define('__SAMSON_VIEW_PATH', __SAMSON_APP_PATH.'/view/');
 
 /** Путь к файлу с главным шаблоном системы */
-define('__SAMSON_DEFAULT_TEMPLATE', __SAMSON_APP_PATH.'/view/index.php' );
+define('__SAMSON_DEFAULT_TEMPLATE', __SAMSON_VIEW_PATH.'index.php' );
 
 /** Максимальное время выполнения скрипта */
 define( '__SAMSON_MAX_EXECUTION__', 10000 );

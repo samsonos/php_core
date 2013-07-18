@@ -151,13 +151,13 @@ class File
 					{						
 						// Если передан только один тип файла преобразуем в массив
 						if( ! is_array( $type ) ) $type = array( $type );
-						 
+						//trace(pathinfo( $full_path, PATHINFO_EXTENSION ));
 						// Если расширение файла не подходит - пропускаем
 						if( !in_array( pathinfo( $full_path, PATHINFO_EXTENSION ), $type )) continue;
 					}
 						
 					// Добавим файл
-					$result[] = $modyfier . $full_path;
+					$result[] = normalizepath($modyfier.$full_path);
 				}
 				// Если это подкаталог то углубимся в рекурсию
 				else if( is_dir( $full_path ) ) self::dir( $full_path, $type, $modyfier, $result, $max_level, $level++, $restrict );				
