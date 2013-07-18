@@ -19,7 +19,7 @@ class ExternalModule extends Module implements iExternalModule
 	public function  __construct( $path = NULL )
 	{	
 		// Module identifier not specified - set it to NameSpace\Classname
-		if( !isset( $this->id{0} )) $this->id = get_class($this);
+		if( !isset( $this->id{0} )) $this->id = strtolower(get_class($this));
 		
 		//[PHPCOMPRESSOR(remove,start)]
 		// Создадим конфигурацию для composer
@@ -33,7 +33,7 @@ class ExternalModule extends Module implements iExternalModule
 	public function __sleep()
 	{
 		// Remove all unnessesary fields from serialization
-		return array_diff( array_keys( get_object_vars( $this )), array( 'view_path', 'view_html', 'data', 'view_data' ));
+		return array_diff( array_keys( get_object_vars( $this )), array( 'view_path', 'view_html', 'view_data' ));
 	}
 	
 	/** @see Module::duplicate() */

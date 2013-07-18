@@ -130,14 +130,11 @@ class Module implements iModule, \ArrayAccess, iModuleViewable
 		else if( $view_path !== self::VD_POINTER_DEF )
 		{						
 			// Add extension if nessesary
-			if( strpos( $view_path, '.php' ) === FALSE ) $view_path .= '.php';
+			if( strpos( $view_path, '.php' ) === false ) $view_path .= '.php';
 			
+			// If no default view path was specified
 			if( strpos( $view_path, __SAMSON_VIEW_PATH ) === false ) $view_path = __SAMSON_VIEW_PATH.$view_path;			
-			//[PHPCOMPRESSOR(remove,start)]
-			// If view does not exists, try standart location, for backward compatibility
-			//if( !file_exists( $this->path.$view_path )) $view_path = __SAMSON_VIEW_PATH.'/'.$view_path;			
-			//[PHPCOMPRESSOR(remove,end)]
-		
+					
 			// Copy current view data stack to new entry for direct output
 			$this->view_data[ $view_path ] = array_merge( array(), $this->view_data[ $this->view_path ] ); 
 				

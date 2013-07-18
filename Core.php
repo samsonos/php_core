@@ -10,11 +10,8 @@ namespace samson\core;
 final class Core implements iCore
 {		
 	/** Module pathes loaded stack */
-	protected $load_path_stack = array();
-	
-	/** Scanned module resources */
-	public $load_resources = array();
-	
+	public $load_path_stack = array();
+
 	/** Modules to be loaded stack */
 	public $load_stack = array();
 	
@@ -44,9 +41,6 @@ final class Core implements iCore
 	
 	/** Модификатор пути к представлениям, для шаблонизации представлений */
 	protected $view_path = '';
-
-	/** Данные о загружаемом в данный момент модуле */
-	protected $loaded_module = array();
 	
 	/** Режим работы с представлениями */
 	public $render_mode = self::RENDER_STANDART;
@@ -98,7 +92,7 @@ final class Core implements iCore
 	
 	/** @see \samson\core\iCore::resources() */
 	public function resources( & $path, & $ls = array(), & $files = null )
-	{
+	{	
 		$path = normalizepath( $path.'/' );		
 		
 		//trace('Collecting resources from '.$path);
@@ -140,11 +134,8 @@ final class Core implements iCore
 					// Save resource file path to appropriate collection and fix possible slash issues to *nix format
 					$resources[ $rt ][] = $resource;				
 				}
-			}
-		
-			// Combine module resources with global resources collection
-			$this->load_resources = array_merge_recursive( $this->load_resources, $resources );
-			
+			}		
+				
 			// If module contains PHP resources - lets distribute them to specific collections
 			if( isset( $resources[ 'php' ] )) foreach ( $resources[ 'php' ] as $php )
 			{				
@@ -219,12 +210,14 @@ final class Core implements iCore
 							
 							// Check for namespace uniqueness 
 							if( !isset($this->load_stack[ $ns ])) $this->load_stack[ $ns ] = & $ls;
-							else elapsed('   !! Found duplicate ns:'.$ns.' for class'.$class_name); 
+							else e('Found duplicate ns(##) for class(##) ', E_SAMSON_CORE_ERROR, array( $ns, $class_name)); 
 							
 							//elapsed('   -- Found iModule ancestor '.$class_name.'('.$ns.') in '.$path);
 				
 							// Create object
-							$connector = new $class_name( $path );						
+							$connector = new $class_name( $path );
+
+							//trace($connector);
 								
 							$id = $connector->id();
 							$ls['id'] = $id;
@@ -403,13 +396,7 @@ final class Core implements iCore
 			$this->template_path = $path.$this->template_path;  
 	
 			// Сохраним относительный путь к Веб-приложению
-			$this->system_path = $path;
-			
-			// Установим путь к локальному модулю
-			$this->module_stack['local']->path( $this->system_path );
-			
-			// Выполним инициализацию ядра
-			$this->init();
+			$this->system_path = $path;	
 			
 			// Продолжил цепирование
 			return $this;
@@ -639,22 +626,18 @@ final class Core implements iCore
 		////elapsed('End routing');
 	}	
 	
+	//[PHPCOMPRESSOR(remove,start)]
 	/** Конструктор */
 	public function __construct()
-	{	
+	{		
 		// Get backtrace to define witch scipt initiated core creation
 		$db = debug_backtrace();	
 		
 		// Get local web application path for backtrace if available
 		if( isset($db[1]) ) $this->system_path = normalizepath( pathname($db[1]['file']) ).'/';	
-
-		// Build absolute path to local template
-		$this->template_path = $this->system_path.$this->template_path;
-				 
-		//[PHPCOMPRESSOR(remove,start)]
+				 		
 		// Установим обработчик автоматической загрузки классов
-		spl_autoload_register( array( $this, '__autoload'));		
-		//[PHPCOMPRESSOR(remove,end)]						
+		spl_autoload_register( array( $this, '__autoload'));								
 		
 		// Свяжем коллекцию загруженных модулей в систему со статической коллекцией
 		// Созданных экземпляров класса типа "Модуль"
@@ -682,7 +665,10 @@ final class Core implements iCore
 		}		
 		
 		// Create local module and set it as active
-		$this->active = new CompressableLocalModule( 'local', $this->system_path );			
+		$this->active = new CompressableLocalModule( 'local', $this->system_path );		
+
+		// Set main template path
+		$this->template( $this->template_path );
 				
 		// Search for remote web applications if this is local web application
 		$files = File::dir( $this->system_path );
@@ -729,10 +715,11 @@ final class Core implements iCore
 		// Выполним инициализацию конфигурации модулей загруженных в ядро
 		Config::load();
 	}
+	//[PHPCOMPRESSOR(remove,end)]
 	
 	/** Магический метод для десериализации объекта */
 	public function __wakeup(){	$this->active = & $this->module_stack['local']; }
 	
 	/** Магический метод для сериализации объекта */
-	public function __sleep(){ return array( 'module_stack', 'e404', 'render_mode', /*'render_stack',*/ 'view_path' ); }
+	public function __sleep(){  return array( 'module_stack', 'e404', 'render_mode', 'view_path' ); }
 }
