@@ -83,10 +83,7 @@ final class Core implements iCore
 					// Require lastarray element
 					return require( end($files) );
 				}
-			}		 
-			
-			// If we get here - no file has been required
-			e('Cannot autoload class(##), class not found', E_SAMSON_CORE_ERROR, $class );
+			}		
 		}
 	}
 	

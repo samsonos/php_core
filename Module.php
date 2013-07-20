@@ -12,6 +12,12 @@ class Module implements iModule, \ArrayAccess, iModuleViewable
 	/** Коллекция созданных экземпляров модулей системы */	
 	public static $instances = array();	
 	
+	/**
+	 * Module core
+	 * @var Core
+	 */
+	protected $core;
+	
 	/** Путь к подключаемому модулю */
 	protected $path = '';
 	
@@ -34,17 +40,11 @@ class Module implements iModule, \ArrayAccess, iModuleViewable
 	protected $data = array();	
 	
 	/** Collection of data for view rendering, filled with default pointer */
-	public $view_data = array( self::VD_POINTER_DEF => array( 'html' => '' ) );	
+	protected $view_data = array( self::VD_POINTER_DEF => array( 'html' => '' ) );	
 	
 	
 	/**	@see iModule::title() */
 	public function title( $title = NULL ){ return $this->set( 'title', $title ); }
-	
-	/**
-	 * @deprecated use iModule::id() 
-	 * @return string
-	 */
-	public function core_id(){ return $this->id; }
 	
 	/**	@see iModule::id() */
 	public function id(){ return $this->id; }	
@@ -77,14 +77,11 @@ class Module implements iModule, \ArrayAccess, iModuleViewable
 	public function html( $value = NULL )
 	{
 		// Если передан параметр то установим его
-		if( func_num_args() )
-		{ 	
-			$this->data[ self::VD_HTML ] = $value;
-			
-			return $this; 
-		}
+		if( func_num_args() ) $this->data[ self::VD_HTML ] = $value;
 		// Вернем значение текущего представления модели
 		else return $this->data[ 'html' ];
+		
+		return $this;
 	}
 	
 	/** @see iModule::view() */
@@ -253,6 +250,24 @@ class Module implements iModule, \ArrayAccess, iModuleViewable
 
 		// Если мы используем универсальный контроллер добавим первым параметром универсального контроллера - имя метода
 		if( $method_name == $this->id.'__HANDLER' ) $parameters = array_merge( array( url()->method() ), $parameters );	
+			
+		// TODO: wait for getHint() method for removing parameter name dependency and use just hint type
+		
+		// Pass specific system parameters to controller action handler
+		$f = new \ReflectionFunction($method_name);
+		// Iterate params and match needed parameters by name
+		foreach ( $f->getParameters() as $n => $p) 
+		{				
+			// If system core needed
+			if( $p->name == '_core' || $p->name == 's' )  $var = s();
+			// If current module needed
+			else if( $p->name == '_module' || $p->name == 'm' ) $var = $this;
+			// Parameter does not match
+			else continue;
+			
+			// If we here that something matched - insert neede parameter in parameter array
+			array_splice( $parameters, $n, 0, array($var) );
+		}		
 		
 		// Оптимизируем вызов функции call_user_func_array в зависимости от количества параметров
 		switch( sizeof( $parameters ) )
@@ -270,7 +285,7 @@ class Module implements iModule, \ArrayAccess, iModuleViewable
 			case 10	: $action_result = $method_name( $parameters[0],$parameters[1],$parameters[2],$parameters[3],$parameters[4],$parameters[5],$parameters[6],$parameters[7],$parameters[8],$parameters[9] ); break;
 			case 11	: $action_result = $method_name( $parameters[0],$parameters[1],$parameters[2],$parameters[3],$parameters[4],$parameters[5],$parameters[6],$parameters[7],$parameters[8],$parameters[9],$parameters[10] ); break;					
 			default	: return e('Передано слишком много параметров для контроллера(##)',E_SAMSON_FATAL_ERROR, sizeof( $parameters ) );
-		}		
+		}			
 		
 		// Вернем результат выполнения метода контроллера
 		return ! isset( $action_result ) ? A_SUCCESS : $action_result;		
