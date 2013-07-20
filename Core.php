@@ -479,14 +479,12 @@ final class Core implements iCore
 		$template_html = str_ireplace( '<head>', '<head>'.$head_html, $template_html );
 		
 		// Так сказать - копирайт =)
-		$body_html = '<a style="display:none" target="_blank" href="http://samsonos.com" title="Сайт разработан SamsonOS">Сайт разработан SamsonOS</a>';
-		
-		// Добавим в конец предложения по работе
+		$body_html = '<!-- Сайт разработан компанией SamsonOS -->';
 		$body_html .= '<!-- PHP фреймфорк SamsonPHP http:://samsonos.com  -->';
 		$body_html .= '<!-- Нравится PHP/HTML, хочешь узнать много нового и зарабатывать на этом деньги? Пиши info@samsonos.com -->';
 		
 		// Вставим указатель JavaScript ресурсы в конец HTML документа
-		$template_html = str_ireplace( '</body>', $body_html.'</body>', $template_html );
+		$template_html = str_ireplace( '</html>', '</html>'.$body_html, $template_html );
 		
 		return $template_html;
 	}
@@ -539,7 +537,7 @@ final class Core implements iCore
 			
 		// Проинициализируем НЕ ЛОКАЛЬНЫЕ модули
 		foreach ($this->module_stack as $id => $module )
-		{	
+		{				
 			// Только внешние модули и их оригиналы
 			if( method_exists( $module, 'init') && $module->id() == $id )
 			{			
@@ -548,6 +546,7 @@ final class Core implements iCore
 				////elapsed('End - Initializing module: '.$id);
 			}
 		}	
+		
 		////elapsed('End initing modules');
 		
 		// Результат выполнения действия модуля
@@ -563,14 +562,14 @@ final class Core implements iCore
 		
 		// Если модуль был успешно загружен и находится в стеке модулей ядра
 		if( isset( $this->module_stack[ $module_name ] ) )
-		{		
+		{	
+			//elapsed('Preforming '.$module_name.'::'.url()->method().' controller action');
+			
 			// Установим требуемый модуль как текущий
 			$this->active = & $this->module_stack[ $module_name ];			
 		
 			// Попытаемся выполнить действие модуля указанное в URL, переданим тип HTTP запроса
-			$module_loaded = $this->active->action( url()->method() );
-
-			//elapsed('Preforming '.$module_name.'::'.url()->method().' controller action');
+			$module_loaded = $this->active->action( url()->method() );			
 		}
 	
 		// Если мы не выполнили ни одного контроллера, обработаем ошибку 404

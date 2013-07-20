@@ -214,7 +214,7 @@ function vi( $name ){ $m = & m();  if( $m->offsetExists( $name )) echo htmlentit
  * @param string $src 	Имя переменной представления с путем к изображению
  * @param string $alt 	Описание изображения
  */
-function vimg( $src, $alt = '' )
+function vimg( $src, $id='', $class='', $alt = '' )
 { 
 	// Закешируем ссылку на текущий модуль
 	$m = & m();  
@@ -223,7 +223,7 @@ function vimg( $src, $alt = '' )
 	if( $m->offsetExists( $src )) $src = $m[ $src ];
 	 
 	// Выведем изображение
-	echo '<img src="'.url()->build($src).'" alt="'.$alt.'" title="'.$alt.'">';	 
+	echo '<img src="'.url()->build($src).'" id="'.$id.'" class="'.$class.'" alt="'.$alt.'" title="'.$alt.'">';	 
 }
 
 
