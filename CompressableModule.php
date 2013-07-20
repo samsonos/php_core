@@ -8,11 +8,12 @@ namespace samson\core;
  * @version 0.1
  * @deprecated use CompressableExternalModule
  */
-class CompressableModule extends ModuleConnector implements iModuleCompressable
+class CompressableModule extends CompressableExternalModule
 {		
-	/** @see \samson\core\iModuleCompressable::beforeCompress() */
-	public function beforeCompress( & $obj = null, array & $code = null ){}
-	
-	/** @see \samson\core\iModuleCompressable::compress() */
-	public function afterCompress( & $obj = null, array & $code = null ){}
+	public function __construct()
+	{
+		e('Module(##) - Class(##) is deprecated use parent class(##) instead', E_SAMSON_CORE_ERROR, array( $this->id, __CLASS__,get_parent_class(__CLASS__)));
+		
+		parent::__construct( func_get_args() );
+	}
 }
