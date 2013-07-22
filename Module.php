@@ -357,7 +357,7 @@ class Module implements iModule, \ArrayAccess, iModuleViewable
 		else if( is_array( $field ) ) $this->data = array_merge( $this->data, $field );
 		// Если передана обычная переменная, установим значение переменной представления
 		// Сделаем имя переменной представления регистро-независимой
-		else $this->data[ $field ] = $value;		
+		else  $this->data[ $field ] = $value;		
 	}
 	
 	/** Обработчик сериализации объекта */
