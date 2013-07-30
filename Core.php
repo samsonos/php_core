@@ -524,9 +524,9 @@ final class Core implements iCore
 	
 	/**	@see iCore::start() */
 	public function start( $default )
-	{					
+	{	
 		//elapsed('Start routing');	
-		
+			
 		//[PHPCOMPRESSOR(remove,start)]				
 		// Проинициализируем оставшиеся конфигурации и подключим внешние модули по ним
 		Config::init( $this );					
@@ -626,6 +626,8 @@ final class Core implements iCore
 	/** Конструктор */
 	public function __construct()
 	{		
+		//elapsed('Constructor');
+		
 		// Get backtrace to define witch scipt initiated core creation
 		$db = debug_backtrace();	
 		

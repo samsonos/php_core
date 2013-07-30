@@ -54,7 +54,7 @@ define('__SAMSON_VIEW_PATH', __SAMSON_APP_PATH.'/view/');
 define('__SAMSON_DEFAULT_TEMPLATE', __SAMSON_VIEW_PATH.'index.php' );
 
 /** Максимальное время выполнения скрипта */
-define( '__SAMSON_MAX_EXECUTION__', 10000 );
+define( '__SAMSON_MAX_EXECUTION__', 15 );
 
 /** Действие контроллера выполнено успешно */
 define( 'A_SUCCESS', TRUE );
@@ -71,8 +71,14 @@ set_time_limit( __SAMSON_MAX_EXECUTION__ );
 // Установим ограничение на выполнение скрипта
 ini_set( 'max_execution_time', __SAMSON_MAX_EXECUTION__ );
 
+//echo microtime(TRUE) - __SAMSON_T_STARTED__;
+
 // Начать сессию
 session_start();
+
+//print_R($_SESSION);
+
+//echo microtime(TRUE) - __SAMSON_T_STARTED__;
 
 // Подключение основных файлов фреймворка
 require('include.php');
@@ -414,7 +420,7 @@ function output( $view, array $vars = NULL, $prefix = NULL )
 
 /**
  * URL(УРЛ) - Получить объект для работы с URL
- * @return URL Объект для работы с URL
+ * @return samson\core\URL Объект для работы с URL
  */
 function & url(){ static $_v; return ( $_v = isset($_v) ? $_v : new \samson\core\URL()); }
 

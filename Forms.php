@@ -135,8 +135,8 @@ function html_db_form_select_options( $entity_name, $db_obj = NULL, $name_attr =
 			$select_data[] = array
 			(
 				'id' 			=> $obj->id,
-				'name' 			=> $obj->$name_attr,			
-				'description' 	=> $obj->$desc_attr
+				'name' 			=> isset($obj->$name_attr) ? $obj->$name_attr : '-',			
+				'description' 	=> isset($obj->$desc_attr) ? $obj->$desc_attr : '-'
 			);
 		} 
 		

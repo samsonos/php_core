@@ -19,7 +19,7 @@ function pathname( $path )
 	}
 		
 	// Cut unnessesary part of the path 
-	return substr( $path, 0, $p ); 
+	return $p !== false ? substr( $path, 0, $p ) : $path; 
 }
 
 /**
