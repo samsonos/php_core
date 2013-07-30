@@ -160,7 +160,7 @@ class File
 					$result[] = normalizepath($modyfier.$full_path);
 				}
 				// Если это подкаталог то углубимся в рекурсию
-				else if( is_dir( $full_path ) ) self::dir( $full_path, $type, $modyfier, $result, $max_level, $level++, $restrict );				
+				else if( is_dir( $full_path ) ) self::dir( $full_path, $type, $modyfier, $result, $max_level, ++$level, $restrict );				
 			}
 	
 			// Закроем чтение папки
