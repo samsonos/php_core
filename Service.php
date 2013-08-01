@@ -27,8 +27,8 @@ class Service extends ExternalModule
 	public static function getInstance( $class = null )
 	{		
 		// Получим класс из которого был вызван метод
-		$class = isset( $class ) ? $class : 
-			function_exists('get_called_class') ? get_called_class() : e('Classname not specified', E_SAMSON_FATAL_ERROR);
+		$class = isset( $class ) ? $class : e('Classname not specified', E_SAMSON_FATAL_ERROR);
+			//function_exists('get_called_class') ? get_called_class() : e('Classname not specified', E_SAMSON_FATAL_ERROR);
 		
 		// Вернем единственный экземпляр
 		return self::$_factory[ $class ];

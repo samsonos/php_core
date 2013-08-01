@@ -73,7 +73,7 @@ final class Core implements iCore
 			
 			// If we have php files in this entry to search for needed class
 			if( isset($ls['php']) && sizeof($ls['php']) )
-			{
+			{				
 				// Simple method - trying to find class by classname
 				if( $files = preg_grep( '/\/'.$class_name.'\.php/i', $ls['php']))
 				{
@@ -200,11 +200,9 @@ final class Core implements iCore
 						if( in_array( ns_classname('ExternalModule','samson\core'), class_parents( $class_name )))
 						{	
 							// Save namespace module data to load stack
-							$ns = pathname( $class_name );
-							
 							// If no namespace specified consider classname as namespace
-							$ns = isset($ns{0}) ? $ns : $class_name;													
-							
+							$ns = pathname( strtolower($class_name) );
+														
 							// Check for namespace uniqueness 
 							if( !isset($this->load_stack[ $ns ])) $this->load_stack[ $ns ] = & $ls;
 							else e('Found duplicate ns(##) for class(##) ', E_SAMSON_CORE_ERROR, array( $ns, $class_name)); 
