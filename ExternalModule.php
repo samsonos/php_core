@@ -19,14 +19,14 @@ class ExternalModule extends Module implements iExternalModule
 	public function  __construct( $path = NULL )
 	{	
 		// Module identifier not specified - set it to NameSpace\Classname
-		if( !isset( $this->id{0} )) $this->id = strtolower(get_class($this));
+		if( !isset( $this->id{0} )) $this->id = strtolower(get_class($this));	
+
+		parent::__construct( $this->id, $path );
 		
 		//[PHPCOMPRESSOR(remove,start)]
 		// Создадим конфигурацию для composer
 		$this->composer();
 		//[PHPCOMPRESSOR(remove,end)]	
-
-		parent::__construct( $this->id, $path );
 	}
 	
 	/** Обработчик сериализации объекта */
@@ -163,6 +163,9 @@ class ExternalModule extends Module implements iExternalModule
 	/** Создать файл конфигурации для composer */
 	private function composer()
 	{
+		// Check if this is existing external module
+		if( !isset($this->path{0}) ) return true;
+	
 		// Преобразуем массив зависисмостей в объект
 		$require = new \stdClass();
 	
@@ -175,11 +178,11 @@ class ExternalModule extends Module implements iExternalModule
 	
 		// Сформируем файл-конфигурацию для composer
 		$composer = str_replace('\\\\', '/', json_encode( array(
-				'name'		=> dirname(get_class($this)),
+				'name'		=> $this->id,
 				'author' 	=> $this->author,
 				'version'	=> $this->version,
 				'require'	=> $require
-		), 64 ));
+		), 64 ));		
 	
 		// Проверим если файл конфигурации для composer не существует или конфигурация изменилась
 		if( ! file_exists( $this->path.'/composer.json' ) || ( md5(file_get_contents( $this->path.'/composer.json' )) != md5($composer)) )

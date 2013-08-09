@@ -222,7 +222,7 @@ final class Core implements iCore
 							//elapsed('   -- Created instance of '.$class_name.'('.$id.') in '.$path);
 							
 							// Module check
-							if( !isset($id{0})) e('Module from ## has doens not have identifier', E_SAMSON_CORE_ERROR, $path );
+							if( !isset($id{0})) e('Module from ## does not have identifier', E_SAMSON_CORE_ERROR, $path );
 							if( $ns != strtolower($ns)) e('Module ## has incorrect namespace ## - it must be lowercase', E_SAMSON_CORE_ERROR, array($id,$ns) );
 							if( !isset($ns{0}) ) e('Module ## has no namespace', E_SAMSON_CORE_ERROR,  $id, $ns );
 											
@@ -237,11 +237,8 @@ final class Core implements iCore
 							//elapsed('   -- Configured '.$class_name.' in '.$path);
 							
 							// Prepare module mechanism
-							if( !$connector->prepare())
-							{
-								e('## - Failed preparing module', E_SAMSON_FATAL_ERROR, $id);
-							}
-							
+							if( $connector->prepare() === false ) e('## - Failed preparing module', E_SAMSON_FATAL_ERROR, $id);
+													
 							//elapsed('   -- Prepared '.$class_name.' in '.$path);
 									
 							// Trying to find parent class for connecting to it to use View/Controller inheritance
@@ -694,12 +691,12 @@ final class Core implements iCore
 			
 			// Require local controllers 
 			foreach ( $ls2['controllers'] as $controler ) 
-			{
+			{				
 				require( $controler );
 				
 				// Get local module name
-				$local_module = basename( $controler, '.php' );
-					
+				$local_module = strtolower(basename( $controler, '.php' ));
+									
 				// Create new local compressable module
 				new CompressableLocalModule( $local_module, $this->system_path );
 			}
