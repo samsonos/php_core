@@ -181,7 +181,7 @@ class ExternalModule extends Module implements iExternalModule
 	
 		// Сформируем файл-конфигурацию для composer
 		$composer = str_replace('\\\\', '/', json_encode( array(
-				'name'		=> self::COMPOSER_VENDOR.$this->id,
+				'name'		=> self::COMPOSER_VENDOR.'/'.$this->id,
 				'author' 	=> $this->author,
 				'version'	=> $this->version,
 				'require'	=> $require
