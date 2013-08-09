@@ -10,7 +10,7 @@ namespace samson\core;
 class ExternalModule extends Module implements iExternalModule
 {		
 	/** Correct name for composer generator */
-	const COMPOSER_VENDOR = 'samsonphp';
+	const COMPOSER_VENDOR = 'samsonos';
 	
 	/** Указатель на родительский модуль */
 	public $parent = NULL;
