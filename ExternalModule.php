@@ -9,6 +9,9 @@ namespace samson\core;
  */
 class ExternalModule extends Module implements iExternalModule
 {		
+	/** Correct name for composer generator */
+	const COMPOSER_VENDOR = 'samsonphp';
+	
 	/** Указатель на родительский модуль */
 	public $parent = NULL;
 	
@@ -178,7 +181,7 @@ class ExternalModule extends Module implements iExternalModule
 	
 		// Сформируем файл-конфигурацию для composer
 		$composer = str_replace('\\\\', '/', json_encode( array(
-				'name'		=> $this->id,
+				'name'		=> self::COMPOSER_VENDOR.$this->id,
 				'author' 	=> $this->author,
 				'version'	=> $this->version,
 				'require'	=> $require
