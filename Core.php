@@ -49,6 +49,9 @@ final class Core implements iCore
 	/** Модификатор пути к представлениям, для шаблонизации представлений */
 	protected $view_path = '';
 	
+	/** Collection of performance benchmarks for analyzing */
+	protected $benchmarks = array();
+	
 	/** Режим работы с представлениями */
 	public $render_mode = self::RENDER_STANDART;
 	
@@ -167,6 +170,11 @@ final class Core implements iCore
 	/** @see \samson\core\iCore::load() */
 	public function load( $path = NULL )
 	{	
+		// Fix performance
+		//[PHPCOMPRESSOR(remove,start)]
+		$this->benchmarks[] = array( microtime(true)-__SAMSON_T_STARTED__, get_class($this).'::'.__FUNCTION__, func_get_args() );
+		//[PHPCOMPRESSOR(remove,end)]
+		
 		//elapsed('Start loading from '.$path);
 		
 		// If we han't scanned resources at this path
@@ -527,7 +535,10 @@ final class Core implements iCore
 	/**	@see iCore::start() */
 	public function start( $default )
 	{	
-		//elapsed('Start routing');	
+		// Fix performance
+		//[PHPCOMPRESSOR(remove,start)]
+		$this->benchmarks[] = array( microtime(true)-__SAMSON_T_STARTED__, get_class($this).'::'.__FUNCTION__, func_get_args() );
+		//[PHPCOMPRESSOR(remove,end)]	
 			
 		//[PHPCOMPRESSOR(remove,start)]				
 		// Проинициализируем оставшиеся конфигурации и подключим внешние модули по ним
@@ -613,13 +624,34 @@ final class Core implements iCore
 			$template_html = str_ireplace( '</head>', $head_html.'</head>', $template_html );				
 			
 			// Профайлинг PHP
-			$template_html .= '<!-- '.profiler().' -->';
-			$template_html .= '<!-- Использовано памяти: '.round(memory_get_usage(true)/1000000,1).' МБ -->';			
+			$template_html .= '<!-- Total time elapsed:'.round( microtime(TRUE) - __SAMSON_T_STARTED__, 3 ).'s -->';
 			if( function_exists('db')) $template_html .= '<!-- '.db()->profiler().' -->';
+			$template_html .= '<!-- Memory used: '.round(memory_get_usage(true)/1000000,1).' МБ -->';
+			// TODO: Добавить вывод параметров функции потом интегрировать его в elapsed\error 
+			$template_html .= '<!-- Time benchmark: -->';
+			$l = 0;			
+			foreach ($this->benchmarks as $func => $data ) 
+			{				
+				// Generate params string
+				$params = array();
+				if(is_array( $data[2] )) foreach ( $data[2] as $value ) 
+				{
+					if( is_string($value) ) $params[] = '"'.$value.'"';
+				}
+				$params = implode( ',', $params );				
+			
+				$started = number_format( round($data[0],4), 4 );
+				$elapsed = number_format( round($data[0] - $l,4), 4 );
+				
+				$template_html .= '<!-- '.$started.'s - '.$elapsed.' # '.$data[1].'('.$params.') -->';
+				
+				// Save previous TS
+				$l = $data[0];
+			}
 		}
 		
 		// Выведем все что мы на генерили
-		echo $template_html;	
+		echo $template_html;			
 		
 		////elapsed('End routing');
 	}	
@@ -629,6 +661,11 @@ final class Core implements iCore
 	public function __construct()
 	{		
 		//elapsed('Constructor');
+		
+		// Fix performance
+		//[PHPCOMPRESSOR(remove,start)]
+		$this->benchmarks[] = array( microtime(true)-__SAMSON_T_STARTED__, get_class($this).'::'.__FUNCTION__, func_get_args() );
+		//[PHPCOMPRESSOR(remove,end)]
 		
 		// Get backtrace to define witch scipt initiated core creation
 		$db = debug_backtrace();	

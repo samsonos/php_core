@@ -249,7 +249,10 @@ class Module implements iModule, \ArrayAccess, iModuleViewable
 		$parameters = url()->parameters();
 
 		// Если мы используем универсальный контроллер добавим первым параметром универсального контроллера - имя метода
-		if( $method_name == $this->id.'__HANDLER' ) $parameters = array_merge( array( url()->method() ), $parameters );	
+		if( $method_name == $this->id.'__HANDLER' && isset(url()->method{0}) ) 
+		{
+			$parameters = array_merge( array( url()->method ), $parameters );	
+		}
 			
 		// TODO: wait for getHint() method for removing parameter name dependency and use just hint type
 		
