@@ -50,7 +50,7 @@ final class Core implements iCore
 	protected $view_path = '';
 	
 	/** Collection of performance benchmarks for analyzing */
-	protected $benchmarks = array();
+	public $benchmarks = array();
 	
 	/** Режим работы с представлениями */
 	public $render_mode = self::RENDER_STANDART;
@@ -621,33 +621,7 @@ final class Core implements iCore
 			</script>';			
 			
 			// Insert what we have generated
-			$template_html = str_ireplace( '</head>', $head_html.'</head>', $template_html );				
-			
-			// Профайлинг PHP
-			$template_html .= '<!-- Total time elapsed:'.round( microtime(TRUE) - __SAMSON_T_STARTED__, 3 ).'s -->';
-			if( function_exists('db')) $template_html .= '<!-- '.db()->profiler().' -->';
-			$template_html .= '<!-- Memory used: '.round(memory_get_usage(true)/1000000,1).' МБ -->';
-			// TODO: Добавить вывод параметров функции потом интегрировать его в elapsed\error 
-			$template_html .= '<!-- Time benchmark: -->';
-			$l = 0;			
-			foreach ($this->benchmarks as $func => $data ) 
-			{				
-				// Generate params string
-				$params = array();
-				if(is_array( $data[2] )) foreach ( $data[2] as $value ) 
-				{
-					if( is_string($value) ) $params[] = '"'.$value.'"';
-				}
-				$params = implode( ',', $params );				
-			
-				$started = number_format( round($data[0],4), 4 );
-				$elapsed = number_format( round($data[0] - $l,4), 4 );
-				
-				$template_html .= '<!-- '.$started.'s - '.$elapsed.' # '.$data[1].'('.$params.') -->';
-				
-				// Save previous TS
-				$l = $data[0];
-			}
+			$template_html = str_ireplace( '</head>', $head_html.'</head>', $template_html );			
 		}
 		
 		// Выведем все что мы на генерили

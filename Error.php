@@ -107,13 +107,44 @@ class Error
 	 */
 	public function shutdown()
 	{		
+		// TODO: Create core shutdown routines
+		if( !s()->async() )
+		{
+			// Профайлинг PHP
+			$template_html = '<!-- Total time elapsed:'.round( microtime(TRUE) - __SAMSON_T_STARTED__, 3 ).'s -->';
+			if( function_exists('db')) $template_html .= '<!-- '.db()->profiler().' -->';
+			$template_html .= '<!-- Memory used: '.round(memory_get_usage(true)/1000000,1).' МБ -->';			
+			$template_html .= '<!-- Time benchmark: -->';
+			$l = 0;
+			foreach (s()->benchmarks as $func => $data )
+			{
+				// Generate params string
+				$params = array();
+				if(is_array( $data[2] )) foreach ( $data[2] as $value )
+				{
+					if( is_string($value) ) $params[] = '"'.$value.'"';
+				}
+				$params = implode( ',', $params );
+					
+				$started = number_format( round($data[0],4), 4 );
+				$elapsed = number_format( round($data[0] - $l,4), 4 );
+					
+				$template_html .= '<!-- '.$started.'s - '.$elapsed.' # '.$data[1].'('.$params.') -->';
+					
+				// Save previous TS
+				$l = $data[0];
+			}
+			
+			echo $template_html;			
+		}
+		
 		// Если установлен обработчик завершения выполнения скрипта - вызовем его
 		if( isset( self::$shutdown_handler ) && ( call_user_func( self::$shutdown_handler ) === false )) return null;		
 				
 		//echo 'Конец';
 		
 		// Выведем все накопленные ошибки 
-		$this->output();		
+		$this->output();	
 	}
 	
 	/**
