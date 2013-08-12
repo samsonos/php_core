@@ -110,6 +110,11 @@ class Error
 		// TODO: Create core shutdown routines
 		if( !s()->async() )
 		{
+			// Fix performance
+			//[PHPCOMPRESSOR(remove,start)]
+			s()->benchmarks[] = array( microtime(true)-__SAMSON_T_STARTED__, get_class($this).'::'.__FUNCTION__, func_get_args() );
+			//[PHPCOMPRESSOR(remove,end)]
+			
 			// Профайлинг PHP
 			$template_html = '<!-- Total time elapsed:'.round( microtime(TRUE) - __SAMSON_T_STARTED__, 3 ).'s -->';
 			if( function_exists('db')) $template_html .= '<!-- '.db()->profiler().' -->';

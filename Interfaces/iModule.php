@@ -90,7 +90,7 @@ interface iModule
 	 * 
 	 * @param string $controller Метод контроллера для выполнения
 	 */
-	public function render( $controller = NULL);
+	public function render( $controller = NULL );
 	
 	/**
 	 * Выполнить метод контроллера, варианты выполнения:
