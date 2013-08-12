@@ -33,9 +33,6 @@ class Module implements iModule, \ArrayAccess, iModuleViewable
 	/** Path to view for rendering, also key to $view_data entry */
 	protected $view_path = self::VD_POINTER_DEF;
 	
-	/** Код HTML представление модуля */
-	protected $view_html = '';
-	
 	/** Pointer to view data enty */
 	protected $data = array();	
 	

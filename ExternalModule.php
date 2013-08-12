@@ -92,18 +92,38 @@ class ExternalModule extends Module implements iExternalModule
 		// Если этот класс не прямой наследник класса "Подключаемого Модуля"
 		if( isset($this->parent) )
 		{					
+			// Temp path var
+			$_view_path = $view_path;
+			
+			// Add extension if nessesary
+			if( strpos( $_view_path, '.php' ) === false ) $_view_path .= '.php';
+			
+			// If no default view path was specified
+			if( strpos( $_view_path, __SAMSON_VIEW_PATH ) === false ) $_view_path = __SAMSON_VIEW_PATH.$_view_path;
+						
 			// Построим путь к представлению относительно текущего модуля
-			$path = $this->path.$view_path;
+			$path = $this->path.$_view_path;
+			
+			//elapsed($path.' - '.$view_path);
 				
 			// Если требуемое представление НЕ существует в текущем модуле -
 			// выполним вывод представления для родительского модуля
 			if( ! file_exists( $path ) && ! isset($GLOBALS['__compressor_files'][ $path ]) )
 			{
-				return $this->view_html.$this->parent->output( $view_path, $this->data );
+				//elapsed('Parent - '.$this->parent->id);
+				
+				// Merge view data for parent module
+				$this->parent->view_data = array_merge( $this->parent->view_data, $this->view_data );
+				
+				// Switch parent view context
+				$this->parent->data = & $this->data;
+				
+				// Call parent module rendering
+				return $this->parent->output( $view_path );
 			}
 		}
 	
-		// Просто выполним родительский метод
+		// Call regular rendering
 		return parent::output( $view_path );
 	}
 	
