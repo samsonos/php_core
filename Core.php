@@ -22,6 +22,9 @@ final class Core implements iCore
 	/** Modules to be loaded stack */
 	public $load_stack = array();
 	
+	/** Modules to be loaded stack */
+	public $load_module_stack = array();
+	
 	/** Стек загруженных в ядро модулей */
 	public $module_stack = array();
 	
@@ -214,23 +217,26 @@ final class Core implements iCore
 						// If this is ExternalModule ancestor
 						if( in_array( ns_classname('ExternalModule','samson\core'), class_parents( $class_name )))
 						{	
+							//elapsed('   -- Found iModule ancestor '.$class_name.'('.$ns.') in '.$path);
+							
+							// Create object
+							$connector = new $class_name( $path, $module_id );
+							$id = $connector->id();
+							
 							// Save namespace module data to load stack
 							// If no namespace specified consider classname as namespace
 							$ns = pathname( strtolower($class_name) );							
+						
+							// Save module resources
+							$this->load_module_stack[ $id ] = $ls;
 							
 							// Check for namespace uniqueness 
 							if( !isset($this->load_stack[ $ns ])) $this->load_stack[ $ns ] = & $ls;
 							// Merge another ns location to existing
-							else $this->load_stack[ $ns ] = array_merge_recursive ( $this->load_stack[ $ns ], & $ls );
-							//else e('Found duplicate ns(##) for class(##) ', E_SAMSON_CORE_ERROR, array( $ns, $class_name)); 
+							else $this->load_stack[ $ns ] = array_merge_recursive ( $this->load_stack[ $ns ], & $ls );	
 							
-							//elapsed('   -- Found iModule ancestor '.$class_name.'('.$ns.') in '.$path);
-				
-							// Create object
-							$connector = new $class_name( $path, $module_id );
-							$id = $connector->id();
-							//trace($connector);												
-
+							//else e('Found duplicate ns(##) for class(##) ', E_SAMSON_CORE_ERROR, array( $ns, $class_name)); 
+											
 							//elapsed('   -- Created instance of '.$class_name.'('.$id.') in '.$path);
 							
 							// Module check
@@ -661,10 +667,9 @@ final class Core implements iCore
 		$path = __SAMSON_PATH__;
 		if( $this->resources( $path, $ls ))
 		{	
-			$ls['namespace'] = 'samson\core';
-			$ls['id'] = 'core';
-			$ls['classname'] = 'System';
-			$this->load_stack['samson\core'] = & $ls;
+			$this->load_stack['core'] = & $ls;
+			// Save module resources
+			$this->load_module_stack[ 'core' ] = & $ls;
 		}		
 		
 		// Create local module and set it as active
@@ -693,11 +698,9 @@ final class Core implements iCore
 		// Инициализируем локальные модуль
 		if( $this->resources( $this->system_path, $ls2, $files ))
 		{			
-			// Manually include local module to load stack
-			$ls2['namespace'] = 'local';
-			$ls2['id'] = 'local';
-			$ls2['classname'] = 'local';
+			// Manually include local module to load stack			
 			$this->load_stack['local'] = & $ls2;
+			$this->load_module_stack[ 'local' ] = & $ls2;
 			
 			// Require local controllers 
 			foreach ( $ls2['controllers'] as $controler ) 
