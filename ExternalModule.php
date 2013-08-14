@@ -19,11 +19,14 @@ class ExternalModule extends Module implements iExternalModule
 	protected $requirements = array();
 	
 	/** Конструктор */
-	public function  __construct( $path = NULL )
+	public function  __construct( $path = NULL, $id = null )
 	{	
+		// If special id is passed;
+		if( isset($id) ) $this->id = $id;		
 		// Module identifier not specified - set it to NameSpace\Classname
-		if( !isset( $this->id{0} )) $this->id = strtolower(get_class($this));	
+		else if( !isset( $this->id{0} )) $this->id = strtolower(get_class($this));	
 
+		// Call parent constructor
 		parent::__construct( $this->id, $path );
 		
 		//[PHPCOMPRESSOR(remove,start)]
