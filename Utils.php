@@ -283,12 +283,15 @@ function debug_backtrace_html( $message, array $backtrace = NULL )
 
 	// Переберем элементы стека вызовов начиная с 3-го элемента
 	for ($i = 1; $i < $stack_size; $i++) $html[] = debug_to_string( $backtrace[ $i ] );	
-		
+	
+	// Create unique id fo input [checkbox]
+	$id = rand(0, 1000);
+	
 	// Вернем преобразованный в HTML стек вызовов
 	return '<ul class="_core_error_text">
 				<li class="_core_error_function">
-					<input type="checkbox" id="elapsed_click">
-					<label for="elapsed_click"></label>' . $message . '
+					<input type="checkbox" class="elapsed_click" id=".$id.">
+					<label for=".$id."></label>' . $message . '
 					<ul class="_core_error_stack"><li>' . implode( '</li>
 						<li>' ,$html ) . '</li>
 					</ul>

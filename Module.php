@@ -311,10 +311,11 @@ class Module implements iModule, \ArrayAccess, iModuleViewable
 		// Add to module identifier to view data stack
 		$this->data['id'] = $this->id;	
 	
-		// Save this instance in static instances collection		
-		self::$instances[ $this->id ] = & $this;
+		// Save ONLY ONE copy of this instance in static instances collection,
+		// avoiding rewriting by cloned modules		
+		if( !isset( self::$instances[ $this->id ]) ) self::$instances[ $this->id ] = & $this;
 		
-		elapsed('Registering module: '.$this->id.'('.$path.')' );
+		//elapsed('Registering module: '.$this->id.'('.$path.')' );
 	}		
 	
 	/** Обработчик уничтожения объекта */

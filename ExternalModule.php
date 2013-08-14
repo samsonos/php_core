@@ -12,19 +12,27 @@ class ExternalModule extends Module implements iExternalModule
 	/** Correct name for composer generator */
 	const COMPOSER_VENDOR = 'samsonos';
 	
+	/** Virtual module identifier */
+	public $vid = null;
+	
 	/** Указатель на родительский модуль */
 	public $parent = NULL;
 	
 	/** Коллекция связанных модулей с текущим */
 	protected $requirements = array();
-	
-	/** Конструктор */
-	public function  __construct( $path = NULL, $id = null )
+		
+	/**
+	 * Constructor
+	 * @param string $path 	Path to module location
+	 * @param string $vid	Virtual module identifier
+	 */
+	public function  __construct( $path, $vid = null )
 	{	
-		// If special id is passed;
-		if( isset($id) ) $this->id = $id;		
+		// Save this module under virtual identifier
+		if( isset($vid) ) self::$instances[ ($this->vid = $id) ] = & $this;		
+		
 		// Module identifier not specified - set it to NameSpace\Classname
-		else if( !isset( $this->id{0} )) $this->id = uni_classname(get_class($this));	
+		if( !isset( $this->id{0} )) $this->id = uni_classname(get_class($this));	
 		
 		// Call parent constructor
 		parent::__construct( $this->id, $path );

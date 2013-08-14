@@ -25,7 +25,7 @@ blockquote,th,td { margin: 0; padding: 0; } li { list-style: none; }
 ._core_error._core_debug { background-color: #fbfbfb;}
 
 /* click by css for elapsed output */
-label[for="elapsed_click"] {
+label {
 	position: absolute;
 	display: block; 
 	width: 100%; 
@@ -35,8 +35,8 @@ label[for="elapsed_click"] {
 	cursor: pointer;
 	z-index: 1;
 }
-#elapsed_click{display: none;}
-#elapsed_click:checked ~ ._core_error_stack{ height: auto; display: block; }
+.elapsed_click{display: none;}
+.elapsed_click:checked ~ ._core_error_stack{ height: auto; display: block; }
 
 /* Фатальная ошибка */
 ._core_error._core_fatal_error { background-color: #FFC2A8; border-top:1px solid #FF0C29; border-bottom:1px solid #FF0C29; }
