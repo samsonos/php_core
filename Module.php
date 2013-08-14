@@ -314,7 +314,7 @@ class Module implements iModule, \ArrayAccess, iModuleViewable
 		// Save this instance in static instances collection		
 		self::$instances[ $this->id ] = & $this;
 		
-		//elapsed('Registering module: '.$this->id.'('.$path.')' );
+		elapsed('Registering module: '.$this->id.'('.$path.')' );
 	}		
 	
 	/** Обработчик уничтожения объекта */

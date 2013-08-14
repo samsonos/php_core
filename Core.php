@@ -227,7 +227,7 @@ final class Core implements iCore
 							//elapsed('   -- Found iModule ancestor '.$class_name.'('.$ns.') in '.$path);
 				
 							// Create object
-							$connector = new $class_name( $path );
+							$connector = new $class_name( $path, $module_id );
 							$id = $connector->id();
 							//trace($connector);												
 
@@ -429,18 +429,13 @@ final class Core implements iCore
 		$ret_val = null;
 		
 		// Ничего не передано - вернем текущуй модуль системы
-		if( !isset($_module) && isset( $this->active ) ) $ret_val = $this->active;	
+		if( !isset($_module) && isset( $this->active ) ) $ret_val = & $this->active;	
 		// Если уже передан какой-то модуль - просто вернем его
-		else if( is_object( $_module ) ) $ret_val = $_module;
-		// Если передано имя модуля	
-		else
-		{
-			// Получим регистро не зависимое имя модуля 
-			$_module = mb_strtolower( $_module, 'UTF-8' );			
-			
-			// Если передано имя модуля то попытаемся его найти в стеке модулей
-			if( isset( $this->module_stack[ $_module ] ) ) $ret_val = $this->module_stack[ $_module ];			
-		}		
+		else if( is_object( $_module ) ) $ret_val = & $_module;
+		// If module name is passed - try to find it
+		else if( is_string( $_module ) && isset( $this->module_stack[ $_module ] ) ) $ret_val = & $this->module_stack[ $_module ];				
+		
+		//elapsed('Getting module: '.$_module);
 		
 		// Ничего не получилось вернем ошибку
 		if( $ret_val === null ) e('Не возможно получить модуль(##) системы', E_SAMSON_CORE_ERROR, array( $_module ) );

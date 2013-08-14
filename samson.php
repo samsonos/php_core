@@ -513,4 +513,14 @@ function ns_classname( $class_name, $ns = 'samson\activerecord' )
 	else return classname( $class_name );
 }
 
+/**
+ * Tranform classname with namespace to universal form
+ * @param string $class_name Classname for transformation
+ * @return mixed Transformed classname in universal format
+ */
+function uni_classname( $class_name )
+{
+	return trim(str_replace('\\', '_',strtolower($class_name)));	
+}
+
 //elapsed('core included');

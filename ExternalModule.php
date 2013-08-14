@@ -24,8 +24,8 @@ class ExternalModule extends Module implements iExternalModule
 		// If special id is passed;
 		if( isset($id) ) $this->id = $id;		
 		// Module identifier not specified - set it to NameSpace\Classname
-		else if( !isset( $this->id{0} )) $this->id = strtolower(get_class($this));	
-
+		else if( !isset( $this->id{0} )) $this->id = uni_classname(get_class($this));	
+		
 		// Call parent constructor
 		parent::__construct( $this->id, $path );
 		
