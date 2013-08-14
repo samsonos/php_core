@@ -25,7 +25,7 @@ blockquote,th,td { margin: 0; padding: 0; } li { list-style: none; }
 ._core_error._core_debug { background-color: #fbfbfb;}
 
 /* click by css for elapsed output */
-label {
+._core_error label {
 	position: absolute;
 	display: block; 
 	width: 100%; 

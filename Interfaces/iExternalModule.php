@@ -24,4 +24,10 @@ interface iExternalModule
 	 * @param array $params Необязательная коллекция параметров для инициализации модуля 
 	 */
 	public function init( array $params = array() );
+	
+	/**
+	 * Create module copy
+	 * @return iExternalModule Copied module instance
+	 */
+	public function & copy();
 }

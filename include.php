@@ -3,7 +3,6 @@
 /**/
 // Базовые интерфейсы SamsonPHP
 require( 'Interfaces/iModule.php' );
-require( 'Interfaces/iModuleConnector.php' );
 require( 'Interfaces/iModuleViewable.php' );
 require( 'Interfaces/iModuleCompressable.php' );
 require( 'Interfaces/iExternalModule.php');

@@ -32,7 +32,7 @@ class ExternalModule extends Module implements iExternalModule
 		if( !isset( $this->id{0} )) $this->id = uni_classname(get_class($this));	
 		
 		// Save this module under virtual identifier
-		if( isset($vid) ) self::$instances[ ($this->vid = $id) ] = & $this;
+		if( isset($vid) ) self::$instances[ ($this->vid = $vid) ] = & $this;
 		// Otherwise equal it to real identifier
 		else $this->vid = $this->id;
 		
@@ -45,11 +45,24 @@ class ExternalModule extends Module implements iExternalModule
 		//[PHPCOMPRESSOR(remove,end)]	
 	}
 	
-	/** Clone magic handler */
-	function __clone()
+	/**
+	 * 
+	 * @return unknown
+	 */
+	public function & copy()
 	{
-		//trace( $this );
+		// Get current class name
+		$classname = get_class( $this );
+		
+		// Generate unique virtual id for copy
+		$id = $this->id.'_'.rand( 0, 99999999 );
+		
+		// Create copy instance
+		$o = new $classname( $this->path, $id );		
+		
+		return $o;
 	}
+	
 	
 	/** Обработчик сериализации объекта */
 	public function __sleep()
@@ -146,7 +159,7 @@ class ExternalModule extends Module implements iExternalModule
 		return parent::output( $view_path );
 	}
 	
-	/**	@see iModuleConnector::prepare() */
+	/**	@see iExternalModule::prepare() */
 	public function prepare()
 	{		
 		// Переберем все связи модуля
@@ -193,7 +206,7 @@ class ExternalModule extends Module implements iExternalModule
 		return TRUE;
 	}
 	
-	/**	@see iModuleConnector::init() */
+	/**	@see iExternalModule::init() */
 	public function init( array $params = array() )
 	{
 		// Установим переданные параметры
