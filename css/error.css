@@ -13,7 +13,7 @@ blockquote,th,td { margin: 0; padding: 0; } li { list-style: none; }
 ._core_error { clear:both; float:left; width:100%; font-size: 9pt; position:relative; z-index:99; background-color:  #F5E4E4; border-bottom:1px solid lightgray; line-height: 20px; color: black;}
 
 /* Вынесим чекбокс за рамки экрана */
-._core_error_check_box {position:absolute; margin-left: -300px;}
+._core_error_check_box {display: none;}
 
 /* Лейбл для чекбокса */
 ._core_error ._core_error_label {position:relative; display:block; width: 100%; cursor:pointer; min-height:20px; height:auto; }

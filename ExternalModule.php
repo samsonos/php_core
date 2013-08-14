@@ -27,12 +27,14 @@ class ExternalModule extends Module implements iExternalModule
 	 * @param string $vid	Virtual module identifier
 	 */
 	public function  __construct( $path, $vid = null )
-	{	
-		// Save this module under virtual identifier
-		if( isset($vid) ) self::$instances[ ($this->vid = $id) ] = & $this;		
-		
+	{			
 		// Module identifier not specified - set it to NameSpace\Classname
 		if( !isset( $this->id{0} )) $this->id = uni_classname(get_class($this));	
+		
+		// Save this module under virtual identifier
+		if( isset($vid) ) self::$instances[ ($this->vid = $id) ] = & $this;
+		// Otherwise equal it to real identifier
+		else $this->vid = $this->id;
 		
 		// Call parent constructor
 		parent::__construct( $this->id, $path );
@@ -41,6 +43,12 @@ class ExternalModule extends Module implements iExternalModule
 		// Создадим конфигурацию для composer
 		$this->composer();
 		//[PHPCOMPRESSOR(remove,end)]	
+	}
+	
+	/** Clone magic handler */
+	function __clone()
+	{
+		//trace( $this );
 	}
 	
 	/** Обработчик сериализации объекта */

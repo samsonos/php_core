@@ -650,7 +650,7 @@ final class Core implements iCore
 		//$this->load2( __SAMSON_PATH__ );		
 	
 		// Создадим специальный модуль для PHP
-		new PHP();	
+		new PHP( __SAMSON_PATH__ );	
 		
 		// Load samson\core module
 		new System( __SAMSON_PATH__ );		
