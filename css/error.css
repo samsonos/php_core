@@ -22,7 +22,22 @@ blockquote,th,td { margin: 0; padding: 0; } li { list-style: none; }
 ._core_error_check_box:checked ~ ._core_error_label ._core_error_stack { display:block;}
 
 /* Отладочное сообщение */
-._core_error._core_debug { background-color: #fbfbfb; }
+._core_error._core_debug { background-color: #fbfbfb;}
+
+/* click by css for elapsed output */
+label[for="elapsed_click"] {
+	position: absolute;
+	display: block; 
+	width: 100%; 
+	height: 100%;	 
+	top:0px; 
+	left: 0px;
+	cursor: pointer;
+	z-index: 1;
+}
+#elapsed_click{display: none;}
+#elapsed_click:checked ~ ._core_error_stack{ height: auto; display: block; }
+
 /* Фатальная ошибка */
 ._core_error._core_fatal_error { background-color: #FFC2A8; border-top:1px solid #FF0C29; border-bottom:1px solid #FF0C29; }
 
@@ -47,4 +62,4 @@ blockquote,th,td { margin: 0; padding: 0; } li { list-style: none; }
 /* Функция в которой была ошибка */
 ._core_error ._core_error_function { float:left; cursor: pointer;  }
 /* Стек вызовов в виде списка */
-._core_error ._core_error_function ._core_error_stack { clear:both; display:none; position: relative;}
+._core_error_stack { clear:both; display:none; position: relative;}

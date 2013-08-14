@@ -168,7 +168,7 @@ final class Core implements iCore
 	}
 
 	/** @see \samson\core\iCore::load() */
-	public function load( $path = NULL )
+	public function load( $path = NULL, $module_id = NULL )
 	{	
 		// Fix performance
 		//[PHPCOMPRESSOR(remove,start)]
@@ -216,23 +216,20 @@ final class Core implements iCore
 						{	
 							// Save namespace module data to load stack
 							// If no namespace specified consider classname as namespace
-							$ns = pathname( strtolower($class_name) );
-														
+							$ns = pathname( strtolower($class_name) );							
+							
 							// Check for namespace uniqueness 
 							if( !isset($this->load_stack[ $ns ])) $this->load_stack[ $ns ] = & $ls;
-							else e('Found duplicate ns(##) for class(##) ', E_SAMSON_CORE_ERROR, array( $ns, $class_name)); 
+							// Merge another ns location to existing
+							else $this->load_stack[ $ns ] = array_merge_recursive ( $this->load_stack[ $ns ], & $ls );
+							//else e('Found duplicate ns(##) for class(##) ', E_SAMSON_CORE_ERROR, array( $ns, $class_name)); 
 							
 							//elapsed('   -- Found iModule ancestor '.$class_name.'('.$ns.') in '.$path);
 				
 							// Create object
 							$connector = new $class_name( $path );
-
-							//trace($connector);
-								
 							$id = $connector->id();
-							$ls['id'] = $id;
-							$ls['classname'] = $class_name;
-							$ls['namespace'] = $ns;			
+							//trace($connector);												
 
 							//elapsed('   -- Created instance of '.$class_name.'('.$id.') in '.$path);
 							

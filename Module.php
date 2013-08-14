@@ -138,7 +138,7 @@ class Module implements iModule, \ArrayAccess, iModuleViewable
 			// Change view data pointer to appropriate view data entry
 			$this->data = & $this->view_data[ $view_path ];	
 		}		
-	
+
 		// Output data
 		$out = isset($this->data[ self::VD_HTML ]) ? $this->data[ self::VD_HTML ] : '';		
 		

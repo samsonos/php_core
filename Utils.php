@@ -285,7 +285,15 @@ function debug_backtrace_html( $message, array $backtrace = NULL )
 	for ($i = 1; $i < $stack_size; $i++) $html[] = debug_to_string( $backtrace[ $i ] );	
 		
 	// Вернем преобразованный в HTML стек вызовов
-	return '<ul class="_core_error_text"><li class="_core_error_function ">' . $message . '<ul class="_core_error_stack"><li>' . implode( '</li><li>' ,$html ) . '</li></ul></li></ul>';
+	return '<ul class="_core_error_text">
+				<li class="_core_error_function">
+					<input type="checkbox" id="elapsed_click">
+					<label for="elapsed_click"></label>' . $message . '
+					<ul class="_core_error_stack"><li>' . implode( '</li>
+						<li>' ,$html ) . '</li>
+					</ul>
+				</li>
+			</ul>';
 }
 
 /**

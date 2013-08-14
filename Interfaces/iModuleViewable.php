@@ -22,4 +22,3 @@ interface iModuleViewable
 	 */
 	function toView( $prefix = NULL, array $restricted = array() );
 }
-?>
