@@ -188,7 +188,7 @@ class Module implements iModule, \ArrayAccess, iModuleViewable
 			$old = & s()->active( $this );
 			
 			// Выполним действие текущего модуля
-			$this->action( $controller );	
+			$this->action( $controller == '' ? null : $controller );	
 
 			// Ввостановим предыдущий текущий модуль контролера
 			s()->active( $old );				
@@ -203,89 +203,64 @@ class Module implements iModule, \ArrayAccess, iModuleViewable
 	/** @see iModule::action() */
 	public function action( $method_name = NULL )
 	{			
-		// Если не указан конкретный метод контроллера
+		// If no controller action name is specified 
 		if( ! isset( $method_name ) )
 		{
-			// Проверим HTTP метод запроса
+			// Try to guess controller action name by server request type
 			switch( $_SERVER['REQUEST_METHOD'] )
 			{
-				case 'POST'		: $method_name = iModule::POST_CONTROLLER; 	break;
-				case 'PUT'		: $method_name = iModule::PUT_CONTROLLER; 	break;
-				case 'DELETE'	: $method_name = iModule::DELETE_CONTROLLER; break;
-				case 'GET'		:  // Стандартное поведение
+				case 'POST'		: $method_name = self::CTR_POST; 		break;
+				case 'PUT'		: $method_name = self::CTR_PUT; 		break;
+				case 'DELETE'	: $method_name = self::CTR_DELETE; 		break;
+				default			: $method_name = self::CTR_BASE;	 				
 			}
-		}
-		
-		// Проверим переданное имя контроллера
-		switch( $method_name )
-		{
-			// Если указан специальный идентификатор использования базового контроллера
-			case self::BASE_CONTROLLER		: $method_name = $this->id; break;
-			// Если указан специальный идентификатор использования универсального контроллера
-			case self::UNI_CONTROLLER		: $method_name = $this->id.'__HANDLER'; break;		
-			// Если указан специальный идентификатор использования универсального контроллера
-			case self::POST_CONTROLLER		: $method_name = $this->id.'__POST'; break;
-			// Если указан специальный идентификатор использования универсального контроллера
-			case self::PUT_CONTROLLER		: $method_name = $this->id.'__PUT'; break;
-			// Если указан специальный идентификатор использования универсального контроллера
-			case self::DELETE_CONTROLLER	: $method_name = $this->id.'__DELETE'; break;
-			// Если не найден специальный идентификатор метода контроллера
-			default : 
-				
-				// Сформируем полное имя метода контроллера если оно задано или устанвоим базовый контроллер
-				$method_name = isset( $method_name ) ? $this->id.'_'.$method_name : $this->id;			
-	
-				// Если существует универсальный контроллер - установим его имя
-				if( ! function_exists( $method_name ) ) $method_name = $this->id.'__HANDLER';					
 		}	
 
-		// Если базовый контроллер или указанный метод контроллера не существует
-		if( ! function_exists( $method_name ) ) return A_FAILED;			
-		
-		// Получим параметры
+		// Get parameters from URL
 		$parameters = url()->parameters();
-
-		// Если мы используем универсальный контроллер добавим первым параметром универсального контроллера - имя метода
-		if( $method_name == $this->id.'__HANDLER' && isset(url()->method{0}) ) 
-		{
-			$parameters = array_merge( array( url()->method ), $parameters );	
-		}
-			
-		// TODO: wait for getHint() method for removing parameter name dependency and use just hint type
 		
-		// Pass specific system parameters to controller action handler
-		$f = new \ReflectionFunction($method_name);
-		// Iterate params and match needed parameters by name
-		foreach ( $f->getParameters() as $n => $p) 
-		{				
-			// If system core needed
-			if( $p->name == '_core' || $p->name == 's' )  $var = s();
-			// If current module needed
-			else if( $p->name == '_module' || $p->name == 'm' ) $var = $this;
-			// Parameter does not match
-			else continue;
+		// If module object has controller action defined - try object approach
+		if( method_exists( $this, $method_name ) ) $method_name = array( $this, $method_name );		
+		// Now module object controller action method found - try function approach
+		else 
+		{
+			// Build function controller action name		
+			$method_name = $this->id.(isset( $method_name{0} ) && $method_name != self::CTR_BASE ? '_'.$method_name : '');		
+		
+			// If we did not found controller action try universal controller action
+			if( ! function_exists( $method_name ))
+			{
+				// Modify parameters list for universal controller action
+				$parameters = array_merge( array( url()->method ), $parameters );
+				
+				// Set universal controller action
+				$method_name .= self::CTR_UNI;
+			}		
 			
-			// If we here that something matched - insert neede parameter in parameter array
-			array_splice( $parameters, $n, 0, array($var) );
+			// No appropriate controller action found for this module		
+			if( ! function_exists( $method_name )) return A_FAILED;
+		
+			// TODO: wait for getHint() method for removing parameter name dependency and use just hint type
+			
+			// Pass specific system parameters to controller action handler
+			$f = new \ReflectionFunction( $method_name );
+			// Iterate params and match needed parameters by name
+			foreach ( $f->getParameters() as $n => $p) 
+			{				
+				// If system core needed
+				if( $p->name == '_core' || $p->name == 's' )  $var = s();
+				// If current module needed
+				else if( $p->name == '_module' || $p->name == 'm' ) $var = $this;
+				// Parameter does not match
+				else continue;
+				
+				// If we here that something matched - insert neede parameter in parameter array
+				array_splice( $parameters, $n, 0, array($var) );
+			}		
 		}		
 		
-		// Оптимизируем вызов функции call_user_func_array в зависимости от количества параметров
-		switch( sizeof( $parameters ) )
-		{
-			case 0	: $action_result = $method_name(); break;
-			case 1	: $action_result = $method_name( $parameters[0] ); break;			
-			case 2	: $action_result = $method_name( $parameters[0],$parameters[1] ); break;
-			case 3	: $action_result = $method_name( $parameters[0],$parameters[1],$parameters[2] ); break;
-			case 4	: $action_result = $method_name( $parameters[0],$parameters[1],$parameters[2],$parameters[3] ); break;
-			case 5	: $action_result = $method_name( $parameters[0],$parameters[1],$parameters[2],$parameters[3],$parameters[4] ); break;
-			case 6	: $action_result = $method_name( $parameters[0],$parameters[1],$parameters[2],$parameters[3],$parameters[4],$parameters[5] ); break;
-			case 7	: $action_result = $method_name( $parameters[0],$parameters[1],$parameters[2],$parameters[3],$parameters[4],$parameters[5],$parameters[6] ); break;
-			case 8	: $action_result = $method_name( $parameters[0],$parameters[1],$parameters[2],$parameters[3],$parameters[4],$parameters[5],$parameters[6],$parameters[7] ); break;
-			case 9	: $action_result = $method_name( $parameters[0],$parameters[1],$parameters[2],$parameters[3],$parameters[4],$parameters[5],$parameters[6],$parameters[7],$parameters[8] ); break;
-			case 10	: $action_result = $method_name( $parameters[0],$parameters[1],$parameters[2],$parameters[3],$parameters[4],$parameters[5],$parameters[6],$parameters[7],$parameters[8],$parameters[9] ); break;
-			case 11	: $action_result = $method_name( $parameters[0],$parameters[1],$parameters[2],$parameters[3],$parameters[4],$parameters[5],$parameters[6],$parameters[7],$parameters[8],$parameters[9],$parameters[10] ); break;					
-			default	: return e('Передано слишком много параметров для контроллера(##)',E_SAMSON_FATAL_ERROR, sizeof( $parameters ) );
-		}			
+		// Run module action method
+		$action_result = call_user_func( $method_name, $parameters );
 		
 		// Вернем результат выполнения метода контроллера
 		return ! isset( $action_result ) ? A_SUCCESS : $action_result;		

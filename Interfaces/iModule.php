@@ -39,23 +39,20 @@ interface iModule
 	/** Pointer to plain html entry in view data entry */
 	const VD_HTML = '__html__';
 	
-	/** Идентификатор указывающий на использование базового контроллера модуля */
-	const BASE_CONTROLLER = MOD_BASE_CONTROLLER;
+	/** Default controller name */
+	const CTR_BASE = '__BASE';
 	
-	/** Идентификатор указывающий на использование универсального контроллера модуля */
-	const UNI_CONTROLLER = MOD_UNI_CONTROLLER;
+	/** Universal controller name */
+	const CTR_UNI = '__HANDLER';	
 	
-	/** Идентификатор указывающий на использование контроллера GET модуля */
-	const GET_CONTROLLER = MOD_GET_CONTROLLER;
+	/** Post controller name */
+	const CTR_POST = MOD_POST_CONTROLLER;
 	
-	/** Идентификатор указывающий на использование контроллера POST модуля */
-	const POST_CONTROLLER = MOD_POST_CONTROLLER;
+	/** Put controller name */
+	const CTR_PUT = MOD_POST_CONTROLLER;
 	
-	/** Идентификатор указывающий на использование контроллера PUT модуля */
-	const PUT_CONTROLLER = MOD_PUT_CONTROLLER;
-	
-	/** Идентификатор указывающий на использование контроллера DELETE модуля */
-	const DELETE_CONTROLLER = MOD_DELETE_CONTROLLER;
+	/** Delete controller name */
+	const CTR_DELETE = MOD_POST_CONTROLLER;
 	
 	/**
 	 * Установить заголовок страницы
