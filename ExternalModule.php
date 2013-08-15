@@ -58,7 +58,7 @@ class ExternalModule extends Module implements iExternalModule
 		$id = $this->id.'_'.rand( 0, 99999999 );
 		
 		// Create copy instance
-		$o = new $classname( $this->path, $id );		
+		$o = new $classname( $this->path, $id );	
 		
 		return $o;
 	}
