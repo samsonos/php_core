@@ -31,7 +31,7 @@ interface iCore
 	 * @param array 	$view_data Коллекция данных для передачи в представление
 	 * @return string Обработанное прорисованное представление
 	 */
-	public function render( $view_path, array $view_data = array() );
+	public function render( $view_path, $view_data = array() );
 	
 	/**
 	 * Add template render function to render stack 

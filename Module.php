@@ -122,15 +122,20 @@ class Module implements iModule, \ArrayAccess, iModuleViewable
 		if( !isset( $view_path ) ) $view_path = $this->view_path;
 		// Direct rendering of specific view, not default view data entry
 		else if( $view_path !== self::VD_POINTER_DEF )
-		{						
+		{					
 			// Add extension if nessesary
 			if( strpos( $view_path, '.php' ) === false ) $view_path .= '.php';
 			
 			// If no default view path was specified
 			if( strpos( $view_path, __SAMSON_VIEW_PATH ) === false ) $view_path = __SAMSON_VIEW_PATH.$view_path;			
-					
+							
 			// Copy current view data stack to new entry for direct output
-			$this->view_data[ $view_path ] = array_merge( array(), $this->view_data[ $this->view_path ] ); 
+			if( isset($this->view_data[ $this->view_path ] ) )
+			{
+				$this->view_data[ $view_path ] = array_merge( array(), $this->view_data[ $this->view_path ] );
+			} 
+			// Create new view data entry
+			else $this->view_data[ $view_path ] = array();
 				
 			// When direct outputting don't copy plain html			
 			unset($this->view_data[ $view_path ][ self::VD_HTML ]);		
@@ -214,13 +219,18 @@ class Module implements iModule, \ArrayAccess, iModuleViewable
 				case 'DELETE'	: $method_name = self::CTR_DELETE; 		break;
 				default			: $method_name = self::CTR_BASE;	 				
 			}
+			
+			// Copy default controller action name
+			$o_method_name = $method_name;
 		}	
+		// Append object controller action name prefix 
+		else $o_method_name = '__'.$method_name;
 
 		// Get parameters from URL
 		$parameters = url()->parameters();
 		
 		// If module object has controller action defined - try object approach
-		if( method_exists( $this, $method_name ) ) $method_name = array( $this, $method_name );		
+		if( method_exists( $this, $o_method_name ) ) $method_name = array( $this, $o_method_name );		
 		// Now module object controller action method found - try function approach
 		else 
 		{
@@ -234,7 +244,7 @@ class Module implements iModule, \ArrayAccess, iModuleViewable
 				$parameters = array_merge( array( url()->method ), $parameters );
 				
 				// Set universal controller action
-				$method_name .= self::CTR_UNI;
+				$method_name = $this->id.self::CTR_UNI;
 			}		
 			
 			// No appropriate controller action found for this module		
@@ -260,7 +270,7 @@ class Module implements iModule, \ArrayAccess, iModuleViewable
 		}		
 		
 		// Run module action method
-		$action_result = call_user_func( $method_name, $parameters );
+		$action_result = call_user_func_array( $method_name, $parameters );
 		
 		// Вернем результат выполнения метода контроллера
 		return ! isset( $action_result ) ? A_SUCCESS : $action_result;		

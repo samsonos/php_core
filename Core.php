@@ -154,7 +154,7 @@ final class Core implements iCore
 				// Models
 				else if ( strpos( $php, __SAMSON_MODEL_PATH ) ) $ls['models'][] = $php;
 				// Views and other php files will load only when needed
-				else if ( strpos( $php, __SAMSON_VIEW_PATH ) ) 	$ls['views'][] = $php;
+				else if ( strpos( $php, __SAMSON_VIEW_PATH ) || pathinfo($php,PATHINFO_EXTENSION) == 'vphp') $ls['views'][] = $php;
 				// Regular php file
 				else $ls['php'][] = $php;
 			}
@@ -286,12 +286,12 @@ final class Core implements iCore
 		return $this;
 	}
 			/** @see \samson\core\iCore::render() */
-	public function render( $__view, array $__data = array() )
+	public function render( $__view, $__data = array() )
 	{		
 		////elapsed('Start rendering '.$__view);
 		
 		// Объявить ассоциативный массив переменных в данном контексте
-		extract( $__data );	
+		if( is_array( $__data ))extract( $__data );	
 		
 		// Начать вывод в буффер
 		ob_start();
