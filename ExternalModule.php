@@ -12,21 +12,22 @@ class ExternalModule extends Module implements iExternalModule
 	/** Correct name for composer generator */
 	const COMPOSER_VENDOR = 'samsonos';
 	
-	/** Virtual module identifier */
-	public $vid = null;
-	
 	/** Указатель на родительский модуль */
 	public $parent = NULL;
+	
+	/** Virtual module identifier */
+	protected $vid = null;	
 	
 	/** Коллекция связанных модулей с текущим */
 	protected $requirements = array();
 		
 	/**
 	 * Constructor
-	 * @param string $path 	Path to module location
-	 * @param string $vid	Virtual module identifier
+	 * @param string 	$path 		Path to module location
+	 * @param string 	$vid		Virtual module identifier
+	 * @param array 	$resources	Module resources list 
 	 */
-	public function  __construct( $path, $vid = null )
+	public function  __construct( $path, $vid = null, $resources = NULL )
 	{			
 		// Module identifier not specified - set it to NameSpace\Classname
 		if( !isset( $this->id{0} )) $this->id = uni_classname(get_class($this));	
@@ -37,7 +38,7 @@ class ExternalModule extends Module implements iExternalModule
 		else $this->vid = $this->id;
 		
 		// Call parent constructor
-		parent::__construct( $this->id, $path );
+		parent::__construct( $this->id, $path, $resources );
 		
 		//[PHPCOMPRESSOR(remove,start)]
 		// Создадим конфигурацию для composer
@@ -45,10 +46,7 @@ class ExternalModule extends Module implements iExternalModule
 		//[PHPCOMPRESSOR(remove,end)]	
 	}
 	
-	/**
-	 * 
-	 * @return unknown
-	 */
+	/** @see \samson\core\iExternalModule::copy() */
 	public function & copy()
 	{
 		// Get current class name
@@ -59,6 +57,7 @@ class ExternalModule extends Module implements iExternalModule
 		
 		// Create copy instance
 		$o = new $classname( $this->path, $id );	
+		$o->resources = & $this->resources;
 		
 		return $o;
 	}
@@ -122,25 +121,16 @@ class ExternalModule extends Module implements iExternalModule
 	public function output( $view_path = null )
 	{
 		// Если этот класс не прямой наследник класса "Подключаемого Модуля"
-		if( isset($this->parent) )
-		{					
-			// Temp path var
-			$_view_path = $view_path;
+		if( isset( $this->parent ) )
+		{			
+			// Find full path to view file
+			$_view_path = $this->findView( $view_path );
+
+			//elapsed( 'Outputting '.$_view_path );
 			
-			// Add extension if nessesary
-			if( strpos( $_view_path, '.php' ) === false ) $_view_path .= '.php';
-			
-			// If no default view path was specified
-			if( strpos( $_view_path, __SAMSON_VIEW_PATH ) === false ) $_view_path = __SAMSON_VIEW_PATH.$_view_path;
-						
-			// Построим путь к представлению относительно текущего модуля
-			$path = $this->path.$_view_path;
-			
-			//elapsed($path.' - '.$view_path);
-				
 			// Если требуемое представление НЕ существует в текущем модуле -
 			// выполним вывод представления для родительского модуля
-			if( ! file_exists( $path ) && ! isset($GLOBALS['__compressor_files'][ $path ]) )
+			if( ! file_exists( $_view_path ) && ! isset($GLOBALS['__compressor_files'][ $_view_path ]) )
 			{
 				//elapsed('Parent - '.$this->parent->id);
 				

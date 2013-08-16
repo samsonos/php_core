@@ -220,7 +220,7 @@ final class Core implements iCore
 							//elapsed('   -- Found iModule ancestor '.$class_name.'('.$ns.') in '.$path);
 							
 							// Create object
-							$connector = new $class_name( $path, $module_id );
+							$connector = new $class_name( $path, $module_id, $ls );
 							$id = $connector->id();
 							
 							// Save namespace module data to load stack
@@ -670,13 +670,7 @@ final class Core implements iCore
 			$this->load_stack['core'] = & $ls;
 			// Save module resources
 			$this->load_module_stack[ 'core' ] = & $ls;
-		}		
-		
-		// Create local module and set it as active
-		$this->active = new CompressableLocalModule( 'local', $this->system_path );		
-
-		// Set main template path
-		$this->template( $this->template_path );
+		}	
 				
 		// Search for remote web applications if this is local web application
 		$files = File::dir( $this->system_path );
@@ -697,21 +691,27 @@ final class Core implements iCore
 		
 		// Инициализируем локальные модуль
 		if( $this->resources( $this->system_path, $ls2, $files ))
-		{			
+		{	
+			// Create local module and set it as active
+			$this->active = new CompressableLocalModule( 'local', $this->system_path, $ls2 );
+			
+			// Set main template path
+			$this->template( $this->template_path );
+			
 			// Manually include local module to load stack			
 			$this->load_stack['local'] = & $ls2;
 			$this->load_module_stack[ 'local' ] = & $ls2;
 			
 			// Require local controllers 
 			foreach ( $ls2['controllers'] as $controler ) 
-			{				
+			{				   
 				require( $controler );
 				
 				// Get local module name
 				$local_module = strtolower(basename( $controler, '.php' ));
 									
 				// Create new local compressable module
-				new CompressableLocalModule( $local_module, $this->system_path );
+				new CompressableLocalModule( $local_module, $this->system_path, $ls2 );
 			}
 			
 			// Require local models

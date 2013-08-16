@@ -19,7 +19,7 @@ class Module implements iModule, \ArrayAccess, iModuleViewable
 	protected $core;
 	
 	/** Module views collection */
-	protected $views;
+	protected $resources = array( 'views' => array() );
 	
 	/** Module location */
 	protected $path = '';
@@ -40,7 +40,58 @@ class Module implements iModule, \ArrayAccess, iModuleViewable
 	protected $data = array();	
 	
 	/** Collection of data for view rendering, filled with default pointer */
-	protected $view_data = array( self::VD_POINTER_DEF => array( 'html' => '' ) );	
+	protected $view_data = array( self::VD_POINTER_DEF => array( self::VD_HTML => '' ) );	
+	
+	/**
+	 * Perform module view context switching 
+	 * @param string $view_path New view context name
+	 */
+	protected function viewContext( $view_path )
+	{
+		//elapsed( 'Switching view context for '.$view_path );
+		
+		// Create new entry in view data collection
+		if( !isset( $this->view_data[ $view_path ] ) )
+		{
+			// If view data pointer is set to default view data entry
+			if( $this->data === $this->view_data[ self::VD_POINTER_DEF ] )
+			{
+				//elapsed('Copying default view context view data to new view context '.$view_path );
+								
+				// Copy default view context view data to new view context
+				$this->view_data[ $view_path ] = array_merge( array(), $this->view_data[ self::VD_POINTER_DEF ] );
+				
+				// Clear plain HTML for new view context
+				$this->view_data[ $view_path ][ self::VD_HTML ] = '';
+			}
+			// Create new view context view data entry
+			else $this->view_data[ $view_path ] = array( self::VD_HTML => '' );
+				
+			//elapsed($this->core_id.' - Changing VD_POINTER to '.$view_path.' with '.sizeof($this->view_data[ self::VD_POINTER_DEF ]).' params' );
+		}
+		
+		// Change view data pointer to appropriate view data entry
+		$this->data = & $this->view_data[ $view_path ];
+	}
+	
+	/**
+	 * Find view file by its part in module view resources and return full path to it
+	 * @param string $view_path Part of path to module view file
+	 * @return string Full path to view file
+	 */
+	protected function findView( $view_path )
+	{				
+		// Remove file extension for correct array searching
+		$view_path = str_replace( array('.php','.vphp'), '', $view_path );		
+		
+		// Try to find passed view_path in  resources views collection
+		if( sizeof($view = preg_grep('/'.addcslashes($view_path,'/\\').'(\.php|\.vphp)/ui', $this->resources['views'])) )
+		{			
+			// Set current full view path as last found view
+			return end( $view );
+		}		
+		else return e('Cannot find ## view ## - file does not exists', E_SAMSON_RENDER_ERROR, array( $this->id, $view_path));
+	}
 	
 	
 	/**	@see iModule::title() */
@@ -86,33 +137,12 @@ class Module implements iModule, \ArrayAccess, iModuleViewable
 	
 	/** @see iModule::view() */
 	public function view( $view_path )
-	{		
-		// Доставим расширение файла если его нет
-		if( strpos( $view_path, '.php' ) === FALSE ) $view_path .= '.php';
-			
-		// Build path to default view folder
-		$view_path = __SAMSON_VIEW_PATH.$view_path;	
-
-		// Create new entry in view data collection
-		if( !isset( $this->view_data[ $view_path ] ) ) 
-		{				
-			// If view data pointer is set to default view data entry			
-			if( $this->data === $this->view_data[ self::VD_POINTER_DEF ] )
-			{
-				// Pointer first view entry to it
-				$this->view_data[ $view_path ] = array_merge( array(), $this->view_data[ self::VD_POINTER_DEF ] );				
-			}
-			// Create new view data entry
-			else $this->view_data[ $view_path ] = array(); 						
-			
-			//elapsed($this->core_id.' - Changing VD_POINTER to '.$view_path.' with '.sizeof($this->view_data[ self::VD_POINTER_DEF ]).' params' );
-		}
+	{			
+		// Set current full view path as last found view
+		$this->view_path = $this->findView( $view_path );
 		
-		// Set current view path
-		$this->view_path = $view_path;
-		
-		// Change view data pointer to appropriate view data entry
-		$this->data = & $this->view_data[ $this->view_path ];
+		// Switch view context to founded module view
+		$this->viewContext( $this->view_path );		
 			
 		// Продолжим цепирование
 		return $this;
@@ -125,39 +155,25 @@ class Module implements iModule, \ArrayAccess, iModuleViewable
 		if( !isset( $view_path ) ) $view_path = $this->view_path;
 		// Direct rendering of specific view, not default view data entry
 		else if( $view_path !== self::VD_POINTER_DEF )
-		{					
-			// Add extension if nessesary
-			if( strpos( $view_path, '.php' ) === false ) $view_path .= '.php';
-			
-			// If no default view path was specified
-			if( strpos( $view_path, __SAMSON_VIEW_PATH ) === false ) $view_path = __SAMSON_VIEW_PATH.$view_path;			
+		{				
+			// Find full path to view file
+			$view_path = $this->findView( $view_path );					
 							
-			// Copy current view data stack to new entry for direct output
-			if( isset($this->view_data[ $this->view_path ] ) )
-			{
-				$this->view_data[ $view_path ] = array_merge( array(), $this->view_data[ $this->view_path ] );
-			} 
-			// Create new view data entry
-			else $this->view_data[ $view_path ] = array();
-				
-			// When direct outputting don't copy plain html			
-			unset($this->view_data[ $view_path ][ self::VD_HTML ]);		
-				
-			// Change view data pointer to appropriate view data entry
-			$this->data = & $this->view_data[ $view_path ];	
+			// Switch view context to new module view
+			$this->viewContext( $view_path );
 		}		
 
 		// Output data
 		$out = isset($this->data[ self::VD_HTML ]) ? $this->data[ self::VD_HTML ] : '';		
 		
 		// If view path specified
-		if( isset( $view_path {0}) && ($view_path != __SAMSON_VIEW_PATH.'/.php'))
+		if( isset( $view_path {0}) )
 		{	
 			// Временно изменим текущий модуль системы
 			$old = s()->active( $this );
 				
 			// Прорисуем представление модуля
-			$out .= s()->render( $this->path.$view_path, $this->data );
+			$out .= s()->render( /*$this->path.*/$view_path, $this->data );
 			
 			// Вернем на место текущий модуль системы
 			s()->active( $old );	
@@ -253,23 +269,7 @@ class Module implements iModule, \ArrayAccess, iModuleViewable
 			// No appropriate controller action found for this module		
 			if( ! function_exists( $method_name )) return A_FAILED;
 		
-			// TODO: wait for getHint() method for removing parameter name dependency and use just hint type
-			
-			// Pass specific system parameters to controller action handler
-			$f = new \ReflectionFunction( $method_name );
-			// Iterate params and match needed parameters by name
-			foreach ( $f->getParameters() as $n => $p) 
-			{				
-				// If system core needed
-				if( $p->name == '_core' || $p->name == 's' )  $var = s();
-				// If current module needed
-				else if( $p->name == '_module' || $p->name == 'm' ) $var = $this;
-				// Parameter does not match
-				else continue;
-				
-				// If we here that something matched - insert neede parameter in parameter array
-				array_splice( $parameters, $n, 0, array($var) );
-			}		
+			// TODO: wait for getHint() method for removing parameter name dependency and use just hint type			
 		}		
 		
 		// Run module action method
@@ -280,12 +280,13 @@ class Module implements iModule, \ArrayAccess, iModuleViewable
 	}		
 
 	/**
-	 * Конструктор 
+	 * Constructor 
 	 * 
-	 * @param string 	$id 	Уникальный идентификатор модуля описывающий его "физические" файлы	 
-	 * @param string 	$path 	Путь для модулей которые находиться отдельно от веб-приложения и системы
+	 * @param string 	$id 		Module unique identifier	 
+	 * @param string 	$path 		Module location
+	 * @param array 	$resources	Module resources list 
 	 */
-	public function __construct( $id, $path = NULL )
+	public function __construct( $id, $path = NULL, $resources = NULL )
 	{		
 		// Set up default view data pointer
 		$this->view_data[ self::VD_POINTER_DEF ] = & $this->data;		
@@ -298,11 +299,20 @@ class Module implements iModule, \ArrayAccess, iModuleViewable
 		
 		// Add to module identifier to view data stack
 		$this->data['id'] = $this->id;	
+		
+		// Save resources list
+		isset( $resources ) ? $this->resources = & $resources : '';				
 	
 		// Save ONLY ONE copy of this instance in static instances collection,
 		// avoiding rewriting by cloned modules		
 		if( !isset( self::$instances[ $this->id ]) ) self::$instances[ $this->id ] = & $this;
 		
+		//trace($this->id);
+		//trace($this->resources['views']);
+		
+		// Make view path relative to module - remove module path from view path
+		//$this->resources['views'] = str_replace( $this->path, '', $this->resources['views'] );
+			
 		//elapsed('Registering module: '.$this->id.'('.$path.')' );
 	}		
 	
