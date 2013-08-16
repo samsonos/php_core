@@ -9,7 +9,7 @@ namespace samson\core;
  */
 class Module implements iModule, \ArrayAccess, iModuleViewable 
 {		
-	/** Коллекция созданных экземпляров модулей системы */	
+	/** Static module instances collection */	
 	public static $instances = array();	
 	
 	/**
@@ -18,16 +18,19 @@ class Module implements iModule, \ArrayAccess, iModuleViewable
 	 */
 	protected $core;
 	
-	/** Путь к подключаемому модулю */
+	/** Module views collection */
+	protected $views;
+	
+	/** Module location */
 	protected $path = '';
 	
-	/** Настоящее имя модуля, идентифицируещее его физическую структуру */
+	/** Unique module identifier */
 	protected $id = '';
 	
-	/** Автор модуля */
-	protected $author = 'SamsonOS';
+	/** Default module author */
+	protected $author = 'Vitaly Iegorov <egorov@samsonos.com>';
 	
-	/** Версия модуля */
+	/** Default module version */
 	protected $version = '0.0.1';
 	
 	/** Path to view for rendering, also key to $view_data entry */
@@ -344,6 +347,16 @@ class Module implements iModule, \ArrayAccess, iModuleViewable
 		// Если передана обычная переменная, установим значение переменной представления
 		// Сделаем имя переменной представления регистро-независимой
 		else  $this->data[ $field ] = $value;		
+	}
+	
+	/** Magic method for calling unexisting object methods */
+	public function __call( $method, $arguments )
+	{
+		// If value is passed - set it
+		if( isset( $arguments[0] ) )$this->data[ $method ] = $arguments[0];
+		
+		// Chaining
+		return $this;
 	}
 	
 	/** Обработчик сериализации объекта */
