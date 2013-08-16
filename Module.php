@@ -47,31 +47,36 @@ class Module implements iModule, \ArrayAccess, iModuleViewable
 	 * @param string $view_path New view context name
 	 */
 	protected function viewContext( $view_path )
-	{
-		//elapsed( 'Switching view context for '.$view_path );
-		
-		// Create new entry in view data collection
-		if( !isset( $this->view_data[ $view_path ] ) )
+	{	
+		// If we are trying to switch to NEW view context
+		if( $this->view_path !== $view_path ) 		
 		{
-			// If view data pointer is set to default view data entry
-			if( $this->data === $this->view_data[ self::VD_POINTER_DEF ] )
+			//elapsed( $this->id.' - Switching view context from '.$this->view_path.' to '.$view_path );
+			
+			// Create new entry in view data collection if it does not exists
+			if( ! isset( $this->view_data[ $view_path ] ) )
 			{
-				//elapsed('Copying default view context view data to new view context '.$view_path );
-								
-				// Copy default view context view data to new view context
-				$this->view_data[ $view_path ] = array_merge( array(), $this->view_data[ self::VD_POINTER_DEF ] );
-				
-				// Clear plain HTML for new view context
-				$this->view_data[ $view_path ][ self::VD_HTML ] = '';
+				// If view data pointer is set to default view data entry
+				if( $this->data === $this->view_data[ self::VD_POINTER_DEF ] )
+				{
+					//elapsed( $this->id.'Copying default view context view data to new view context '.$view_path );
+									
+					// Copy default view context view data to new view context
+					$this->view_data[ $view_path ] = array_merge( array(), $this->view_data[ self::VD_POINTER_DEF ] );
+					
+					// Clear plain HTML for new view context
+					$this->view_data[ $view_path ][ self::VD_HTML ] = '';
+				}
+				// Create new view context view data entry
+				else $this->view_data[ $view_path ] = array( self::VD_HTML => '' );
+					
+				//elapsed($this->core_id.' - Changing VD_POINTER to '.$view_path.' with '.sizeof($this->view_data[ self::VD_POINTER_DEF ]).' params' );
 			}
-			// Create new view context view data entry
-			else $this->view_data[ $view_path ] = array( self::VD_HTML => '' );
-				
-			//elapsed($this->core_id.' - Changing VD_POINTER to '.$view_path.' with '.sizeof($this->view_data[ self::VD_POINTER_DEF ]).' params' );
+			
+			// Change view data pointer to appropriate view data entry
+			$this->data = & $this->view_data[ $view_path ];
 		}
-		
-		// Change view data pointer to appropriate view data entry
-		$this->data = & $this->view_data[ $view_path ];
+		//else elapsed( $this->id.' - NO need to switch view context from '.$this->view_path.' to '.$view_path );
 	}
 	
 	/**
@@ -161,7 +166,9 @@ class Module implements iModule, \ArrayAccess, iModuleViewable
 							
 			// Switch view context to new module view
 			$this->viewContext( $view_path );
-		}		
+		}
+
+		elapsed($this->id.' - Outputting '.$view_path );		
 
 		// Output data
 		$out = isset($this->data[ self::VD_HTML ]) ? $this->data[ self::VD_HTML ] : '';		
@@ -185,7 +192,7 @@ class Module implements iModule, \ArrayAccess, iModuleViewable
 		}
 			
 		// If we have only one element - it is a default enty - delete it
-		if( sizeof($this->view_data) == 1 ) $this->view_data[ self::VD_POINTER_DEF ] = array();	
+		if( sizeof($this->view_data) == 1 ) $this->view_data[ self::VD_POINTER_DEF ] = array( self::VD_HTML => '' );	
 		// Delete current view data entry 
 		else unset( $this->view_data[ $view_path ] );
 		
