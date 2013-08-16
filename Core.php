@@ -175,7 +175,7 @@ final class Core implements iCore
 	{	
 		// Fix performance
 		//[PHPCOMPRESSOR(remove,start)]
-		$this->benchmarks[] = array( microtime(true)-__SAMSON_T_STARTED__, get_class($this).'::'.__FUNCTION__, func_get_args() );
+		$this->benchmarks[] = array( microtime(true)-__SAMSON_T_STARTED__, get_class($this).'::'.__FUNCTION__, func_get_args(), memory_get_peak_usage(true) );
 		//[PHPCOMPRESSOR(remove,end)]
 		
 		//elapsed('Start loading from '.$path);
@@ -535,8 +535,8 @@ final class Core implements iCore
 	{	
 		// Fix performance
 		//[PHPCOMPRESSOR(remove,start)]
-		$this->benchmarks[] = array( microtime(true)-__SAMSON_T_STARTED__, get_class($this).'::'.__FUNCTION__, func_get_args() );
-		//[PHPCOMPRESSOR(remove,end)]	
+		$this->benchmarks[] = array( microtime(true)-__SAMSON_T_STARTED__, get_class($this).'::'.__FUNCTION__, func_get_args(), memory_get_peak_usage(true) );
+		//[PHPCOMPRESSOR(remove,end)]
 			
 		//[PHPCOMPRESSOR(remove,start)]				
 		// Проинициализируем оставшиеся конфигурации и подключим внешние модули по ним
@@ -636,7 +636,7 @@ final class Core implements iCore
 		
 		// Fix performance
 		//[PHPCOMPRESSOR(remove,start)]
-		$this->benchmarks[] = array( microtime(true)-__SAMSON_T_STARTED__, get_class($this).'::'.__FUNCTION__, func_get_args() );
+		$this->benchmarks[] = array( microtime(true)-__SAMSON_T_STARTED__, get_class($this).'::'.__FUNCTION__, func_get_args(), memory_get_peak_usage(true) );
 		//[PHPCOMPRESSOR(remove,end)]
 		
 		// Get backtrace to define witch scipt initiated core creation

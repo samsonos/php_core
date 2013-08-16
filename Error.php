@@ -112,7 +112,7 @@ class Error
 		{
 			// Fix performance
 			//[PHPCOMPRESSOR(remove,start)]
-			s()->benchmarks[] = array( microtime(true)-__SAMSON_T_STARTED__, get_class($this).'::'.__FUNCTION__, func_get_args() );
+			$this->benchmarks[] = array( microtime(true)-__SAMSON_T_STARTED__, get_class($this).'::'.__FUNCTION__, func_get_args(), memory_get_peak_usage(true) );
 			//[PHPCOMPRESSOR(remove,end)]
 			
 			// Профайлинг PHP
@@ -134,7 +134,7 @@ class Error
 				$started = number_format( round($data[0],4), 4 );
 				$elapsed = number_format( round($data[0] - $l,4), 4 );
 					
-				$template_html .= '<!-- '.$started.'s - '.$elapsed.' # '.$data[1].'('.$params.') -->';
+				$template_html .= '<!-- '.$started.'s - '.$elapsed.'s # '.round($data[3]/1000000,1).' МБ '.$data[1].'('.$params.') -->';
 					
 				// Save previous TS
 				$l = $data[0];
