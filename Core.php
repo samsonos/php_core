@@ -64,6 +64,10 @@ final class Core implements iCore
 	 */
 	private function __autoload( $class )
 	{	
+		//[PHPCOMPRESSOR(remove,start)]
+		$this->benchmark( __FUNCTION__, func_get_args() );		
+		//[PHPCOMPRESSOR(remove,end)]
+		
 		// Get just class name without ns
 		$class_name = classname( $class );
 		// Get just ns without class name 
@@ -120,6 +124,10 @@ final class Core implements iCore
 	/** @see \samson\core\iCore::resources() */
 	public function resources( & $path, & $ls = array(), & $files = null )
 	{	
+		//[PHPCOMPRESSOR(remove,start)]
+		$this->benchmark( __FUNCTION__, func_get_args() );
+		//[PHPCOMPRESSOR(remove,end)]
+		
 		$path = normalizepath( $path.'/' );		
 		
 		//trace('Collecting resources from '.$path);
@@ -304,6 +312,10 @@ final class Core implements iCore
 			/** @see \samson\core\iCore::render() */
 	public function render( $__view, $__data = array() )
 	{		
+		//[PHPCOMPRESSOR(remove,start)]
+		$this->benchmark( __FUNCTION__, func_get_args() );
+		//[PHPCOMPRESSOR(remove,end)]
+		
 		////elapsed('Start rendering '.$__view);
 		
 		// Объявить ассоциативный массив переменных в данном контексте
@@ -374,8 +386,7 @@ final class Core implements iCore
 			$html = call_user_func( $renderer, $html, $__data, $this->active );
 		}		
 		
-		////elapsed('End rendering '.$__view);
-		
+		////elapsed('End rendering '.$__view);		
 		return $html ;
 	}
 	
