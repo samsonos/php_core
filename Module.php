@@ -18,6 +18,12 @@ class Module implements iModule, \ArrayAccess, iModuleViewable
 	 */
 	protected $core;
 	
+	/** Collection for callable controllers of module */
+	protected $controllers = array();
+	
+	/** Module views collection */
+	protected $views = array();
+	
 	/** Module views collection */
 	protected $resources = array( 'views' => array() );
 	
@@ -53,31 +59,41 @@ class Module implements iModule, \ArrayAccess, iModuleViewable
 		{
 			//elapsed( $this->id.' - Switching view context from '.$this->view_path.' to '.$view_path );
 			
+			// Pointer to NEW view data context
+			$new = & $this->view_data[ $view_path ];
+			
 			// Create new entry in view data collection if it does not exists
-			if( ! isset( $this->view_data[ $view_path ] ) )
+			if( ! isset( $new ) )
 			{
-				// If view data pointer is set to default view data entry
-				if( $this->data === $this->view_data[ self::VD_POINTER_DEF ] )
-				{
-					//elapsed( $this->id.'Copying default view context view data to new view context '.$view_path );
-									
+				// Create new view context view data entry
+				$new = array( self::VD_HTML => '' );						
+				
+				// Pointer to OLD view data context
+				$old = & $this->view_data[ $this->view_path ];
+				
+				// If current view data context has view data 
+				if( isset( $old ) && sizeof( $old ) > 1 )
+				{					
+					//elapsed( $this->id.' - Copying previous view context view data '.$this->view_path.' to new view context '.$view_path );
+					
 					// Copy default view context view data to new view context
-					$this->view_data[ $view_path ] = array_merge( array(), $this->view_data[ self::VD_POINTER_DEF ] );
+					$new = array_merge( $new, $old );
 					
 					// Clear plain HTML for new view context
-					$this->view_data[ $view_path ][ self::VD_HTML ] = '';
-				}
-				// Create new view context view data entry
-				else $this->view_data[ $view_path ] = array( self::VD_HTML => '' );
-					
-				//elapsed($this->core_id.' - Changing VD_POINTER to '.$view_path.' with '.sizeof($this->view_data[ self::VD_POINTER_DEF ]).' params' );
+					$new[ self::VD_HTML ] = '';
+				}				
+									
+				//elapsed($this->id.' - Changing VD_POINTER to '.$view_path.' with '.sizeof($this->view_data[ self::VD_POINTER_DEF ]).' params' );
 			}
 			
 			// Change view data pointer to appropriate view data entry
-			$this->data = & $this->view_data[ $view_path ];
+			$this->data = & $new;
 		}
 		//else elapsed( $this->id.' - NO need to switch view context from '.$this->view_path.' to '.$view_path );
 	}
+	
+	/** Sort array by string length */
+	protected function sortStrings( $a, $b ){ return strlen($b) - strlen($a); }
 	
 	/**
 	 * Find view file by its part in module view resources and return full path to it
@@ -91,7 +107,10 @@ class Module implements iModule, \ArrayAccess, iModuleViewable
 		
 		// Try to find passed view_path in  resources views collection
 		if( sizeof($view = preg_grep('/'.addcslashes($view_path,'/\\').'(\.php|\.vphp)/ui', $this->resources['views'])) )
-		{			
+		{		
+			// Sort view pathes to get the shortest path	
+			usort( $view, array( $this, 'sortStrings') );
+			
 			// Set current full view path as last found view
 			return end( $view );
 		}		
@@ -143,11 +162,14 @@ class Module implements iModule, \ArrayAccess, iModuleViewable
 	/** @see iModule::view() */
 	public function view( $view_path )
 	{			
-		// Set current full view path as last found view
-		$this->view_path = $this->findView( $view_path );
-		
+		// Find full path to view file
+		$view_path = $this->findView( $view_path );
+			
 		// Switch view context to founded module view
-		$this->viewContext( $this->view_path );		
+		$this->viewContext( $view_path );
+
+		// Set current view path 
+		$this->view_path = $view_path;
 			
 		// Продолжим цепирование
 		return $this;
@@ -166,9 +188,11 @@ class Module implements iModule, \ArrayAccess, iModuleViewable
 							
 			// Switch view context to new module view
 			$this->viewContext( $view_path );
-		}
+		}	
 
-		elapsed($this->id.' - Outputting '.$view_path );		
+		//elapsed($this->id.' - Outputting '.$view_path );
+		//elapsed( key( $this->view_data ) );
+		//elapsed( array_keys($this->view_data));
 
 		// Output data
 		$out = isset($this->data[ self::VD_HTML ]) ? $this->data[ self::VD_HTML ] : '';		
@@ -190,12 +214,10 @@ class Module implements iModule, \ArrayAccess, iModuleViewable
 		{ 
 			return e('Cannot render view for module ## - No view path or data has been set', E_SAMSON_CORE_ERROR, $this->id );
 		}
-			
-		// If we have only one element - it is a default enty - delete it
-		if( sizeof($this->view_data) == 1 ) $this->view_data[ self::VD_POINTER_DEF ] = array( self::VD_HTML => '' );	
+				
 		// Delete current view data entry 
-		else unset( $this->view_data[ $view_path ] );
-		
+		unset( $this->view_data[ $view_path ] );
+				
 		// Switch internal array pointer to last element
 		end( $this->view_data );
 		
@@ -276,7 +298,9 @@ class Module implements iModule, \ArrayAccess, iModuleViewable
 			// No appropriate controller action found for this module		
 			if( ! function_exists( $method_name )) return A_FAILED;
 		
-			// TODO: wait for getHint() method for removing parameter name dependency and use just hint type			
+			// TODO: add module and core references pass to controller function by hint
+			// TODO: wait for getHint() method for removing parameter name dependency and use just hint type
+						
 		}		
 		
 		// Run module action method
@@ -308,12 +332,48 @@ class Module implements iModule, \ArrayAccess, iModuleViewable
 		$this->data['id'] = $this->id;	
 		
 		// Save resources list
-		isset( $resources ) ? $this->resources = & $resources : '';				
+		isset( $resources ) ? $this->resources = & $resources : '';
+						
+		// Save views list
+		isset( $resources ) ? $this->views = & $resources['views'] : '';
 	
 		// Save ONLY ONE copy of this instance in static instances collection,
 		// avoiding rewriting by cloned modules		
-		if( !isset( self::$instances[ $this->id ]) ) self::$instances[ $this->id ] = & $this;
+		!isset( self::$instances[ $this->id ] ) ? self::$instances[ $this->id ] = & $this : '';
 		
+		// Iterate class methods
+		foreach ( get_class_methods( $this ) as $method )
+		{
+			// Controller method match
+			if( preg_match('/^__(?<controller>.*)/', $method, $matches ) ) 
+			{
+				// Try to find standart controllers 
+				$found = null;
+				switch( $matches[ 'controller' ] )
+				{
+					case self::CTR_UNI		: $found = $method; break;
+					case self::CTR_POST		: $found = $method; break;
+					case self::CTR_PUT		: $found = $method; break;
+					case self::CTR_DELETE	: $found = $method; break;
+					case self::CTR_BASE		: $found = $method; break;					
+				}
+				
+				// If we have found callable controller action - add it to colection
+				if( isset( $found )) $this->controllers[ $method ] = array( $this, $found );		
+			}
+		}
+		
+		// Find all controller actions
+		$functions = get_defined_functions();
+		foreach ( preg_grep('/^'.$this->id.'_/', $functions['user'] ) as $action ) $this->controllers[] = $action;
+		
+		// Old-fashioned function style controller action method search
+		if( function_exists( $this->id.self::CTR_UNI )) 	$this->controllers[ self::CTR_UNI ] 	= $this->id.self::CTR_UNI;
+		if( function_exists( $this->id.self::CTR_POST )) 	$this->controllers[ self::CTR_POST ] 	= $this->id.self::CTR_POST;
+		if( function_exists( $this->id.self::CTR_PUT )) 	$this->controllers[ self::CTR_PUT ] 	= $this->id.self::CTR_PUT;
+		if( function_exists( $this->id )) $this->controllers[ self::CTR_BASE ] 	= $this->id;	
+			
+		//trace($this->controllers);		
 		//trace($this->id);
 		//trace($this->resources['views']);
 		
@@ -377,7 +437,7 @@ class Module implements iModule, \ArrayAccess, iModuleViewable
 	}
 	
 	/** Обработчик сериализации объекта */
-	public function __sleep(){	return array( 'id', 'path', 'author', 'version', 'data' );	}
+	public function __sleep(){	return array( 'id', 'path', 'author', 'version', 'data', 'controllers' );	}
 	/** Обработчик десериализации объекта */
 	public function __wakeup()
 	{

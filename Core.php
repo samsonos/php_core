@@ -100,6 +100,23 @@ final class Core implements iCore
 		}
 	}
 	
+	
+	/**
+	 * Put benchmark record for performance analyzing
+	 * @param string 	$function 	Function name
+	 * @param array 	$args		Function arguments
+	 */
+	public function benchmark( $function = __FUNCTION__, $args = array() )
+	{		
+		$this->benchmarks[] = array( 
+				microtime(true)-__SAMSON_T_STARTED__, 	// Time elapsed from start
+				get_class($this).'::'.$function, 		// Function class::name
+				$args, 									// Function arguments
+				memory_get_usage(true) 					// Memmory
+		);		
+	}
+	
+	
 	/** @see \samson\core\iCore::resources() */
 	public function resources( & $path, & $ls = array(), & $files = null )
 	{	
@@ -173,9 +190,8 @@ final class Core implements iCore
 	/** @see \samson\core\iCore::load() */
 	public function load( $path = NULL, $module_id = NULL )
 	{	
-		// Fix performance
 		//[PHPCOMPRESSOR(remove,start)]
-		$this->benchmarks[] = array( microtime(true)-__SAMSON_T_STARTED__, get_class($this).'::'.__FUNCTION__, func_get_args(), memory_get_peak_usage(true) );
+		$this->benchmark( __FUNCTION__, func_get_args() );		
 		//[PHPCOMPRESSOR(remove,end)]
 		
 		//elapsed('Start loading from '.$path);
@@ -533,9 +549,8 @@ final class Core implements iCore
 	/**	@see iCore::start() */
 	public function start( $default )
 	{	
-		// Fix performance
 		//[PHPCOMPRESSOR(remove,start)]
-		$this->benchmarks[] = array( microtime(true)-__SAMSON_T_STARTED__, get_class($this).'::'.__FUNCTION__, func_get_args(), memory_get_peak_usage(true) );
+		$this->benchmark( __FUNCTION__, func_get_args() );		
 		//[PHPCOMPRESSOR(remove,end)]
 			
 		//[PHPCOMPRESSOR(remove,start)]				
@@ -632,11 +647,10 @@ final class Core implements iCore
 	/** Конструктор */
 	public function __construct()
 	{		
-		//elapsed('Constructor');
-		
-		// Fix performance
+		//elapsed('Constructor');		
+	
 		//[PHPCOMPRESSOR(remove,start)]
-		$this->benchmarks[] = array( microtime(true)-__SAMSON_T_STARTED__, get_class($this).'::'.__FUNCTION__, func_get_args(), memory_get_peak_usage(true) );
+		$this->benchmark( __FUNCTION__, func_get_args() );		
 		//[PHPCOMPRESSOR(remove,end)]
 		
 		// Get backtrace to define witch scipt initiated core creation

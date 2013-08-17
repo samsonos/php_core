@@ -112,15 +112,17 @@ class Error
 		{
 			// Fix performance
 			//[PHPCOMPRESSOR(remove,start)]
-			$this->benchmarks[] = array( microtime(true)-__SAMSON_T_STARTED__, get_class($this).'::'.__FUNCTION__, func_get_args(), memory_get_peak_usage(true) );
+			s()->benchmark( __FUNCTION__, func_get_args() );		
 			//[PHPCOMPRESSOR(remove,end)]
 			
 			// Профайлинг PHP
 			$template_html = '<!-- Total time elapsed:'.round( microtime(TRUE) - __SAMSON_T_STARTED__, 3 ).'s -->';
 			if( function_exists('db')) $template_html .= '<!-- '.db()->profiler().' -->';
-			$template_html .= '<!-- Memory used: '.round(memory_get_usage(true)/1000000,1).' МБ -->';			
-			$template_html .= '<!-- Time benchmark: -->';
+			$template_html .= '<!-- Memory used: '.round(memory_get_peak_usage(true)/1000000,1).' МБ -->';			
+			$template_html .= '<!-- Benchmark table: -->';
+
 			$l = 0;
+			$m = 0;
 			foreach (s()->benchmarks as $func => $data )
 			{
 				// Generate params string
@@ -131,13 +133,16 @@ class Error
 				}
 				$params = implode( ',', $params );
 					
-				$started = number_format( round($data[0],4), 4 );
-				$elapsed = number_format( round($data[0] - $l,4), 4 );
+				$started 		= sprintf( '%5ss', number_format( round($data[0],4), 4 ));
+				$elapsed 		= sprintf( ' | %5ss', number_format( round($data[0] - $l,4), 4 ));
+				$mem 			= sprintf( ' | %7s МБ',number_format($data[3]/1000000,4));
+				$mem_elapsed 	= sprintf( ' | %7s МБ',number_format(($data[3]-$m)/1000000,4));		
 					
-				$template_html .= '<!-- '.$started.'s - '.$elapsed.'s # '.round($data[3]/1000000,1).' МБ '.$data[1].'('.$params.') -->';
+				$template_html .= '<!-- '.$started.''.$elapsed.$mem.$mem_elapsed.' | '.$data[1].'('.$params.') -->';
 					
 				// Save previous TS
 				$l = $data[0];
+				$m = $data[3];
 			}
 			
 			echo $template_html;			
