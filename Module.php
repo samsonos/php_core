@@ -39,57 +39,62 @@ class Module implements iModule, \ArrayAccess, iModuleViewable
 	/** Default module version */
 	protected $version = '0.0.1';
 	
-	/** Path to view for rendering, also key to $view_data entry */
-	protected $view_path = self::VD_POINTER_DEF;
+	/** Path to view for rendering */
+	public $view_path = self::VD_POINTER_DEF;
 	
 	/** Pointer to view data enty */
-	protected $data = array();	
+	protected $data = array( self::VD_POINTER_DEF => array( self::VD_HTML => '' ) );
 	
 	/** Collection of data for view rendering, filled with default pointer */
 	protected $view_data = array( self::VD_POINTER_DEF => array( self::VD_HTML => '' ) );	
+	
+	/** Name of current view context entry */
+	protected $view_context = self::VD_POINTER_DEF;
 	
 	/**
 	 * Perform module view context switching 
 	 * @param string $view_path New view context name
 	 */
 	protected function viewContext( $view_path )
-	{	
+	{			
+		// Pointer to NEW view data context
+		$new = & $this->view_data[ $view_path ];
+		
+		// Pointer to OLD view data context
+		$old = & $this->view_data[ $this->view_context ];
+		
 		// If we are trying to switch to NEW view context
-		if( $this->view_path !== $view_path ) 		
+		if( $this->view_context !== $view_path ) 		
 		{
-			//elapsed( $this->id.' - Switching view context from '.$this->view_path.' to '.$view_path );
-			
-			// Pointer to NEW view data context
-			$new = & $this->view_data[ $view_path ];
+			//elapsed( $this->id.' - Switching view context from '.$this->view_context.' to '.$view_path );		
 			
 			// Create new entry in view data collection if it does not exists
-			if( ! isset( $new ) )
+			if( ! isset( $this->view_data[ $view_path ] ) ) 
 			{
-				// Create new view context view data entry
-				$new = array( self::VD_HTML => '' );						
-				
-				// Pointer to OLD view data context
-				$old = & $this->view_data[ $this->view_path ];
-				
+				// Create new view data record 
+				$new = array();
+			
 				// If current view data context has view data 
-				if( isset( $old ) && sizeof( $old ) > 1 )
-				{					
-					//elapsed( $this->id.' - Copying previous view context view data '.$this->view_path.' to new view context '.$view_path );
-					
+				if( isset( $old )  )
+				{
+					//elapsed($old);
+					//elapsed( $this->id.' - Copying previous view context view data '.$this->view_context.' to new view context '.$view_path.'('.sizeof($old).')');
+						
 					// Copy default view context view data to new view context
-					$new = array_merge( $new, $old );
-					
-					// Clear plain HTML for new view context
-					$new[ self::VD_HTML ] = '';
-				}				
-									
-				//elapsed($this->id.' - Changing VD_POINTER to '.$view_path.' with '.sizeof($this->view_data[ self::VD_POINTER_DEF ]).' params' );
+					$new = array_merge( $new, $old );							
+				}
+				
+				// Clear plain HTML for new view context
+				$new[ self::VD_HTML ] = '';
 			}
 			
 			// Change view data pointer to appropriate view data entry
 			$this->data = & $new;
+
+			// Save current context name
+			$this->view_context = $view_path;
 		}
-		//else elapsed( $this->id.' - NO need to switch view context from '.$this->view_path.' to '.$view_path );
+		//else elapsed( $this->id.' - NO need to switch view context from '.$this->view_context.' to '.$view_path );	
 	}
 	
 	/** Sort array by string length */
@@ -151,6 +156,8 @@ class Module implements iModule, \ArrayAccess, iModuleViewable
 	/** @see iModule::html() */
 	public function html( $value = NULL )
 	{
+		//elapsed($this->id.' - Setting HTML for '.array_search(  $this->data, $this->view_data ).'('.strlen($value).')');
+		
 		// Если передан параметр то установим его
 		if( func_num_args() ) $this->data[ self::VD_HTML ] = $value;
 		// Вернем значение текущего представления модели
@@ -161,15 +168,17 @@ class Module implements iModule, \ArrayAccess, iModuleViewable
 	
 	/** @see iModule::view() */
 	public function view( $view_path )
-	{			
+	{	
 		// Find full path to view file
 		$view_path = $this->findView( $view_path );
+		
+		//elapsed($this->id.' - Changing current view to '.$view_path);
 			
 		// Switch view context to founded module view
 		$this->viewContext( $view_path );
 
 		// Set current view path 
-		$this->view_path = $view_path;
+		$this->view_path = $view_path;		
 			
 		// Продолжим цепирование
 		return $this;
@@ -177,25 +186,20 @@ class Module implements iModule, \ArrayAccess, iModuleViewable
 	
 	/**	@see iModule::output() */
 	public function output( $view_path = null )
-	{					
+	{	
 		// If view path not specified - use current correct view path
 		if( !isset( $view_path ) ) $view_path = $this->view_path;
 		// Direct rendering of specific view, not default view data entry
-		else if( $view_path !== self::VD_POINTER_DEF )
-		{				
-			// Find full path to view file
-			$view_path = $this->findView( $view_path );					
+		else if( isset( $view_path{0} ) ) $view_path = $this->findView( $view_path );		
 							
-			// Switch view context to new module view
-			$this->viewContext( $view_path );
-		}	
+		// Switch view context to new module view		
+		$this->viewContext( $view_path );		
 
-		//elapsed($this->id.' - Outputting '.$view_path );
-		//elapsed( key( $this->view_data ) );
-		//elapsed( array_keys($this->view_data));
+		//elapsed($this->id.' - Outputing '.$view_path.'-'.sizeof($this->data));
+		//elapsed(array_keys($this->view_data));		
 
-		// Output data
-		$out = isset($this->data[ self::VD_HTML ]) ? $this->data[ self::VD_HTML ] : '';		
+		// Get current view context plain HTML
+		$out = $this->data[ self::VD_HTML ];
 		
 		// If view path specified
 		if( isset( $view_path {0}) )
@@ -213,20 +217,20 @@ class Module implements iModule, \ArrayAccess, iModuleViewable
 		else if( !isset($out{0}) )
 		{ 
 			return e('Cannot render view for module ## - No view path or data has been set', E_SAMSON_CORE_ERROR, $this->id );
-		}
-				
-		// Delete current view data entry 
-		unset( $this->view_data[ $view_path ] );
-				
-		// Switch internal array pointer to last element
+		}	
+		
+		// Clear cuurently outputted view context from VCS
+		unset($this->view_data[ $view_path ]);
+		
+		// Get last element from VCS
 		end( $this->view_data );
 		
-		// Get previous view path in view data stack
-		$this->view_path = key( $this->view_data );
+		// Get last element from VCS name 
+		$this->view_context = key( $this->view_data );
 		
-		// Change view data pointer
-		$this->data = & $this->view_data[ $this->view_path ];	
-		
+		// Set internal view data pointer to last VCS entry
+		$this->data = & $this->view_data[ $this->view_context ];
+				
 		// Вернем результат прорисовки
 		return $out;
 	}	
@@ -247,7 +251,7 @@ class Module implements iModule, \ArrayAccess, iModuleViewable
 			s()->active( $old );				
 		}			
 		
-		//trace('rendering '.$this->id.'('.$this->view_path.')');
+		//elapsed( $this->id.' - Rendering '.$this->view_path );
 		
 		// Прорисуем представление и выведем его в текущий поток вывода
 		echo $this->output( $this->view_path );	
@@ -318,9 +322,12 @@ class Module implements iModule, \ArrayAccess, iModuleViewable
 	 * @param array 	$resources	Module resources list 
 	 */
 	public function __construct( $id, $path = NULL, $resources = NULL )
-	{		
+	{	
+		// Set defautl view context name
+		$this->view_context = self::VD_POINTER_DEF;
+		
 		// Set up default view data pointer
-		$this->view_data[ self::VD_POINTER_DEF ] = & $this->data;		
+		$this->data = & $this->view_data[ $this->view_context ];		
 		
 		// Set module identifier
 		$this->id = $id;
@@ -429,6 +436,8 @@ class Module implements iModule, \ArrayAccess, iModuleViewable
 	/** Magic method for calling unexisting object methods */
 	public function __call( $method, $arguments )
 	{
+		//elapsed($this->id.' - __Call '.$method);
+		
 		// If value is passed - set it
 		if( isset( $arguments[0] ) )$this->data[ $method ] = $arguments[0];
 		
@@ -445,7 +454,10 @@ class Module implements iModule, \ArrayAccess, iModuleViewable
 		self::$instances[ $this->id ] = & $this;
 
 		// Set up default view data pointer
-		$this->view_data[ self::VD_POINTER_DEF ] = & $this->data;
+		$this->view_data[ self::VD_POINTER_DEF ] = $this->data;
+		
+		// Set reference to view context entry
+		$this->data = & $this->view_data[ self::VD_POINTER_DEF ];
 	}
 	
 	/** Группа методов для доступа к аттрибутам в виде массива */
