@@ -110,11 +110,11 @@ final class Core implements iCore
 	 * @param string 	$function 	Function name
 	 * @param array 	$args		Function arguments
 	 */
-	public function benchmark( $function = __FUNCTION__, $args = array() )
+	public function benchmark( $function = __FUNCTION__, $args = array(), $class = __CLASS__ )
 	{		
 		$this->benchmarks[] = array( 
 				microtime(true)-__SAMSON_T_STARTED__, 	// Time elapsed from start
-				get_class($this).'::'.$function, 		// Function class::name
+				$class.'::'.$function, 		// Function class::name
 				$args, 									// Function arguments
 				memory_get_usage(true) 					// Memmory
 		);		
@@ -652,17 +652,14 @@ final class Core implements iCore
 		echo $template_html;			
 		
 		////elapsed('End routing');
-	}	
-	
+	}		
+
 	//[PHPCOMPRESSOR(remove,start)]
 	/** Конструктор */
 	public function __construct()
 	{		
 		//elapsed('Constructor');		
-	
-		//[PHPCOMPRESSOR(remove,start)]
-		$this->benchmark( __FUNCTION__, func_get_args() );		
-		//[PHPCOMPRESSOR(remove,end)]
+		$this->benchmark( __FUNCTION__, func_get_args() );			
 		
 		// Get backtrace to define witch scipt initiated core creation
 		$db = debug_backtrace();	
@@ -678,8 +675,7 @@ final class Core implements iCore
 		$this->module_stack = & Module::$instances;		
 		
 		// TODO: Сделать полноценную загрузку core и local через load
-		//$this->load2( __SAMSON_PATH__ );		
-	
+
 		// Создадим специальный модуль для PHP
 		new PHP( __SAMSON_PATH__ );	
 		

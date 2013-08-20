@@ -57,7 +57,8 @@ class ExternalModule extends Module implements iExternalModule
 		
 		// Create copy instance
 		$o = new $classname( $this->path, $id );	
-		$o->resources = & $this->resources;
+		$o->views = & $this->views;
+		$o->controllers = & $this->controllers;
 		
 		return $o;
 	}
@@ -125,12 +126,12 @@ class ExternalModule extends Module implements iExternalModule
 		{			
 			// Find full path to view file
 			$_view_path = $this->findView( $view_path );
-
-			//elapsed( 'Outputting '.$_view_path );
+			
+			//elapsed( 'Outputting '.$_view_path );		
 			
 			// Если требуемое представление НЕ существует в текущем модуле -
 			// выполним вывод представления для родительского модуля
-			if( ! file_exists( $_view_path ) && ! isset($GLOBALS['__compressor_files'][ $_view_path ]) )
+			if( !isset($_view_path{0})  )					
 			{
 				//elapsed('Parent - '.$this->parent->id);
 				
@@ -199,6 +200,10 @@ class ExternalModule extends Module implements iExternalModule
 	/**	@see iExternalModule::init() */
 	public function init( array $params = array() )
 	{
+		//[PHPCOMPRESSOR(remove,start)]
+		s()->benchmark( __FUNCTION__, func_get_args(), get_class($this) );
+		//[PHPCOMPRESSOR(remove,end)]
+		
 		// Установим переданные параметры
 		$this->set( $params );
 	

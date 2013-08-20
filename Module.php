@@ -12,20 +12,11 @@ class Module implements iModule, \ArrayAccess, iModuleViewable
 	/** Static module instances collection */	
 	public static $instances = array();	
 	
-	/**
-	 * Module core
-	 * @var Core
-	 */
-	protected $core;
-	
 	/** Collection for callable controllers of module */
 	protected $controllers = array();
 	
 	/** Module views collection */
 	protected $views = array();
-	
-	/** Module views collection */
-	protected $resources = array( 'views' => array() );
 	
 	/** Module location */
 	protected $path = '';
@@ -40,7 +31,7 @@ class Module implements iModule, \ArrayAccess, iModuleViewable
 	protected $version = '0.0.1';
 	
 	/** Path to view for rendering */
-	public $view_path = self::VD_POINTER_DEF;
+	protected $view_path = self::VD_POINTER_DEF;
 	
 	/** Pointer to view data enty */
 	protected $data = array( self::VD_POINTER_DEF => array( self::VD_HTML => '' ) );
@@ -111,7 +102,7 @@ class Module implements iModule, \ArrayAccess, iModuleViewable
 		$view_path = str_replace( array('.php','.vphp'), '', $view_path );		
 		
 		// Try to find passed view_path in  resources views collection
-		if( sizeof($view = preg_grep('/'.addcslashes($view_path,'/\\').'(\.php|\.vphp)/ui', $this->resources['views'])) )
+		if( sizeof($view = preg_grep('/'.addcslashes($view_path,'/\\').'(\.php|\.vphp)/ui', $this->views )) )
 		{		
 			// Sort view pathes to get the shortest path	
 			usort( $view, array( $this, 'sortStrings') );
@@ -119,7 +110,11 @@ class Module implements iModule, \ArrayAccess, iModuleViewable
 			// Set current full view path as last found view
 			return end( $view );
 		}		
-		else return e('Cannot find ## view ## - file does not exists', E_SAMSON_RENDER_ERROR, array( $this->id, $view_path));
+		else
+		{
+			//elapsed($this->views);
+			//return e('Cannot find ## view ## - file does not exists', E_SAMSON_RENDER_ERROR, array( $this->id, $view_path));
+		}
 	}
 	
 	
@@ -148,7 +143,12 @@ class Module implements iModule, \ArrayAccess, iModuleViewable
 	public function path( $value = NULL )
 	{		
 		// Если передан параметр - установим его
-		if( func_num_args() ){ $this->path = normalizepath($value); return $this; }		
+		if( func_num_args() )
+		{ 
+			$this->path = normalizepath($value);	
+			
+			return $this; 
+		}		
 		// Вернем относительный путь к файлам модуля
 		else return $this->path;
 	}
@@ -208,7 +208,7 @@ class Module implements iModule, \ArrayAccess, iModuleViewable
 			$old = s()->active( $this );
 				
 			// Прорисуем представление модуля
-			$out .= s()->render( /*$this->path.*/$view_path, $this->data );
+			$out .= s()->render( $this->path.$view_path, $this->data );
 			
 			// Вернем на место текущий модуль системы
 			s()->active( $old );	
@@ -277,7 +277,7 @@ class Module implements iModule, \ArrayAccess, iModuleViewable
 		}	
 		// Append object controller action name prefix 
 		else $o_method_name = '__'.$method_name;
-
+	
 		// Get parameters from URL
 		$parameters = url()->parameters();
 		
@@ -336,10 +336,7 @@ class Module implements iModule, \ArrayAccess, iModuleViewable
 		$this->path( $path );						
 		
 		// Add to module identifier to view data stack
-		$this->data['id'] = $this->id;	
-		
-		// Save resources list
-		isset( $resources ) ? $this->resources = & $resources : '';
+		$this->data['id'] = $this->id;			
 						
 		// Save views list
 		isset( $resources ) ? $this->views = & $resources['views'] : '';
@@ -379,13 +376,9 @@ class Module implements iModule, \ArrayAccess, iModuleViewable
 		if( function_exists( $this->id.self::CTR_POST )) 	$this->controllers[ self::CTR_POST ] 	= $this->id.self::CTR_POST;
 		if( function_exists( $this->id.self::CTR_PUT )) 	$this->controllers[ self::CTR_PUT ] 	= $this->id.self::CTR_PUT;
 		if( function_exists( $this->id )) $this->controllers[ self::CTR_BASE ] 	= $this->id;	
-			
-		//trace($this->controllers);		
-		//trace($this->id);
-		//trace($this->resources['views']);
 		
 		// Make view path relative to module - remove module path from view path
-		//$this->resources['views'] = str_replace( $this->path, '', $this->resources['views'] );
+		$this->views = str_replace( $this->path, '', $this->views );
 			
 		//elapsed('Registering module: '.$this->id.'('.$path.')' );
 	}		
@@ -446,10 +439,10 @@ class Module implements iModule, \ArrayAccess, iModuleViewable
 	}
 	
 	/** Обработчик сериализации объекта */
-	public function __sleep(){	return array( 'id', 'path', 'author', 'version', 'data', 'controllers' );	}
+	public function __sleep(){	return array( 'id', 'path', 'author', 'version', 'data', 'controllers', 'views' );	}
 	/** Обработчик десериализации объекта */
 	public function __wakeup()
-	{
+	{		
 		// Fill global instances  
 		self::$instances[ $this->id ] = & $this;
 
