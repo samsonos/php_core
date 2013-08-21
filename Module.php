@@ -378,7 +378,7 @@ class Module implements iModule, \ArrayAccess, iModuleViewable
 		if( function_exists( $this->id )) $this->controllers[ self::CTR_BASE ] 	= $this->id;	
 		
 		// Make view path relative to module - remove module path from view path
-		$this->views = str_replace( $this->path, '', $this->views );
+		$this->views = str_replace( $this->path, '', $this->views );		
 			
 		//elapsed('Registering module: '.$this->id.'('.$path.')' );
 	}		

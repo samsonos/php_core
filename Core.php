@@ -179,10 +179,13 @@ final class Core implements iCore
 				// Models
 				else if ( strpos( $php, __SAMSON_MODEL_PATH ) ) $ls['models'][] = $php;
 				// Views and other php files will load only when needed
-				else if ( strpos( $php, __SAMSON_VIEW_PATH ) || pathinfo($php,PATHINFO_EXTENSION) == 'vphp') $ls['views'][] = $php;
+				else if ( strpos( $php, __SAMSON_VIEW_PATH )) $ls['views'][] = $php;
 				// Regular php file
 				else $ls['php'][] = $php;
 			}
+			
+			// New way for storing views with extension vphp - enables free module folder structure 
+			if( isset( $resources[ 'vphp' ] )) foreach ( $resources[ 'vphp' ] as $php ) $ls['views'][] = $php;
 			
 			// Save path resources data
 			$this->load_path_stack[ $path ] = & $ls;
