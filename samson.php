@@ -285,34 +285,42 @@ function isv( $name )
  * переменной объекта полученного из БД, у которого все поля это строки, за исключением
  * собственно описанных полей.
  * 
- * @param string 	$name 	Имя переменной для проверки
- * @param mixed 	$value 	Значение для сравнения  
+ * @param string 	$name 	Module view variable name
+ * @param mixed 	$value 	Value for checking
+ * @param string	$output	Value for outputting in case of success  
  * @return boolean Соответствует ли указанная переменная представления переданному значению
  */
-function isval( $name, $value = '0' )
+function isval( $name, $value = '0', $output = null )
 {
+	// Flag for checking module value
+	$ok = false;
+	
 	// Получим указатель на текущий модуль
 	$m = & m();
-	
+
 	// Если переменнаяч задана
 	if( isset($m[ $name ]) )
 	{
 		// Получим значение переменной модуля
-		$var = $m[ $name ];			
-				
-		// Если это строка и оно соответствует переданному значению 
-		if( is_string($var) && ($var === ''.$value) ) return true;
+		$var = $m[ $name ];	
+	
+		// Если это строка и оно соответствует переданному значению
+		if( is_string($var) && ($var === ''.$value) ) $ok = true;
 		// Если это плавающее число и оно равно переданному значению
-		else if( is_float($var) && ($var === floatval($value) ) ) return true;
+		else if( is_float($var) && ($var === floatval($value) ) ) $ok = true;
 		// Если это число и оно равно переданному значению
-		else if( is_numeric($var) && ($var === intval($value) ) ) return true;
-		// Если єто булевое число		
-		else if( is_bool($var) && ($var === $value)) return true;	
+		else if( is_numeric($var) && ($var === intval($value) ) ) $ok = true;
+		// Если єто булевое число
+		else if( is_bool($var) && ($var === $value)) $ok = true;
 	}
 	
-	// Переменная не установлена
-	return false;
+	// If we have output - echo it
+	if( $ok && isset( $output) ) echo $output;
+	
+	return $ok;
 }
+
+
 
 /**
  * Is Module ( Является ли текущий модуль указанным ) - Проверить совпадает ли имя текущего модуля с указанным 

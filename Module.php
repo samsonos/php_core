@@ -237,24 +237,24 @@ class Module implements iModule, \ArrayAccess, iModuleViewable
 	
 	/**	@see iModule::render() */
 	public function render( $controller = NULL )
-	{					
+	{			
+		// Временно изменим текущий модуль системы
+		$old = & s()->active( $this );
+		
 		// Если если передан контроллер модуля для выполнения перед его прорисовкой - выполним его
 		if( isset( $controller ) ) 
-		{			
-			// Временно изменим текущий модуль системы
-			$old = & s()->active( $this );
-			
+		{					
 			// Выполним действие текущего модуля
-			$this->action( $controller == '' ? null : $controller );	
-
-			// Ввостановим предыдущий текущий модуль контролера
-			s()->active( $old );				
+			$this->action( $controller == '' ? null : $controller );					
 		}			
 		
 		//elapsed( $this->id.' - Rendering '.$this->view_path );
 		
 		// Прорисуем представление и выведем его в текущий поток вывода
 		echo $this->output( $this->view_path );	
+		
+		// Ввостановим предыдущий текущий модуль контролера
+		s()->active( $old );
 	}
 
 	/** @see iModule::action() */
