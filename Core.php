@@ -549,14 +549,15 @@ final class Core implements iCore
 		// Стандартное поведение
 		else 
 		{
+			//elapsed('e404');
 			// Установим HTTP заголовок что такой страницы нет
-			header('HTTP/1.0 404 Not Found');
+			header('HTTP/1.0 405 Not Found');
 			
 			// Установим представление
 			$this->active->html('<h1>Запрашиваемая страница не найдена</h1>')->title('Страница не найдена');
 
 			// Вернем успешный статус выполнения функции
-			return A_SUCCESS;
+			return A_FAILED;
 		}	
 	}
 	
@@ -610,8 +611,8 @@ final class Core implements iCore
 		}
 	
 		// Если мы не выполнили ни одного контроллера, обработаем ошибку 404
-		if( $module_loaded === A_FAILED ) $module_loaded = $this->e404();			
-
+		if( $module_loaded === A_FAILED ) $module_loaded = $this->e404();		
+	
 		////elapsed('Start outputing');
 		
 		// Сюда соберем весь вывод системы
