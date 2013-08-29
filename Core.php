@@ -551,10 +551,10 @@ final class Core implements iCore
 		{
 			//elapsed('e404');
 			// Установим HTTP заголовок что такой страницы нет
-			header('HTTP/1.0 405 Not Found');
+			header('HTTP/1.0 404 Not Found');
 			
 			// Установим представление
-			$this->active->html('<h1>Запрашиваемая страница не найдена</h1>')->title('Страница не найдена');
+			echo'<h1>Запрашиваемая страница не найдена</h1>';
 
 			// Вернем успешный статус выполнения функции
 			return A_FAILED;
