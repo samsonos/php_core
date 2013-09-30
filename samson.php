@@ -184,7 +184,9 @@ function v( $name, $realName = NULL )
 	if( isset($realName) && $m->offsetExists( $realName ))echo $m[ $realName ];	
 	// Если дополнительный параметр не задан и у текущего модуля задана требуемое
 	// поле - выведем его значение в текущий поток вывода
-	else if ( $m->offsetExists( $name )) echo $m[ $name ];	
+	else if ( $m->offsetExists( $name )) echo $m[ $name ];
+	// Otherwise just output 	
+	else echo $name;
 }
 
 /**
@@ -232,43 +234,6 @@ function vimg( $src, $id='', $class='', $alt = '' )
 	echo '<img src="'.url()->build($src).'" id="'.$id.'" class="'.$class.'" alt="'.$alt.'" title="'.$alt.'">';	 
 }
 
-
-/**
- * Is Variable( Существует ли переменная представления ) - Проверить задана ли 
- * переменная представления. Метод проверяет тип переменной и в зависимости от 
- * этого проверяет задана ли переменная представления:
- * 	- проверяется задана ли переменная вообще
- * 	- если передан Array то проверяется его размер
- * 	- если передана строка то проверяется пустая ли она 
- * 
- * @param string $name Имя переменной для проверки 
- * @return boolean Установлена ли указанная переменная представления в текущем модуле
- */
-function isv( $name ) 
-{	
-	
-	// Получим указатель на текущий модуль
-	$m = & m();
-	
-	// Если переменнаяч задана
-	if( $m->offsetExists( $name ) )
-	{ 			
-		// Получим значение переменной модуля
-		$var = $m[ $name ]; 
-		
-		// Если это пустой массив
-		if( is_array($var) && !sizeof($var) ) return false;		
-		
-		// Если это пустая строка
-		if( is_string($var) && !isset($var{0}) ) return false;
-		
-		// Переменная установлена
-		return true;
-	}	
-	// Переменная не установлена
-	else return false;
-}
-
 /**
  * Is Value( Является ли значением) - Проверить является ли переменная представления 
  * указанным значением. Метод проверяет тип переменной и в зависимости от этого проверяет 
@@ -285,42 +250,78 @@ function isv( $name )
  * переменной объекта полученного из БД, у которого все поля это строки, за исключением
  * собственно описанных полей.
  * 
- * @param string 	$name 	Module view variable name
- * @param mixed 	$value 	Value for checking
- * @param string	$output	Value for outputting in case of success  
+ * @param string 	$name 		Module view variable name
+ * @param mixed 	$value 		Value for checking
+ * @param string	$output		Value for outputting in case of success  
+ * @param boolean	$inverse	Value for outputting in case of success
  * @return boolean Соответствует ли указанная переменная представления переданному значению
  */
-function isval( $name, $value = '0', $output = null )
+function isval( $name, $value = '', $output = null, $inverse = false )
 {
 	// Flag for checking module value
 	$ok = false;
 	
-	// Получим указатель на текущий модуль
+	// Pointer to current module
 	$m = & m();
 
-	// Если переменнаяч задана
+	// If we have module view variable
 	if( isset($m[ $name ]) )
 	{
-		// Получим значение переменной модуля
-		$var = $m[ $name ];	
-	
-		// Если это строка и оно соответствует переданному значению
-		if( is_string($var) && ($var === ''.$value) ) $ok = true;
-		// Если это плавающее число и оно равно переданному значению
-		else if( is_float($var) && ($var === floatval($value) ) ) $ok = true;
-		// Если это число и оно равно переданному значению
-		else if( is_numeric($var) && ($var === intval($value) ) ) $ok = true;
-		// Если єто булевое число
-		else if( is_bool($var) && ($var === $value)) $ok = true;
+		// Get value
+		$var = $m[ $name ];		
+		
+		// Get variable type
+		switch( gettype( $var ) )
+		{
+			// If this is boolean and it matches $value
+			case 'boolean': $ok = $var === $value; 				break;
+			// If this is number and it matches $value
+			case 'integer': $ok = $var === intval($value); 		break;
+			// If this is double and it matches $value
+			case 'double':  $ok = $var === doubleval($value); 	break;		
+			// If this is not empty array
+			case 'array':   $ok = sizeof($var); 				break;		
+			// If this is a string and it matches $value or if no $value is set string is not empty
+			case 'string':  $ok = ($var === strval($value)) || ($value == '' && isset($var{0})); break;
+			// Not supported for now
+			case 'object':
+			case 'NULL':
+			case 'unknown type': 
+			break;
+		}	
+		
+		//trace($name.'-'.$var.'-'.gettype( $var ).'-'.$value.'-'.($var === strval($value)).'-'.$ok.'-'.$inverse);
 	}
 	
+	// If inversion is on
+	if( $inverse ) $ok = ! $ok;
+	
 	// If we have output - echo it
-	if( $ok && isset( $output) ) echo $output;
+	if( $ok && isset( $output) ) v($output);
 	
 	return $ok;
 }
 
+/**
+ * Is Variable exists, also checks:
+ *  - if module view variable is not empty array
+ *  - if module view variable is not empty string
+ *
+ * @param string 	$name Имя переменной для проверки
+ * @param string	$output	Value for outputting in case of success  
+ * @return boolean True if variable exists
+ */
+function isv( $name, $output = null ){ return isval($name, '', $output ); }
 
+/**
+ * Is NOT value - checks if module view variable value does not match $value 
+ * 
+ * @param string 	$name 	Module view variable name
+ * @param mixed 	$value 	Value for checking
+ * @param string	$output	Value for outputting in case of success  
+ * @return boolean True if value does NOT match
+ */
+function isnval( $name, $value = '', $output = null ){ return isval($name, $value, $output, true ); }
 
 /**
  * Is Module ( Является ли текущий модуль указанным ) - Проверить совпадает ли имя текущего модуля с указанным 
@@ -452,6 +453,32 @@ function url_base( $url = '' )
 	$_v = isset($_v) ? $_v : url();
 
 	$args = func_get_args();
+
+	echo call_user_func_array( array( $_v, 'build' ), $args );
+}
+
+/**
+ * Построить полный URL с учетом относительного пути и текущей локали и вывести его в текущий поток вывода
+ * Функция может принимать любое количество аргументов начиная со второго, и их значения будут
+ * переданы в URL пути как параметры.
+ *
+ * Каждый переданный параметр начиная со 2-го, расценивается как переменная представления модуля
+ * и в случаи её отсутствия просто выводится как строка
+ *
+ * @see URL::build()
+ *
+ * @param string $url Начальный URL-Путь для построения
+ * @return string Полный URL с параметрами
+ */
+function url_locale_base( $url = '' )
+{
+	static $_v;
+
+	$_v = isset($_v) ? $_v : url();
+
+	$args = func_get_args();
+	
+	if (locale() != '') $args=array_merge(array(locale()), $args);
 
 	echo call_user_func_array( array( $_v, 'build' ), $args );
 }

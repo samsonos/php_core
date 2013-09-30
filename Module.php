@@ -277,35 +277,36 @@ class Module implements iModule, \ArrayAccess, iModuleViewable
 		}	
 		// Append object controller action name prefix 
 		else $o_method_name = '__'.$method_name;
-	
+		
+		// Build function controller action name
+		$method_name = $this->id.(isset( $method_name{0} ) && $method_name != self::CTR_BASE ? '_'.$method_name : '');		
+		
+		// TODO: Add function POST support
+		
+		//trace($method_name);
 		// Get parameters from URL
 		$parameters = url()->parameters();
 		
 		// If module object has controller action defined - try object approach
-		if( method_exists( $this, $o_method_name ) ) $method_name = array( $this, $o_method_name );		
-		// Now module object controller action method found - try function approach
-		else 
+		if( method_exists( $this, $o_method_name ) ) $method_name = array( $this, $o_method_name );
+		// No module object controller action method found - try function approach
+		else if( function_exists( $method_name )) ;
+		// Try to find universal controller	
+		else  
 		{
-			// Build function controller action name		
-			$method_name = $this->id.(isset( $method_name{0} ) && $method_name != self::CTR_BASE ? '_'.$method_name : '');		
-		
-			// If we did not found controller action try universal controller action
-			if( ! function_exists( $method_name ))
-			{
-				// Modify parameters list for universal controller action
-				$parameters = array_merge( array( url()->method ), $parameters );
-				
-				// Set universal controller action
-				$method_name = $this->id.self::CTR_UNI;
-			}		
+			// Modify parameters list for universal controller action
+			$parameters = array_merge( array( url()->method ), $parameters );
 			
-			// No appropriate controller action found for this module		
-			if( ! function_exists( $method_name )) return A_FAILED;
+			// If object has universal controller
+			if( method_exists( $this, self::CTR_UNI ) ) $method_name = array( $this, self::CTR_UNI );	
+			// If wehave function universal controller
+			else if( function_exists(  $this->id.self::CTR_UNI )) $method_name = $this->id.self::CTR_UNI;
+			// No appropriate controller action found for this module
+			else return A_FAILED;
+		}				
 		
-			// TODO: add module and core references pass to controller function by hint
-			// TODO: wait for getHint() method for removing parameter name dependency and use just hint type
-						
-		}		
+		// TODO: add module and core references pass to controller function by hint
+		// TODO: wait for getHint() method for removing parameter name dependency and use just hint type				
 		
 		// Run module action method
 		$action_result = call_user_func_array( $method_name, $parameters );

@@ -172,8 +172,8 @@ class URL implements iURL
 			// Если переменная модуля не существует тогда используем строковое представление аргумента
 			// добавим "разпознанное" значение аргумента в коллекцию параметров URL
 			$url_params[] = isset( $m[$arg] ) ? $m->$arg : $arg;			 	
-		}	
-				
+		}		
+ 		
 		// Вернем полный URL-путь относительно текущего хоста и веб-приложения
 		// Соберем все отфильтрованные сущности URL использую разделитель "/"
 		return 'http://'.$_SERVER['HTTP_HOST'].$this->base.implode( '/', $url_params );
@@ -206,10 +206,33 @@ class URL implements iURL
 		// Получим массив переданных аргументов маршрута системы из URL
 		// Отфильтруем не пустые элементы, не переживая что мы упустим поряд их следования
 		// так номера элементов в массиве сохраняются
-		$url_args = explode( '/', $url );	
+		$url_args = explode( '/', $url );
+
+		// Попробуем найти локаль в пути
+		/*$key = array_search('locale', $url_args);
 		
+		if($key!==FALSE)
+		{		
+			if (isset($url_args[$key+1]))
+			{
+				// Установим новую локаль
+				SamsonLocale::current($url_args[$key+1]);
+				
+				unset($url_args[$key+1]);
+			}
+			// Удалим из пути локаль
+			unset($url_args[$key]);
+		}*/
+		
+
 		// Очистим элементы массива
 		for ($i = 0; $i < sizeof($url_args); $i++) if( !isset($url_args[$i]{0}) ) unset($url_args[$i]);
+		$url_args = array_values($url_args);
+
+		$key = SamsonLocale::find($url_args);
+
+		if($key!==FALSE) unset($url_args[$key]);
+		$url_args = array_values($url_args);
 
 		// Переберем все аргументы и маршрута системы
 		foreach ( $url_args as $position => $value ) 

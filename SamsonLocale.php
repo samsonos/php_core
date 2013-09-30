@@ -68,8 +68,7 @@ class SamsonLocale
 			// Проверим разрешаемые локали
 			else die('Устанавливаемая локализация "'.$locale.'" - не предусмотрена в SamsonLocale');		
 		}			
-									
-		
+
 		// Проверим значение установленной текущей локализации, если оно не входит в список доступных локализаций
 		// установим локализацию по умолчанию
 		self::check();
@@ -95,13 +94,14 @@ class SamsonLocale
 		if( !isset($locale) ) return $_locale;
 		// Нам передано значение локали 
 		else 
-		{			
+		{	
 			// Только большой регистр
 			$locale = strtolower( $locale );
 			// Если требуется установть доступную локализацию
-			if( in_array( $locale, self::$locales ) ) self::$current_locale = $locale;
+			//if( in_array( $locale, self::$locales ) ) self::$current_locale = $locale;
 			// Установим локализацию по умолчанию
-			else self::$current_locale = SamsonLocale::DEF;
+			//else self::$current_locale = SamsonLocale::DEF;
+			self::$current_locale = $locale;
 			
 			// Запишем текущее значение локализации
 			$_SESSION['__SAMSON_LOCALE__'] = self::$current_locale;					
@@ -110,7 +110,47 @@ class SamsonLocale
 			return $_locale;
 		}	
 	}
+	
+	public static function find($list)
+	{
+		//print_r(SamsonLocale::$locales);
+		$key = false;
+		foreach (self::$locales as $locale)
+		{
+			$key = array_search($locale, $list);
+			if ($key!==false)
+			{
+				self::current($locale);break;
+			}
+		}
+		return $key; 
+	} 
 }
 
 // Установим текущую локаль из сессии, если оно там имеется
-if( isset( $_SESSION['__SAMSON_LOCALE__'] ) ) SamsonLocale::$current_locale = strtolower($_SESSION['__SAMSON_LOCALE__']);
+//if( isset( $_SESSION['__SAMSON_LOCALE__'] ) ) SamsonLocale::$current_locale = strtolower($_SESSION['__SAMSON_LOCALE__']);
+
+/*if ( strpos($_SERVER["REQUEST_URI"], '/locale/')!==FALSE)
+{
+	SamsonLocale::find();
+	// Розпарсим URL 
+		$url = parse_url( $_SERVER["REQUEST_URI"] ); 	
+		
+		// Отрежем путь к текущему веб-приложению из пути и декодируем другие символы
+		$url = trim( urldecode( $url['path'] ));	
+
+		// Получим массив переданных аргументов маршрута системы из URL
+		// Отфильтруем не пустые элементы, не переживая что мы упустим поряд их следования
+		// так номера элементов в массиве сохраняются
+		$url_args = explode( '/', $url );	
+		
+		$key = array_search('locale', $url_args);	
+		$search = '/locale';	
+		if (isset($url_args[$key+1]))  
+		{
+			SamsonLocale::current($url_args[$key+1]);
+			$search .= '/'.$url_args[$key+1];
+		}
+
+		$_SERVER["REQUEST_URI"] = str_replace($search, '', $_SERVER["REQUEST_URI"]);	
+}*/
