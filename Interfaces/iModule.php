@@ -2,31 +2,6 @@
 namespace samson\core;
 
 /**
- * Идентификатор указывающий на использование базового контроллера модуля
- */
-define( 'MOD_BASE_CONTROLLER', 234 );
-/**
- * Идентификатор указывающий на использование универсального контроллера модуля
- */
-define( 'MOD_UNI_CONTROLLER', 235 );
-/**
- * Идентификатор указывающий на использование контроллера GET модуля
- */
-define( 'MOD_GET_CONTROLLER', 236 );
-/**
- * Идентификатор указывающий на использование контроллера PUT модуля
- */
-define( 'MOD_PUT_CONTROLLER', 237 );
-/**
- * Идентификатор указывающий на использование контроллера POST модуля
- */
-define( 'MOD_POST_CONTROLLER', 238 );
-/**
- * Идентификатор указывающий на использование контроллера DELETE модуля
- */
-define( 'MOD_DELETE_CONTROLLER', 239 );
-
-/**
  * Интерфейс для модуля системы
  * @author Vitaly Iegorov <vitalyiegorov@gmail.com>
  *
@@ -46,13 +21,13 @@ interface iModule
 	const CTR_UNI = '__HANDLER';	
 	
 	/** Post controller name */
-	const CTR_POST = MOD_POST_CONTROLLER;
+	const CTR_POST = '__POST';
 	
 	/** Put controller name */
-	const CTR_PUT = MOD_POST_CONTROLLER;
+	const CTR_PUT = '__PUT';
 	
 	/** Delete controller name */
-	const CTR_DELETE = MOD_POST_CONTROLLER;
+	const CTR_DELETE = '__DELETE';
 	
 	/**
 	 * Установить заголовок страницы

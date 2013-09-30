@@ -274,16 +274,23 @@ class Module implements iModule, \ArrayAccess, iModuleViewable
 			
 			// Copy default controller action name
 			$o_method_name = $method_name;
+			
+			// In function approach just add module name
+			$method_name = $this->id.($method_name != self::CTR_BASE ? $method_name : '');
 		}	
-		// Append object controller action name prefix 
-		else $o_method_name = '__'.$method_name;
+		// Controller action specified
+		else 
+		{
+			// Object approach append controller prefix			
+			$o_method_name = '__'.$method_name;
+			
+			// Function approach append module name and separator
+			$method_name = $this->id.'_'.$method_name;
+		}		
 		
 		// Build function controller action name
-		$method_name = $this->id.(isset( $method_name{0} ) && $method_name != self::CTR_BASE ? '_'.$method_name : '');		
-		
-		// TODO: Add function POST support
-		
-		//trace($method_name);
+		//$method_name = $this->id.(isset( $method_name{0} ) && $method_name != self::CTR_BASE ? '_'.$method_name : '');		
+	
 		// Get parameters from URL
 		$parameters = url()->parameters();
 		
