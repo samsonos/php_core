@@ -290,7 +290,7 @@ class Module implements iModule, \ArrayAccess, iModuleViewable
 		
 		// Build function controller action name
 		//$method_name = $this->id.(isset( $method_name{0} ) && $method_name != self::CTR_BASE ? '_'.$method_name : '');		
-	
+		//trace($method_name);
 		// Get parameters from URL
 		$parameters = url()->parameters();
 		

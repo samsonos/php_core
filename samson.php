@@ -256,7 +256,7 @@ function vimg( $src, $id='', $class='', $alt = '' )
  * @param boolean	$inverse	Value for outputting in case of success
  * @return boolean Соответствует ли указанная переменная представления переданному значению
  */
-function isval( $name, $value = '', $output = null, $inverse = false )
+function isval( $name, $value = null, $output = null, $inverse = false )
 {
 	// Flag for checking module value
 	$ok = false;
@@ -282,7 +282,7 @@ function isval( $name, $value = '', $output = null, $inverse = false )
 			// If this is not empty array
 			case 'array':   $ok = sizeof($var); 				break;		
 			// If this is a string and it matches $value or if no $value is set string is not empty
-			case 'string':  $ok = ($var === strval($value)) || ($value == '' && isset($var{0})); break;
+			case 'string':  $ok = (!isset($value) && isset($var{0})) || ($var === $value); break;
 			// Not supported for now
 			case 'object':
 			case 'NULL':
@@ -311,7 +311,7 @@ function isval( $name, $value = '', $output = null, $inverse = false )
  * @param string	$output	Value for outputting in case of success  
  * @return boolean True if variable exists
  */
-function isv( $name, $output = null ){ return isval($name, '', $output ); }
+function isv( $name, $output = null ){ return isval($name, null, $output ); }
 
 /**
  * Is NOT value - checks if module view variable value does not match $value 

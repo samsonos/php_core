@@ -530,9 +530,8 @@ final class Core implements iCore
 		// Если передан аргумент функции то установим новый обработчик e404 
 		if( func_num_args() ) 
 		{
-			// Check e404 handler
-			if( !is_callable( $callable ) ) return e('E404 handler is not valid', E_SAMSON_CORE_ERROR ); 
-			else $this->e404 = $callable;
+			// Set e404 handler		
+			$this->e404 = $callable;
 			
 			// Продолжим цепирование
 			return $this;
