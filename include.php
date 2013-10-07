@@ -15,7 +15,7 @@ require( 'Interfaces/iHandlerE404.php' );
 require( 'Error.php' );
 require( 'Utils.php' );
 require( 'Configuration.php' );
-require( 'i18n.php' );
+//require( 'i18n.php' );
 require( 'URL.php' );
 require( 'Module.php' );
 require( 'LocalModule.php');

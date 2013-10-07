@@ -595,8 +595,8 @@ final class Core implements iCore
 			$this->template( $this->template_path );
 				
 			// Manually include local module to load stack
-			$this->load_stack['local'] = & $ls2;
-			$this->load_module_stack[ 'local' ] = & $ls2;
+			$this->load_stack['local'] = $ls2;
+			$this->load_module_stack[ 'local' ] = $ls2;
 				
 			// Require local controllers
 			foreach ( $ls2['controllers'] as $controler )
@@ -612,7 +612,7 @@ final class Core implements iCore
 				
 			// Require local models
 			foreach ( $ls2['models'] as $model ) require( $model );
-		}
+		}		
 		//[PHPCOMPRESSOR(remove,end)]
 		
 		//[PHPCOMPRESSOR(remove,start)]
@@ -623,7 +623,9 @@ final class Core implements iCore
 		// Проинициализируем оставшиеся конфигурации и подключим внешние модули по ним
 		Config::init( $this );					
 		//[PHPCOMPRESSOR(remove,end)]
-			
+		
+		
+		
 		// Проинициализируем НЕ ЛОКАЛЬНЫЕ модули
 		foreach ($this->module_stack as $id => $module )
 		{				

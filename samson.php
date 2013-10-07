@@ -222,13 +222,23 @@ function vi( $name ){ $m = & m();  if( $m->offsetExists( $name )) echo htmlentit
  * @param string $src 	Имя переменной представления с путем к изображению
  * @param string $alt 	Описание изображения
  */
-function vimg( $src, $id='', $class='', $alt = '' )
+/**
+ * 
+ * @param unknown $src
+ * @param string $id
+ * @param string $class
+ * @param string $alt
+ * @param string $dummy
+ */
+function vimg( $src, $id='', $class='', $alt = '', $dummy = null )
 { 
 	// Закешируем ссылку на текущий модуль
 	$m = & m();  
 	
 	// Проверим задана ли указанная переменная представления в текущем модуле 
 	if( $m->offsetExists( $src )) $src = $m[ $src ];
+	//
+	elseif( isset($dummy))$src = $dummy;
 	 
 	// Выведем изображение
 	echo '<img src="'.url()->build($src).'" id="'.$id.'" class="'.$class.'" alt="'.$alt.'" title="'.$alt.'">';	 
@@ -268,11 +278,11 @@ function isval( $name, $value = null, $output = null, $inverse = false )
 	if( isset($m[ $name ]) )
 	{
 		// Get value
-		$var = $m[ $name ];		
+		$var = $m[ $name ];				
 		
 		// Get variable type
 		switch( gettype( $var ) )
-		{
+		{		
 			// If this is boolean and it matches $value
 			case 'boolean': $ok = $var === $value; 				break;
 			// If this is number and it matches $value
@@ -282,7 +292,7 @@ function isval( $name, $value = null, $output = null, $inverse = false )
 			// If this is not empty array
 			case 'array':   $ok = sizeof($var); 				break;		
 			// If this is a string and it matches $value or if no $value is set string is not empty
-			case 'string':  $ok = (!isset($value) && isset($var{0})) || ($var === $value); break;
+			case 'string':  $ok = ($var === strval($value)) || (!isset($value) && isset($var{0})); break;
 			// Not supported for now
 			case 'object':
 			case 'NULL':
@@ -321,7 +331,7 @@ function isv( $name, $output = null ){ return isval($name, null, $output ); }
  * @param string	$output	Value for outputting in case of success  
  * @return boolean True if value does NOT match
  */
-function isnval( $name, $value = '', $output = null ){ return isval($name, $value, $output, true ); }
+function isnval( $name, $value = null, $output = null ){ return isval($name, $value, $output, true ); }
 
 /**
  * Is Module ( Является ли текущий модуль указанным ) - Проверить совпадает ли имя текущего модуля с указанным 

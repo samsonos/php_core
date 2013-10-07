@@ -2,6 +2,38 @@
 use samson\core\SamsonLocale;
 
 /**
+ * Get all possible combinations of array elements
+ * 
+ * @param array $array 	Array for building combinations
+ * @param string $size	Desired result combination size	
+ * @return array Collection of array values combinations
+ */
+function array_power_set( array $array, $size = null)
+{
+	// initialize by adding the empty set
+	$results =  array(array());
+
+	foreach ($array as $element)
+	{
+		foreach ($results as $combination)
+		{
+			array_push($results, array_merge(array($element), $combination));
+		}
+	}
+
+	// Filter combinations by size if nessesar
+	$_results = array();
+	if(isset($size)) foreach ($results as $combination)
+	{
+		if( sizeof($combination) == $size) $_results[] = $combination;
+	}
+	// Return original results
+	else $_results = & $results;
+
+	return $_results;
+}
+
+/**
  * Get only folder structure from path.
  * Function can also be used for getting namespace withou classname
  * If file name specified in path it will be removed, if no

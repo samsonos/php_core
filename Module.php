@@ -31,13 +31,13 @@ class Module implements iModule, \ArrayAccess, iModuleViewable
 	protected $version = '0.0.1';
 	
 	/** Path to view for rendering */
-	protected $view_path = self::VD_POINTER_DEF;
+	public $view_path = self::VD_POINTER_DEF;
 	
 	/** Pointer to view data enty */
 	protected $data = array( self::VD_POINTER_DEF => array( self::VD_HTML => '' ) );
 	
 	/** Collection of data for view rendering, filled with default pointer */
-	protected $view_data = array( self::VD_POINTER_DEF => array( self::VD_HTML => '' ) );	
+	public $view_data = array( self::VD_POINTER_DEF => array( self::VD_HTML => '' ) );	
 	
 	/** Name of current view context entry */
 	protected $view_context = self::VD_POINTER_DEF;
@@ -237,7 +237,8 @@ class Module implements iModule, \ArrayAccess, iModuleViewable
 	
 	/**	@see iModule::render() */
 	public function render( $controller = NULL )
-	{			
+	{	
+		//trace($this->id.'-'.$controller);
 		// Временно изменим текущий модуль системы
 		$old = & s()->active( $this );
 		
@@ -286,7 +287,9 @@ class Module implements iModule, \ArrayAccess, iModuleViewable
 			
 			// Function approach append module name and separator
 			$method_name = $this->id.'_'.$method_name;
-		}		
+		}	
+		
+		//trace($method_name);
 		
 		// Build function controller action name
 		//$method_name = $this->id.(isset( $method_name{0} ) && $method_name != self::CTR_BASE ? '_'.$method_name : '');		
@@ -420,10 +423,10 @@ class Module implements iModule, \ArrayAccess, iModuleViewable
 	{		
 		// Если передан класс который поддерживает представление для модуля
 		if( is_object( $field ) && in_array( ns_classname('iModuleViewable','samson\core'), class_implements($field )))
-		{					
+		{				
 			// Сформируем регистро не зависимое имя класса для хранения его переменных в модуле
 			$class_name = is_string( $value ) ? $value : ''.mb_strtolower( classname(get_class($field)), 'UTF-8' );
-				
+		
 			// Объединим текущую коллекцию параметров представления модуля с полями класса
 			$this->data = array_merge( $this->data, $field->toView( $class_name.'_' ) );
 		}		
