@@ -16,13 +16,15 @@ class SamsonLocale
 	const UA = 'ua';
 	/** Английская локализация */
 	const EN = 'en';
+	/** Русская локализация */
+	const RU = 'ru';
 	
 	/**
 	 * Коллекция поддерживаемых локализаций
 	 * Используется для дополнительного контроля за локализациями
 	 * @var array
 	 */
-	private static $supported = array( SamsonLocale::DEF, SamsonLocale::EN, SamsonLocale::UA );
+	private static $supported = array( SamsonLocale::DEF, SamsonLocale::EN, SamsonLocale::UA, SamsonLocale::RU );
 	
 	/**
 	 * Текущая локализация веб-приложения

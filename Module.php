@@ -205,7 +205,7 @@ class Module implements iModule, \ArrayAccess, iModuleViewable
 		if( isset( $view_path {0}) )
 		{	
 			// Временно изменим текущий модуль системы
-			$old = s()->active( $this );
+			$old = s()->active( $this );			
 				
 			// Прорисуем представление модуля
 			$out .= s()->render( $this->path.$view_path, $this->data );

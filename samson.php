@@ -189,6 +189,21 @@ function v( $name, $realName = NULL )
 	else echo $name;
 }
 
+/** 
+ * If view variable - output view variable only if it has value
+ * function only differs from v() that if no view variable is found 
+ * this function does not echo view variable name
+ * 
+ */
+function iv( $name, $realName = NULL )
+{
+	// Cache current module pointer
+	$m = & m();
+	
+	// If view variable is set - echo it
+	if ( $m->offsetExists( $name ) ) echo $m[ $name ];	
+}
+
 /**
  * Вывести дату
  * 
@@ -538,6 +553,11 @@ function setlocales(){ \samson\core\SamsonLocale::set( func_get_args() ); }
  * @return string Возвращает текущее значение локали сайта до момента вызова метода
  */
 function locale( $locale = NULL ){ return \samson\core\SamsonLocale::current( $locale ); }
+
+/** 
+ * @return string locale path if current locale is not default locale
+ */
+function locale_path(){ $l = locale(); return ($l != \samson\core\SamsonLocale::DEF)? $l.'/' : '';}
 
 /**
  * Сформировать правильное имя класса с использованием namespace, если оно не указано

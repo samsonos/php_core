@@ -331,11 +331,19 @@ final class Core implements iCore
 		// for meeting first condition
 		$__template_view = $__view;
 		
+		//trace('$$__template_view'.$__template_view);
+		
 		// If another template folder defined 
 		if( isset($this->view_path{0}) )
-		{
+		{	
 			// Modify standart view path with another template 
-			$template_view = str_replace( __SAMSON_VIEW_PATH.'/', __SAMSON_VIEW_PATH.'/'.$this->view_path.'/', $template_view );
+			$template_view = str_replace( __SAMSON_VIEW_PATH.'/', __SAMSON_VIEW_PATH.'/'.$this->view_path.'/', $template_view );			
+		}	
+			
+		if (locale() != SamsonLocale::DEF)
+		{
+			// Modify standart view path with another template
+			$__template_view = str_replace( __SAMSON_VIEW_PATH, __SAMSON_VIEW_PATH.locale().'/', $__template_view );
 		}
 		
 		// Depending on core view rendering model
