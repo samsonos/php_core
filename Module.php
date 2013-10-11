@@ -431,6 +431,12 @@ class Module implements iModule, \ArrayAccess, iModuleViewable
 		// Generate viewprefix as only lowercase classname without NS if it is not specified
 		$class_name = is_string( $viewprefix ) ? $viewprefix : ''.mb_strtolower( classname(get_class($object)), 'UTF-8' );
 		
+		// Save object to view data
+		$this->data[ $class_name ] = $object;
+		
+		// Add separator
+		$class_name .= '_';
+		
 		// Generate objects view array data and merge it with view data
 		$this->data = array_merge( $this->data, $object->toView( $class_name ) );
 	}
