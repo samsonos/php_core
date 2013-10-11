@@ -190,10 +190,7 @@ function v( $name, $realName = NULL )
 }
 
 /** 
- * If view variable - output view variable only if it has value
- * function only differs from v() that if no view variable is found 
- * this function does not echo view variable name
- * 
+ * IV(If view variable) - output view variable only if is correctly set for view output * 
  */
 function iv( $name, $realName = NULL )
 {
@@ -201,22 +198,10 @@ function iv( $name, $realName = NULL )
 	$m = & m();
 	
 	// If view variable is set - echo it
-	if ( $m->offsetExists( $name ) ) echo $m[ $name ];	
+	if ( isvalue( $m, $name) ) echo $m[ $name ];	
 }
 
-/**
- * Вывести дату
- * 
- * @param unknown_type $name
- * @param unknown_type $format
- */
-function vdate( $name, $format = 'd.m.y')
-{
-	// Получим указатель на текущий модуль
-	$m = & m();
-	
-	if ( $m->offsetExists( $name )) echo date( $format, strtotime($m[ $name ]));
-}
+
 
 /**
  * View variable for Input( Переменная представления ) - Вывести значение переменной представления
@@ -230,33 +215,44 @@ function vdate( $name, $format = 'd.m.y')
 function vi( $name ){ $m = & m();  if( $m->offsetExists( $name )) echo htmlentities($m[ $name ], ENT_QUOTES,'UTF-8');}
 	
 /**
- * View img( Изображение представления ) - Вывести изображение используя значение переменной представления
- * текущего модуля системы как путь к изображению в текущий поток вывода
- *
- * @see v()
- * @param string $src 	Имя переменной представления с путем к изображению
- * @param string $alt 	Описание изображения
- */
-/**
+ * Figure out if module view variable value is correctly set for view output
  * 
- * @param unknown $src
- * @param string $id
- * @param string $class
- * @param string $alt
- * @param string $dummy
+ * @param iModule	$m		Pointer to module
+ * @param string 	$name 	View variable name
+ * @param mixed 	$value	Value to compare
+ * @return boolean If view variable can be displayed in view
  */
-function vimg( $src, $id='', $class='', $alt = '', $dummy = null )
-{ 
-	// Закешируем ссылку на текущий модуль
-	$m = & m();  
+function isvalue( $m, $name, $value = null )
+{	
+	// If we have module view variable
+	if( isset($m[ $name ]) )
+	{
+		// Get value
+		$var = $m[ $name ];
+		
+		//trace($name.'-'.$var.'-'.gettype( $var ).'-'.$value);
 	
-	// Проверим задана ли указанная переменная представления в текущем модуле 
-	if( $m->offsetExists( $src )) $src = $m[ $src ];
-	//
-	elseif( isset($dummy))$src = $dummy;
-	 
-	// Выведем изображение
-	echo '<img src="'.url()->build($src).'" id="'.$id.'" class="'.$class.'" alt="'.$alt.'" title="'.$alt.'">';	 
+		// Get variable type
+		switch( gettype( $var ) )
+		{
+			// If this is boolean and it matches $value
+			case 'boolean': return $var === $value; 			break;
+			// If this is number and it matches $value
+			case 'integer': return $var === intval($value); 	break;
+			// If this is double and it matches $value
+			case 'double':  return $var === doubleval($value); 	break;
+			// If this is not empty array
+			case 'array':   return sizeof($var); 				break;
+			// If this is a string and it matches $value or if no $value is set string is not empty
+			case 'string':  return  (!isset($value) && isset($var{0})) || 
+									(isset($value) && $var === strval($value)) ; break;
+			// Not supported for now
+			case 'object':
+			case 'NULL':
+			case 'unknown type': 
+			default: return false;
+		}		
+	}
 }
 
 /**
@@ -282,41 +278,12 @@ function vimg( $src, $id='', $class='', $alt = '', $dummy = null )
  * @return boolean Соответствует ли указанная переменная представления переданному значению
  */
 function isval( $name, $value = null, $output = null, $inverse = false )
-{
-	// Flag for checking module value
-	$ok = false;
-	
+{	
 	// Pointer to current module
 	$m = & m();
-
-	// If we have module view variable
-	if( isset($m[ $name ]) )
-	{
-		// Get value
-		$var = $m[ $name ];				
-		
-		// Get variable type
-		switch( gettype( $var ) )
-		{		
-			// If this is boolean and it matches $value
-			case 'boolean': $ok = $var === $value; 				break;
-			// If this is number and it matches $value
-			case 'integer': $ok = $var === intval($value); 		break;
-			// If this is double and it matches $value
-			case 'double':  $ok = $var === doubleval($value); 	break;		
-			// If this is not empty array
-			case 'array':   $ok = sizeof($var); 				break;		
-			// If this is a string and it matches $value or if no $value is set string is not empty
-			case 'string':  $ok = ($var === strval($value)) || (!isset($value) && isset($var{0})); break;
-			// Not supported for now
-			case 'object':
-			case 'NULL':
-			case 'unknown type': 
-			break;
-		}	
-		
-		//trace($name.'-'.$var.'-'.gettype( $var ).'-'.$value.'-'.($var === strval($value)).'-'.$ok.'-'.$inverse);
-	}
+	
+	// Flag for checking module value
+	$ok = isvalue( $m, $name, $value );
 	
 	// If inversion is on
 	if( $inverse ) $ok = ! $ok;
@@ -347,6 +314,62 @@ function isv( $name, $output = null ){ return isval($name, null, $output ); }
  * @return boolean True if value does NOT match
  */
 function isnval( $name, $value = null, $output = null ){ return isval($name, $value, $output, true ); }
+
+/**
+ * Echo HTML link tag with text value from module view variable
+ *  
+ * @param string $name	View variable name
+ * @param string $href	Link url
+ * @param string $class	CSS class
+ * @param string $id	HTML identifier
+ * @param string $title	Title tag value
+ */
+function vhref( $name, $href = null, $class = null, $id = null,  $title = null )
+{
+	$m = & m();
+	
+	// If value can be displayed
+	if( isvalue( $m, $name ) )
+	{		
+		echo '<a id="'.$id.'" class="'.$class.'" href="'.$href.'" title="'.$title.'" >'.$m[ $name ].'</a>';
+	}
+}
+
+/**
+ *
+ * @param unknown $src
+ * @param string $id
+ * @param string $class
+ * @param string $alt
+ * @param string $dummy
+ */
+function vimg( $src, $id='', $class='', $alt = '', $dummy = null )
+{
+	// Закешируем ссылку на текущий модуль
+	$m = & m();
+
+	// Проверим задана ли указанная переменная представления в текущем модуле
+	if( $m->offsetExists( $src )) $src = $m[ $src ];
+	//
+	elseif( isset($dummy))$src = $dummy;
+
+	// Выведем изображение
+	echo '<img src="'.url()->build($src).'" id="'.$id.'" class="'.$class.'" alt="'.$alt.'" title="'.$alt.'">';
+}
+
+/**
+ * Вывести дату
+ *
+ * @param unknown_type $name
+ * @param unknown_type $format
+ */
+function vdate( $name, $format = 'd.m.y')
+{
+	// Получим указатель на текущий модуль
+	$m = & m();
+
+	if ( $m->offsetExists( $name )) echo date( $format, strtotime($m[ $name ]));
+}
 
 /**
  * Is Module ( Является ли текущий модуль указанным ) - Проверить совпадает ли имя текущего модуля с указанным 
@@ -404,52 +427,7 @@ function e( $error_msg = '', $error_code = E_USER_NOTICE, $args = NULL, & $ret_v
  */
 function output( $view, array $vars = NULL, $prefix = NULL )
 {		
-	return s()->render($view,$vars);
-	
-	/*
-	// Объявить ассоциативный массив переменных в данном контексте	
-	if( isset( $vars ) ) extract( $vars );
-		
-	// Начать вывод в буффер
-	ob_start();
-	
-	// Сформируем путь к представлению зависимый от локали
-	$locale_view = str_replace( '/view/', '/view/'.locale().'/', $view );
-	
-	// Если существует специальный "сжатый" формат представлений	
-	if( isset($GLOBALS['__compressor_files'] ) )
-	{	
-		// Если представления записаны напрямую в переменные
-		if( ! $GLOBALS["__compressor_mode"] )
-		{		
-			// Если существует путь к представлению по текущей локале
-			if( isset($GLOBALS['__compressor_files'][ $locale_view ]) ) eval(' ?>'.$GLOBALS['__compressor_files'][ $locale_view ].'<?php ');
-			// Если требуемый файл уже собран в коллекцию представлений системы
-			else if( isset($GLOBALS['__compressor_files'][ $view ]) ) eval(' ?>'.$GLOBALS['__compressor_files'][ $view ].'<?php ');
-		}
-		// Включить содержание представления по текущей локале в вывод буффера
-		else if( isset($GLOBALS['__compressor_files'][ $locale_view ]) && file_exists( $GLOBALS['__compressor_files'][ $locale_view ] ) ) include( $GLOBALS['__compressor_files'][ $locale_view ] );
-		// Включить содержание представления в вывод буффера
-		else if( isset($GLOBALS['__compressor_files'][ $view ]) && file_exists( $GLOBALS['__compressor_files'][ $view ] ) ) include( $GLOBALS['__compressor_files'][ $view ] );		
-	}	
-	// Включить содержание представления по текущей локале в вывод буффера
-	else if( file_exists( $locale_view ) ) include( $locale_view );	
-	// Включить содержание представления в вывод буффера
-	else if( file_exists( $view ) ) include( $view );
-	// Выводим ошибку
-	//else return e('Ошибка: Файл представления ## - не найден', E_SAMSON_FATAL_ERROR, $view );	
-	
-	// Получим данные из буффера вывода
-	$html = ob_get_contents();
-
-	// Очистим буффер
-	ob_end_clean();	
-	
-	//trace('Вывожу файл:'.$view.'('.strlen($html).')');
-	
-	// Вернем полученное представление если мы хоть что-то да получили, иначе NULL
-	return isset($html{0}) ? $html : NULL;
-	*/
+	return s()->render($view,$vars);	
 }
 
 /**
@@ -468,10 +446,9 @@ function & url(){ static $_v; return ( $_v = isset($_v) ? $_v : new \samson\core
  *
  * @see URL::build()
  *
- * @param string $url Начальный URL-Путь для построения
  * @return string Полный URL с параметрами
  */
-function url_base( $url = '' )
+function url_build()
 {
 	static $_v;
 
@@ -479,8 +456,14 @@ function url_base( $url = '' )
 
 	$args = func_get_args();
 
-	echo call_user_func_array( array( $_v, 'build' ), $args );
+	return call_user_func_array( array( $_v, 'build' ), $args );
 }
+
+/** 
+ * Echo builded from module view parameters URL
+ * @see url_build 
+ */
+function url_base(){ echo call_user_func_array( 'url_build', func_get_args() ); }
 
 /**
  * Построить полный URL с учетом относительного пути и текущей локали и вывести его в текущий поток вывода
@@ -555,9 +538,16 @@ function setlocales(){ \samson\core\SamsonLocale::set( func_get_args() ); }
 function locale( $locale = NULL ){ return \samson\core\SamsonLocale::current( $locale ); }
 
 /** 
+ * @param string $l Locale name
  * @return string locale path if current locale is not default locale
  */
-function locale_path(){ $l = locale(); return ($l != \samson\core\SamsonLocale::DEF)? $l.'/' : '';}
+function locale_path( $l = null )
+{ 
+	
+	$l = !isset($l) ? locale() : $l;
+	 
+	return ($l != \samson\core\SamsonLocale::DEF)? $l.'/' : '';
+}
 
 /**
  * Сформировать правильное имя класса с использованием namespace, если оно не указано

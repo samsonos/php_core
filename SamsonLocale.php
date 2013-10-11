@@ -37,7 +37,7 @@ class SamsonLocale
 	 * Локаль по умолчанию RU, имеет представление пустышку - ''
 	 * @var array
 	 */
-	private static $locales = array('');
+	public static $locales = array('');
 	
 	/**
 	 * Проверить текущей значение установленной локали, и если выставлена

@@ -27,6 +27,7 @@ class File
 		'image/gif' 			=> 'gif',
 		'text/plain' 			=> 'txt',
 		'application/pdf' 		=> 'pdf',
+		'application/zip' 		=> 'zip',
 		'application/rtf' 		=> 'rtf',
 		'application/msword' 	=> 'doc',
 		'application/msexcel' 	=> 'xls',
@@ -250,7 +251,7 @@ class File
 		if( isset( self::$ExtensionMIME[ $file_ext ] ) ) return self::$ExtensionMIME[ $file_ext ];	
 	
 		// Ничего не вышло =(
-		return FALSE;
+		return 'application/octet-stream';
 	}
 	
 	/**

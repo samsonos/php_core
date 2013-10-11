@@ -191,7 +191,8 @@ class Module implements iModule, \ArrayAccess, iModuleViewable
 		if( !isset( $view_path ) ) $view_path = $this->view_path;
 		// Direct rendering of specific view, not default view data entry
 		else if( isset( $view_path{0} ) ) $view_path = $this->findView( $view_path );		
-							
+
+		
 		// Switch view context to new module view		
 		$this->viewContext( $view_path );		
 
@@ -200,7 +201,7 @@ class Module implements iModule, \ArrayAccess, iModuleViewable
 
 		// Get current view context plain HTML
 		$out = $this->data[ self::VD_HTML ];
-		
+				
 		// If view path specified
 		if( isset( $view_path {0}) )
 		{	
@@ -417,23 +418,48 @@ class Module implements iModule, \ArrayAccess, iModuleViewable
 		// Иначе вернем пустышку
 		return $result;		
 	}
+
+	// TODO: Переделать обработчик в одинаковый вид для объектов и простых
+	
+	/**
+	 * 
+	 * @param unknown $object
+	 * @param string $viewprefix
+	 */
+	private function _setObject( $object, $viewprefix = null )
+	{
+		// Generate viewprefix as only lowercase classname without NS if it is not specified
+		$class_name = is_string( $viewprefix ) ? $viewprefix : ''.mb_strtolower( classname(get_class($object)), 'UTF-8' );
+		
+		// Generate objects view array data and merge it with view data
+		$this->data = array_merge( $this->data, $object->toView( $class_name ) );
+	}
+	
+	/**
+	 * 
+	 * @param unknown $array
+	 * @param string $viewprefix
+	 */
+	private function _setArray( $array, $viewprefix = null )
+	{
+		// Save array to view data
+		$this->data[ $viewprefix ] = $array;
+		
+		// Add array values to view data
+		$this->data = array_merge( $this->data, $array );
+	}	
 	
 	// Магический метод для установки переменных представления модуля
 	public function __set( $field, $value = NULL )
 	{		
-		// Если передан класс который поддерживает представление для модуля
+		// If iModuleViewable implementor is passed
 		if( is_object( $field ) && in_array( ns_classname('iModuleViewable','samson\core'), class_implements($field )))
-		{				
-			// Сформируем регистро не зависимое имя класса для хранения его переменных в модуле
-			$class_name = is_string( $value ) ? $value : ''.mb_strtolower( classname(get_class($field)), 'UTF-8' );
-		
-			// Объединим текущую коллекцию параметров представления модуля с полями класса
-			$this->data = array_merge( $this->data, $field->toView( $class_name.'_' ) );
+		{	
+			$this->_setObject( $field, $value );			
 		}		
-		// Если вместо имени переменной передан массив - присоединим его к данным представления
-		else if( is_array( $field ) ) $this->data = array_merge( $this->data, $field );
-		// Если передана обычная переменная, установим значение переменной представления
-		// Сделаем имя переменной представления регистро-независимой
+		// If array is passed 
+		else if( is_array( $field ) ) $this->_setArray( $field, $value );
+		// Set view variable
 		else  $this->data[ $field ] = $value;		
 	}
 	
@@ -443,7 +469,12 @@ class Module implements iModule, \ArrayAccess, iModuleViewable
 		//elapsed($this->id.' - __Call '.$method);
 		
 		// If value is passed - set it
-		if( isset( $arguments[0] ) )$this->data[ $method ] = $arguments[0];
+		if( isset( $arguments[0] ) )
+		{
+			if( is_object($arguments[0]) || is_array($arguments[0]) ) $this->__set( $arguments[0], $method );
+			else  $this->__set( $method, $arguments[0] );
+		}
+			//$this->data[ $method ] = $arguments[0];
 		
 		// Chaining
 		return $this;
