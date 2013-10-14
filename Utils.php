@@ -471,6 +471,39 @@ function utf8_limit_string( $str, $length, $limit_marker = '...' )
 }
 
 /**
+ * Perform string transliteration from UTF-8 Cyrilic to Latin
+ * @param string $str String to transliterate
+ * @return mixed Transliterated string
+ */
+function utf8_translit( $str )
+{
+	$converter = array('а' => 'a',   'б' => 'b',   'в' => 'v',
+			'г' => 'g',   'д' => 'd',   'е' => 'e',
+			'ё' => 'je',   'ж' => 'zh',  'з' => 'z',
+			'и' => 'i',   'й' => 'j',   'к' => 'k',
+			'л' => 'l',   'м' => 'm',   'н' => 'n',
+			'о' => 'o',   'п' => 'p',   'р' => 'r',
+			'с' => 's',   'т' => 't',   'у' => 'y',
+			'ф' => 'f',   'х' => 'h',   'ц' => 'ts',
+			'ч' => 'ch',  'ш' => 'sh',  'щ' => 'sch',
+			'ь' => "",  'ы' => 'u',   'ъ' => "i",
+			'э' => 'e',   'ю' => 'ju',  'я' => 'ja', ' '=>'-', 'ї'=>'gi', 'і'=>'i');
+	
+	
+	$str = mb_strtolower($str,'UTF-8');
+	
+	$str = strtr($str, $converter);
+	
+	$str = preg_replace('/[\-]+/ui', '-', $str);
+	
+	$str = trim(preg_replace('/[^a-z0-9\-\_]/ui', '', $str), '-');
+	
+	$str = str_replace('--', '-', $str);
+	
+	return $str;
+}
+
+/**
  * Закодировать данные для отправки в E-mail
  *
  * @param string $str 		Данные для кодировки
