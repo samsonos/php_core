@@ -2,6 +2,21 @@
 use samson\core\SamsonLocale;
 
 /**
+ * Perform URL replacement in string
+ * @param string $str			Inncoming string
+ * @param string $replacement	Replacement string
+ * @return string Replaced string
+ */
+function replace_url( $str, $replacement = null )
+{
+	if( !isset($replacement) ) $replacement = "<a href=\"\\0\" rel=\"nofollow\" target=\"_blank\">\\0</a>";
+	
+	$pattern = '(?xi)\b((?:https?://|www\d{0,3}[.]|[a-z0-9.\-]+[.][a-z]{2,4}/)(?:[^\s()<>]+|\(([^\s()<>]+|(\([^\s()<>]+\)))*\))+(?:\(([^\s()<>]+|(\([^\s()<>]+\)))*\)|[^\s`\!()\[\]{};:\'".,<>?«»“”‘’]))';
+	
+	return preg_replace("!$pattern!i", $replacement, $str);
+}
+
+/**
  * Get all possible combinations of array elements
  * 
  * @param array $array 	Array for building combinations

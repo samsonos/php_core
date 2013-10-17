@@ -474,8 +474,9 @@ class Module implements iModule, \ArrayAccess, iModuleViewable
 	{
 		//elapsed($this->id.' - __Call '.$method);
 		
+	
 		// If value is passed - set it
-		if( isset( $arguments[0] ) )
+		if( sizeof( $arguments ) )
 		{
 			if( is_object($arguments[0]) || is_array($arguments[0]) ) $this->__set( $arguments[0], $method );
 			else  $this->__set( $method, $arguments[0] );
