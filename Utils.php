@@ -2,6 +2,59 @@
 use samson\core\SamsonLocale;
 
 /**
+ * Get difference time entities between two dates
+ * @param string $enddate
+ * @param string $startdate If no starting date is specified - current timestamp is used
+ * @return array Array of dirrence date entities( years, month, days, hours, minutes )
+ */
+function time_difference( $enddate, $startdate = null )
+{
+	// Get current timestamp
+	if(!isset($startdate)) $startdate = time();
+	else $startdate = strtotime($startdate);
+
+	// Difference in miliseconds
+	$difference = strtotime($enddate) - $startdate;
+
+	// Different time delimeters for calculations
+	$minutes_delimeter 	= 60;
+	$hours_delimeter 	= $minutes_delimeter * 60;
+	$days_delimiter 	= $hours_delimeter * 24;
+	$month_delimiter 	= $days_delimiter * 30;
+	$year_delimiter 	= $month_delimiter * 12;
+	
+	//elapsed($difference.'-'.$year_delimiter.'-'.($difference / $year_delimiter).'-'.round( $difference / $year_delimiter ));
+	
+	// Count time entities
+	$year 	 = round( $difference / $year_delimiter ); 
+	$year_ms = $year * $year_delimiter;
+	
+	$month 	 = round( ($difference - $year_ms) / $month_delimiter );
+	$month_ms = abs($month * $month_delimiter);
+	
+	$days 	 = round( ($difference - $year_ms - $month_ms) / $days_delimiter );
+	$days_ms = abs($days * $days_delimiter);
+	
+	$hours	 = round( ($difference - $year_ms - $month_ms - $days_ms) / $hours_delimeter );
+	$hours_ms = abs($hours * $hours_delimeter);
+	
+	$minutes = round( ($difference - $year_ms - $month_ms - $days_ms - $hours_ms) / $minutes_delimeter );
+	$minutes_ms = abs($minutes * $minutes_delimeter);
+	
+	$seconds = ($difference - $year_ms - $month_ms - $days_ms - $hours_ms - $minutes);
+
+	// Return time entities
+	return array(
+		'year' 		=> $year,
+		'month'		=> $month,
+		'day'		=> $days,
+		'hour'		=> $hours,
+		'minute'	=> $minutes,
+		'second'	=> $seconds
+	);
+}
+
+/**
  * Perform URL replacement in string
  * @param string $str			Inncoming string
  * @param string $replacement	Replacement string
@@ -242,7 +295,7 @@ function debug_parse_markers( $pattern, array & $args = NULL )
 function trace( $text = '', $totextarea = false )
 {
 	if( !$totextarea ) echo '' .print_a($text,TRUE).'<br>'."\n"; 
-	else echo '<textarea>'.print_r( $text,true).'</textarea>';
+	else echo '<textarea style="z-index:1000; position:relative;">'.print_r( $text,true).'</textarea>';
 	
 	return FALSE; 
 }

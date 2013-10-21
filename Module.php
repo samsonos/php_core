@@ -231,6 +231,9 @@ class Module implements iModule, \ArrayAccess, iModuleViewable
 		
 		// Set internal view data pointer to last VCS entry
 		$this->data = & $this->view_data[ $this->view_context ];
+		
+		// Return view path to previous state
+		$this->view_path = $this->view_context;
 				
 		// Вернем результат прорисовки
 		return $out;
