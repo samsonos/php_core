@@ -309,7 +309,7 @@ class Module implements iModule, \ArrayAccess, iModuleViewable
 		else  
 		{
 			// Modify parameters list for universal controller action
-			$parameters = array_merge( array( url()->method ), $parameters );
+			$parameters = strlen(url()->method) ? array_merge( array( url()->method ), $parameters ) : $parameters;
 			
 			// If object has universal controller
 			if( method_exists( $this, self::CTR_UNI ) ) $method_name = array( $this, self::CTR_UNI );	
