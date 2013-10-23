@@ -236,18 +236,19 @@ function isvalue( $m, $name, $value = null )
 		switch( gettype( $var ) )
 		{
 			// If this is boolean and it matches $value
-			case 'boolean': return $var === $value; 			break;
+			case 'boolean': return $var === $value; 			
 			// If this is number and it matches $value
-			case 'integer': return $var === intval($value); 	break;
+			case 'integer': return $var === intval($value); 	
 			// If this is double and it matches $value
-			case 'double':  return $var === doubleval($value); 	break;
+			case 'double':  return $var === doubleval($value); 	
 			// If this is not empty array
-			case 'array':   return sizeof($var); 				break;
+			case 'array':   return sizeof($var); 			
 			// If this is a string and it matches $value or if no $value is set string is not empty
 			case 'string':  return  (!isset($value) && isset($var{0})) || 
-									(isset($value) && $var === strval($value)) ; break;
+									(isset($value) && $var === strval($value)) ; 
+			// If this is an object consider it as ok
+			case 'object': return true;
 			// Not supported for now
-			case 'object':
 			case 'NULL':
 			case 'unknown type': 
 			default: return false;
