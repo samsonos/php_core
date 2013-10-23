@@ -113,19 +113,38 @@ class SamsonLocale
 		}	
 	}
 	
-	public static function find($list)
-	{
-		//print_r(SamsonLocale::$locales);
-		$key = false;
-		foreach (self::$locales as $locale)
+	/**
+	 * Parse URL arguments
+	 * @param array $args Collection of URL arguments
+	 * @return boolean True if current locale has been changed
+	 */
+	public static function parseURL( array & $args )
+	{		
+		// Iterate defined site locales
+		foreach ( self::$locales as $locale )
 		{
-			$key = array_search($locale, $list);
-			if ($key!==false)
+			// Search locale string as URL argument
+			if( ($key = array_search( $locale, $args )) !== FALSE )
 			{
-				self::current($locale);break;
-			}
+				// Change current locale
+				self::current( $locale );
+				
+				// If this is not default locale(empty string) - remove it from URL arguments
+				if( $locale != self::DEF )
+				{
+					// Remove argument contained locale string
+					unset($args[ $key ]);
+					
+					// Reindex array
+					$args = array_values($args);
+				}
+				
+				// Return true status
+				return true;				
+			}			
 		}
-		return $key; 
+		
+		return false; 
 	} 
 }
 
