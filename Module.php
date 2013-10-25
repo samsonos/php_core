@@ -274,23 +274,85 @@ class Module implements iModule, \ArrayAccess, iModuleViewable
 	/** @see iModule::action() */
 	public function action( $method_name = NULL )
 	{	
+		//trace( array_keys($this->controllers),true);
+		
 		// Get parameters from URL
-		$parameters = url()->parameters();		
+		$parameters = url()->parameters();			
+		
+		// NEW ASYNC EVENT CHAIN LOGIC
+		// If this is AJAX request - try to call async handlers
+		if($_SERVER['HTTP_ACCEPT'] == '*/*')
+		{ 
+			// Copy parameters
+			$arguments = $parameters;
+			array_unshift( $arguments, url()->method );
+			
+			// Responce
+			$event_result = array( );
+			
+			// Iterate supported methods
+			for ($idx = 0; $idx < sizeof($arguments); $idx++)
+			{
+				// Build async method handler name and try to find method in arguments list
+				$callback = & $this->controllers[ self::ASYNC_PREFIX.$arguments[ $idx ] ];		
+
+				// If async controller handler exists
+				if( isset( $callback ) )
+				{						
+					// Get function arguments without function name
+					$f_args = array_slice( $arguments, $idx + 1 );
+							
+					// Remove used cells from array
+					$arguments = array_slice( $arguments, $idx + 1 );
+					
+					// Perform event and collect event result data
+					$_event_result = call_user_func_array( $callback, $f_args );	
+					
+					// Anyway convert event result to array
+					if( !is_array($_event_result) ) $_event_result = array($_event_result);
+
+					// If event succesfully completed
+					if( !isset($_event_result['status']) || !$_event_result['status'] )
+					{
+						// Handle event chain fail
+						$_event_result['message'] = "\n".'Event failed: '.$callback[1];
+					
+						// Stop event-chain execution
+						break;
+					}					
+					// Add event result array to results collection
+					else $event_result = array_merge( $event_result, $_event_result );					
+				}
+			}
+			
+			// If at least one event has been executed
+			if( sizeof($event_result) )
+			{			
+				// Set async responce
+				s()->async(true);				
+				
+				// Encode event result as json object
+				echo json_encode( $event_result );
+			}
+		}
 		
 		// Controller by name
 		$naming = $method_name;
 		// Controller by server request type
 		$request = self::OBJ_PREFIX.$_SERVER['REQUEST_METHOD'];
-		// Universal controller 
+		// Universal controller
 		$universal = self::CTR_UNI;
 		
 		// Controller selection logic chain
-		$controller = isset( $this->controllers[ $naming ]  ) ? $this->controllers[ $naming ] : 
-						(isset( $this->controllers[ $request ] ) ? $this->controllers[ $request ] :  
-							(isset( $this->controllers[ $universal ] ) ? $this->controllers[ $universal ] : null));
+		$controller = (isset( $this->controllers[ $naming ]  ) ? $this->controllers[ $naming ] : 
+							(isset( $this->controllers[ $request ] ) ? $this->controllers[ $request ] :  
+								(isset( $this->controllers[ $universal ] ) ? $this->controllers[ $universal ] : null)));
 			
 		// If we selected universal controller - change parameters signature
-		if( $controller == $this->controllers[ $universal ] ) array_unshift( $parameters, url()->method );		
+		if( isset($this->controllers[ $universal ]) && $controller == $this->controllers[ $universal ] )
+		{
+			array_unshift( $parameters, url()->method );		
+		}
 		
 		// Perform controller action
 		$action_result = isset( $controller ) ? call_user_func_array( $controller, $parameters ) : A_FAILED;		
