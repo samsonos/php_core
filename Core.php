@@ -571,6 +571,7 @@ final class Core implements iCore
 	/**	@see iCore::start() */
 	public function start( $default )
 	{	
+		// Parse URL
 		url();		
 		
 		//[PHPCOMPRESSOR(remove,start)]
@@ -630,9 +631,7 @@ final class Core implements iCore
 		//[PHPCOMPRESSOR(remove,start)]				
 		// Проинициализируем оставшиеся конфигурации и подключим внешние модули по ним
 		Config::init( $this );					
-		//[PHPCOMPRESSOR(remove,end)]
-		
-		
+		//[PHPCOMPRESSOR(remove,end)]		
 		
 		// Проинициализируем НЕ ЛОКАЛЬНЫЕ модули
 		foreach ($this->module_stack as $id => $module )

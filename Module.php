@@ -8,7 +8,16 @@ namespace samson\core;
  * @version 1.0
  */
 class Module implements iModule, \ArrayAccess, iModuleViewable 
-{		
+{	
+	/** Controllers naming conventions */
+	
+	/** Procedural controller prefix */
+	const PROC_PREFIX = '_';
+	/** OOP controller prefix */
+	const OBJ_PREFIX = '__';
+	/** AJAX controller prefix */
+	const ASYNC_PREFIX = 'async_';
+	
 	/** Static module instances collection */	
 	public static $instances = array();	
 	
@@ -264,69 +273,30 @@ class Module implements iModule, \ArrayAccess, iModuleViewable
 
 	/** @see iModule::action() */
 	public function action( $method_name = NULL )
-	{			
-		// If no controller action name is specified 
-		if( ! isset( $method_name ) )
-		{
-			// Try to guess controller action name by server request type
-			switch( $_SERVER['REQUEST_METHOD'] )
-			{
-				case 'POST'		: $method_name = self::CTR_POST; 		break;
-				case 'PUT'		: $method_name = self::CTR_PUT; 		break;
-				case 'DELETE'	: $method_name = self::CTR_DELETE; 		break;
-				default			: $method_name = self::CTR_BASE;	 				
-			}
-			
-			// Copy default controller action name
-			$o_method_name = $method_name;
-			
-			// In function approach just add module name
-			$method_name = $this->id.($method_name != self::CTR_BASE ? $method_name : '');
-		}	
-		// Controller action specified
-		else 
-		{
-			// Object approach append controller prefix			
-			$o_method_name = '__'.$method_name;
-			
-			// Function approach append module name and separator
-			$method_name = $this->id.'_'.$method_name;
-		}	
-		
-		//trace($method_name);
-		
-		// Build function controller action name
-		//$method_name = $this->id.(isset( $method_name{0} ) && $method_name != self::CTR_BASE ? '_'.$method_name : '');		
-		//trace($method_name);
+	{	
 		// Get parameters from URL
-		$parameters = url()->parameters();
+		$parameters = url()->parameters();		
 		
-		// If module object has controller action defined - try object approach
-		if( method_exists( $this, $o_method_name ) ) $method_name = array( $this, $o_method_name );
-		// No module object controller action method found - try function approach
-		else if( function_exists( $method_name )) ;
-		// Try to find universal controller	
-		else  
-		{
-			// Modify parameters list for universal controller action
-			$parameters = strlen(url()->method) ? array_merge( array( url()->method ), $parameters ) : $parameters;
+		// Controller by name
+		$naming = $method_name;
+		// Controller by server request type
+		$request = self::OBJ_PREFIX.$_SERVER['REQUEST_METHOD'];
+		// Universal controller 
+		$universal = self::CTR_UNI;
+		
+		// Controller selection logic chain
+		$controller = isset( $this->controllers[ $naming ]  ) ? $this->controllers[ $naming ] : 
+						(isset( $this->controllers[ $request ] ) ? $this->controllers[ $request ] :  
+							(isset( $this->controllers[ $universal ] ) ? $this->controllers[ $universal ] : null));
 			
-			// If object has universal controller
-			if( method_exists( $this, self::CTR_UNI ) ) $method_name = array( $this, self::CTR_UNI );	
-			// If wehave function universal controller
-			else if( function_exists(  $this->id.self::CTR_UNI )) $method_name = $this->id.self::CTR_UNI;
-			// No appropriate controller action found for this module
-			else return A_FAILED;
-		}				
+		// If we selected universal controller - change parameters signature
+		if( $controller == $this->controllers[ $universal ] ) array_unshift( $parameters, url()->method );		
 		
-		// TODO: add module and core references pass to controller function by hint
-		// TODO: wait for getHint() method for removing parameter name dependency and use just hint type				
-		
-		// Run module action method
-		$action_result = call_user_func_array( $method_name, $parameters );
-		
-		// Вернем результат выполнения метода контроллера
-		return ! isset( $action_result ) ? A_SUCCESS : $action_result;		
+		// Perform controller action
+		$action_result = isset( $controller ) ? call_user_func_array( $controller, $parameters ) : A_FAILED;		
+			
+		// Stop candidate search
+		return !isset( $action_result ) ? A_SUCCESS : $action_result;		
 	}		
 
 	/**
@@ -358,39 +328,77 @@ class Module implements iModule, \ArrayAccess, iModuleViewable
 	
 		// Save ONLY ONE copy of this instance in static instances collection,
 		// avoiding rewriting by cloned modules		
-		!isset( self::$instances[ $this->id ] ) ? self::$instances[ $this->id ] = & $this : '';
+		!isset( self::$instances[ $this->id ] ) ? self::$instances[ $this->id ] = & $this : '';		
+			
+		// Find all controller actions
+		$functions = get_defined_functions();
+		foreach ( $functions['user'] as $method )
+		{
+			// Try to find standart controllers
+			switch( strtolower($method) )
+			{
+				// Ignore special controllers
+				case $this->id.self::CTR_UNI		:
+				case $this->id.self::CTR_POST		:
+				case $this->id.self::CTR_PUT		:
+				case $this->id.self::CTR_DELETE		:
+				case $this->id.self::CTR_BASE		:
+					break;
+					
+				// Check if regular controller
+				default: if( preg_match('/^'.$this->id.self::PROC_PREFIX.'(?<controller>.+)/i', $method, $matches ) ) 
+				{
+					$this->controllers[ $matches['controller'] ] = $method;
+				}
+			}			
+		}
 		
 		// Iterate class methods
 		foreach ( get_class_methods( $this ) as $method )
-		{
-			// Controller method match
-			if( preg_match('/^__(?<controller>.*)/', $method, $matches ) ) 
+		{		
+			// Try to find standart controllers			
+			switch( strtolower($method) )
 			{
-				// Try to find standart controllers 
-				$found = null;
-				switch( $matches[ 'controller' ] )
+				// Ignore special controllers
+				case self::CTR_UNI		:
+				case self::CTR_POST	:
+				case self::CTR_PUT		:
+				case self::CTR_DELETE	:
+				case self::CTR_BASE	:
+					break;
+			
+				// Ignore magic methods
+				case '__CALL':
+				case '__WAKEUP':
+				case '__SLEEP':
+				case '__CONSTRUCT':
+				case '__DESTRUCT':
+				case '__SET':
+				case '__GET':
+					break;
+			
+				// Check if regular controller
+				default: if( preg_match('/^'.self::OBJ_PREFIX.'(?<controller>.+)/i', $method, $matches ) ) 
 				{
-					case self::CTR_UNI		: $found = $method; break;
-					case self::CTR_POST		: $found = $method; break;
-					case self::CTR_PUT		: $found = $method; break;
-					case self::CTR_DELETE	: $found = $method; break;
-					case self::CTR_BASE		: $found = $method; break;					
+					$this->controllers[ $matches['controller'] ] = array( $this, $method );
 				}
-				
-				// If we have found callable controller action - add it to colection
-				if( isset( $found )) $this->controllers[ $method ] = array( $this, $found );		
-			}
-		}
+			}				
+		}					
 		
-		// Find all controller actions
-		$functions = get_defined_functions();
-		foreach ( preg_grep('/^'.$this->id.'_/', $functions['user'] ) as $action ) $this->controllers[] = $action;
+		if( function_exists( $this->id )) $this->controllers[ self::CTR_BASE ] 	= $this->id;
+		if( method_exists($this, self::CTR_BASE)) $this->controllers[ self::CTR_BASE ] 	= array( $this, self::CTR_BASE );		
 		
-		// Old-fashioned function style controller action method search
-		if( function_exists( $this->id.self::CTR_UNI )) 	$this->controllers[ self::CTR_UNI ] 	= $this->id.self::CTR_UNI;
 		if( function_exists( $this->id.self::CTR_POST )) 	$this->controllers[ self::CTR_POST ] 	= $this->id.self::CTR_POST;
+		if( method_exists($this, self::CTR_POST)) 			$this->controllers[ self::CTR_POST ] 	= array( $this, self::CTR_POST );	
+		
 		if( function_exists( $this->id.self::CTR_PUT )) 	$this->controllers[ self::CTR_PUT ] 	= $this->id.self::CTR_PUT;
-		if( function_exists( $this->id )) $this->controllers[ self::CTR_BASE ] 	= $this->id;	
+		if( method_exists($this, self::CTR_PUT)) 			$this->controllers[ self::CTR_PUT ] 	= array( $this, self::CTR_PUT );		
+				
+		if( function_exists( $this->id.self::CTR_DELETE )) 	$this->controllers[ self::CTR_DELETE ] 	= $this->id.self::CTR_DELETE;
+		if( method_exists($this, self::CTR_DELETE)) 		$this->controllers[ self::CTR_DELETE ] 	= array( $this, self::CTR_DELETE );
+		
+		if( function_exists( $this->id.self::CTR_UNI )) 	$this->controllers[ self::CTR_UNI ] 	= $this->id.self::CTR_UNI;	
+		if( method_exists($this, self::CTR_UNI)) 			$this->controllers[ self::CTR_UNI ] 	= array( $this, self::CTR_UNI );
 		
 		// Make view path relative to module - remove module path from view path
 		$this->views = str_replace( $this->path, '', $this->views );		

@@ -15,19 +15,19 @@ interface iModule
 	const VD_HTML = '__html__';
 	
 	/** Default controller name */
-	const CTR_BASE = '__BASE';
+	const CTR_BASE = '__get';	
 	
 	/** Universal controller name */
-	const CTR_UNI = '__HANDLER';	
+	const CTR_UNI = '__handler';	
 	
 	/** Post controller name */
-	const CTR_POST = '__POST';
+	const CTR_POST = '__post';
 	
 	/** Put controller name */
-	const CTR_PUT = '__PUT';
+	const CTR_PUT = '__put';
 	
 	/** Delete controller name */
-	const CTR_DELETE = '__DELETE';
+	const CTR_DELETE = '__delete';
 	
 	/**
 	 * Установить заголовок страницы

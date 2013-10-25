@@ -27,6 +27,12 @@ class SamsonLocale
 	private static $supported = array( SamsonLocale::DEF, SamsonLocale::EN, SamsonLocale::UA, SamsonLocale::RU );
 	
 	/**
+	 * Коллекция названий поддерживаемых локализаций
+	 * @var array
+	 */
+	public static $alias = array( SamsonLocale::DEF=>'РУС', SamsonLocale::EN=>'ENG', SamsonLocale::UA=>'УКР', SamsonLocale::RU=>'РУС' );
+	
+	/**
 	 * Текущая локализация веб-приложения
 	 * @var string
 	 */
