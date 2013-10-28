@@ -274,7 +274,7 @@ class Module implements iModule, \ArrayAccess, iModuleViewable
 	/** @see iModule::action() */
 	public function action( $method_name = NULL )
 	{	
-		//trace( array_keys($this->controllers),true);
+		//trace( array_keys($this->controllers), true );
 		
 		// Get parameters from URL
 		$parameters = url()->parameters();			
@@ -334,12 +334,12 @@ class Module implements iModule, \ArrayAccess, iModuleViewable
 				// Encode event result as json object
 				echo json_encode( $event_result );
 			}
-		}
+		}	
 		
 		// Controller by name
 		$naming = $method_name;
 		// Controller by server request type
-		$request = self::OBJ_PREFIX.$_SERVER['REQUEST_METHOD'];
+		$request = strtolower($_SERVER['REQUEST_METHOD'] == 'GET' ? self::CTR_BASE : self::OBJ_PREFIX.$_SERVER['REQUEST_METHOD']);
 		// Universal controller
 		$universal = self::CTR_UNI;
 		
@@ -407,13 +407,16 @@ class Module implements iModule, \ArrayAccess, iModuleViewable
 				case $this->id.self::CTR_BASE		:
 					break;
 					
+				// Default controller
+				//case $this->id: $this->controllers[ $method ] = $method; break;
+					
 				// Check if regular controller
 				default: if( preg_match('/^'.$this->id.self::PROC_PREFIX.'(?<controller>.+)/i', $method, $matches ) ) 
 				{
 					$this->controllers[ $matches['controller'] ] = $method;
 				}
 			}			
-		}
+		}		
 		
 		// Iterate class methods
 		foreach ( get_class_methods( $this ) as $method )
@@ -422,21 +425,21 @@ class Module implements iModule, \ArrayAccess, iModuleViewable
 			switch( strtolower($method) )
 			{
 				// Ignore special controllers
-				case self::CTR_UNI		:
+				case self::CTR_UNI:
 				case self::CTR_POST	:
-				case self::CTR_PUT		:
-				case self::CTR_DELETE	:
+				case self::CTR_PUT:
+				case self::CTR_DELETE:
 				case self::CTR_BASE	:
 					break;
 			
 				// Ignore magic methods
-				case '__CALL':
-				case '__WAKEUP':
-				case '__SLEEP':
-				case '__CONSTRUCT':
-				case '__DESTRUCT':
-				case '__SET':
-				case '__GET':
+				case '__call':
+				case '__wakeup':
+				case '__sleep':
+				case '__construct':
+				case '__destruct':
+				case '__set':
+				case '__get':
 					break;
 			
 				// Check if regular controller

@@ -15,7 +15,7 @@ interface iModule
 	const VD_HTML = '__html__';
 	
 	/** Default controller name */
-	const CTR_BASE = '__get';	
+	const CTR_BASE = '__base';	
 	
 	/** Universal controller name */
 	const CTR_UNI = '__handler';	
