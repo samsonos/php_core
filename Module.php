@@ -288,7 +288,7 @@ class Module implements iModule, \ArrayAccess, iModuleViewable
 			array_unshift( $arguments, url()->method );
 			
 			// Responce
-			$event_result = array( );
+			$event_result = array();
 			
 			// Iterate supported methods
 			for ($idx = 0; $idx < sizeof($arguments); $idx++)
