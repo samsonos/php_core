@@ -15,7 +15,7 @@ namespace samson\core;
  */
 class SingletonModule extends Service 
 {	
-	public function __construct()
+	public function __construct() 
 	{
 		e('Module(##) - Class(##) is deprecated use parent class(##) instead', E_SAMSON_CORE_ERROR, array( $this->id, __CLASS__,get_parent_class(__CLASS__)));
 		
