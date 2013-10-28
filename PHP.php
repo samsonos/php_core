@@ -12,4 +12,4 @@ class PHP extends CompressableExternalModule
 	
 	/** Get real current PHP version */
 	protected $version = PHP_VERSION;	
-}
+} 
