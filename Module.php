@@ -501,7 +501,6 @@ class Module implements iModule, \ArrayAccess, iModuleViewable
 		return $result;		
 	}
 
-	// TODO: Переделать обработчик в одинаковый вид для объектов и простых
 	
 	/**
 	 * Create unique module cache folder structure in local web-application
@@ -529,6 +528,8 @@ class Module implements iModule, \ArrayAccess, iModuleViewable
 			return true;
 		}
 	}
+
+	// TODO: Переделать обработчик в одинаковый вид для объектов и простых
 	
 	/**
 	 * 
@@ -567,30 +568,31 @@ class Module implements iModule, \ArrayAccess, iModuleViewable
 	// Магический метод для установки переменных представления модуля
 	public function __set( $field, $value = NULL )
 	{		
-		// If iModuleViewable implementor is passed
-		if( is_object( $field ) && in_array( ns_classname('iModuleViewable','samson\core'), class_implements($field )))
+		// This is object
+		if( is_object( $field ))
 		{	
-			$this->_setObject( $field, $value );			
+			// If iModuleViewable implementor is passed
+			if( in_array( ns_classname('iModuleViewable','samson\core'), class_implements($field )) ) $this->_setObject( $field, $value );			
 		}		
 		// If array is passed 
 		else if( is_array( $field ) ) $this->_setArray( $field, $value );
 		// Set view variable
-		else  $this->data[ $field ] = $value;		
+		else $this->data[ $field ] = $value;		
 	}
 	
 	/** Magic method for calling unexisting object methods */
 	public function __call( $method, $arguments )
 	{
-		//elapsed($this->id.' - __Call '.$method);
-		
+		//elapsed($this->id.' - __Call '.$method);		
 	
 		// If value is passed - set it
 		if( sizeof( $arguments ) )
 		{
+			// If first argument is object or array - pass method name as second parameter
 			if( is_object($arguments[0]) || is_array($arguments[0]) ) $this->__set( $arguments[0], $method );
+			// Standart logic
 			else  $this->__set( $method, $arguments[0] );
 		}
-			//$this->data[ $method ] = $arguments[0];
 		
 		// Chaining
 		return $this;
