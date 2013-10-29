@@ -76,6 +76,9 @@ ini_set( 'max_execution_time', __SAMSON_MAX_EXECUTION__ );
 // Начать сессию
 session_start();
 
+// Remove unnessesar files umask
+$old_umask = umask(0);
+
 //print_R($_SESSION);
 
 //echo microtime(TRUE) - __SAMSON_T_STARTED__;
