@@ -40,16 +40,19 @@ class Module implements iModule, \ArrayAccess, iModuleViewable
 	protected $version = '0.0.1';
 	
 	/** Path to view for rendering */
-	public $view_path = self::VD_POINTER_DEF;
+	protected $view_path = self::VD_POINTER_DEF;
 	
 	/** Pointer to view data enty */
 	protected $data = array( self::VD_POINTER_DEF => array( self::VD_HTML => '' ) );
 	
 	/** Collection of data for view rendering, filled with default pointer */
-	public $view_data = array( self::VD_POINTER_DEF => array( self::VD_HTML => '' ) );	
+	protected $view_data = array( self::VD_POINTER_DEF => array( self::VD_HTML => '' ) );	
 	
 	/** Name of current view context entry */
 	protected $view_context = self::VD_POINTER_DEF;
+	
+	/** Unique module cache path in local web-application */
+	protected $cache_path;
 	
 	/**
 	 * Perform module view context switching 
@@ -387,6 +390,9 @@ class Module implements iModule, \ArrayAccess, iModuleViewable
 						
 		// Save views list
 		isset( $resources ) ? $this->views = & $resources['views'] : '';
+		
+		// Generate unique module cache path in local web-application
+		$this->cache_path = __SAMSON_CWD__.__SAMSON_CACHE_PATH.'/'.$this->id.'/';
 	
 		// Save ONLY ONE copy of this instance in static instances collection,
 		// avoiding rewriting by cloned modules		
@@ -496,6 +502,33 @@ class Module implements iModule, \ArrayAccess, iModuleViewable
 	}
 
 	// TODO: Переделать обработчик в одинаковый вид для объектов и простых
+	
+	/**
+	 * Create unique module cache folder structure in local web-application
+	 * @param string 	$file 	Path to file relative to module cache location
+	 * @param boolean 	$clear	Flag to perform generic cache folder clearence
+	 * @return boolean TRUE if cache file has to be regenerated
+	 */
+	protected function cache_refresh( & $file, $clear = true )
+	{
+		// If module cache folder does not exists - create it
+		if( !file_exists( $this->cache_path ) ) mkdir( $this->cache_path, 0777, TRUE );
+		
+		// Build full path to cached file
+		$file = $this->cache_path.$file;		
+		
+		// If cached file does not exsits
+		if( file_exists( $file ) ) return false;
+		// Needed file does not exists 	
+		else 
+		{
+			// If clearence flag set to true - clear all files in module cache directory with same extension
+			if( $clear ) File::clear( $this->cache_path, pathinfo( $file, PATHINFO_EXTENSION ) );			
+			
+			// Singal for cache file regeneration
+			return true;
+		}
+	}
 	
 	/**
 	 * 
