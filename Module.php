@@ -339,10 +339,13 @@ class Module implements iModule, \ArrayAccess, iModuleViewable
 			}
 		}	
 		
+		// Get HTTP request type
+		$request_type = $_SERVER['REQUEST_METHOD'];
+		
 		// Controller by name
 		$naming = $method_name;
 		// Controller by server request type
-		$request = strtolower($_SERVER['REQUEST_METHOD'] == 'GET' ? self::CTR_BASE : self::OBJ_PREFIX.$_SERVER['REQUEST_METHOD']);
+		$request = !isset($method_name{0}) ? strtolower( $request_type == 'GET' ? self::CTR_BASE : self::OBJ_PREFIX.$request_type) : '';
 		// Universal controller
 		$universal = self::CTR_UNI;
 		
