@@ -119,7 +119,7 @@ function & s()
 /**
  * Error(Ошибка) - Получить класс для работы с ошибками и отладкой системы
  *
- * @return Error Класс для работы с ошибками и отладкой системы
+ * @return \samson\core\Error Класс для работы с ошибками и отладкой системы
  */
 function & error(){static $_error; return ( $_error = isset($_error) ? $_error : new \samson\core\Error());}
 
@@ -131,7 +131,7 @@ error();
  * @see iCore::module();
  * 
  * @param mixed $module Указатель на модуль системы * 
- * @return ModuleConnector Текущую / Модель по её имени / или FALSE если модель не найдена
+ * @return \samson\core\Module Текущую / Модель по её имени / или FALSE если модель не найдена
  */
 function & m( $module = NULL )
 { 

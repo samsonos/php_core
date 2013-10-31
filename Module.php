@@ -357,7 +357,8 @@ class Module implements iModule, \ArrayAccess, iModuleViewable
 		// If we selected universal controller - change parameters signature
 		if( isset($this->controllers[ $universal ]) && $controller == $this->controllers[ $universal ] )
 		{
-			array_unshift( $parameters, url()->method );		
+			// If method is specified - add it to universal controller parameters list
+			if(isset(url()->method{0})) array_unshift( $parameters, url()->method );		
 		}
 		
 		// Perform controller action

@@ -244,7 +244,10 @@ class URL implements iURL
 		$this->text = $url;
 		
 		// Получим последний аргумент из URL				
-		$this->last = isset($position) ? $url_args[ $position ] : '';	
+		$this->last = isset($position) ? $url_args[ $position ] : '';
+		
+		// If we have only one parameter and it is empty - remove it
+		//if( sizeof($this->parameters) == 1 && !isset($this->parameters[0]{1})) unset($this->parameters[0]);		
 		
 		// Если не создан массив прошлых URL - маршрутов, создадим его
 		if( !isset($_SESSION[ self::S_PREVIOUS_KEY ]) ) $_SESSION[ self::S_PREVIOUS_KEY ] = array();
