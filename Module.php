@@ -108,7 +108,7 @@ class Module implements iModule, \ArrayAccess, iModuleViewable
 	 * @param string $view_path Part of path to module view file
 	 * @return string Full path to view file
 	 */
-	protected function findView( $view_path )
+	public function findView( $view_path )
 	{				
 		// Remove file extension for correct array searching
 		$view_path = str_replace( array('.php','.vphp'), '', $view_path );		
@@ -122,7 +122,7 @@ class Module implements iModule, \ArrayAccess, iModuleViewable
 			// Set current full view path as last found view
 			return end( $view );
 		}		
-		else
+		else return false;
 		{
 			//elapsed($this->views);
 			//return e('Cannot find ## view ## - file does not exists', E_SAMSON_RENDER_ERROR, array( $this->id, $view_path));

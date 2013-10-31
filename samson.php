@@ -310,6 +310,17 @@ function isval( $name, $value = null, $output = null, $inverse = false )
 function isv( $name, $output = null ){ return isval($name, null, $output ); }
 
 /**
+ * Is Variable DOES NOT exists, also checks:
+ *  - if module view variable is not empty array
+ *  - if module view variable is not empty string
+ *
+ * @param string 	$name Имя переменной для проверки
+ * @param string	$output	Value for outputting in case of success
+ * @return boolean True if variable exists
+ */
+function isnv( $name, $output = null ){ return isval($name, null, $output, true ); }
+
+/**
  * Is NOT value - checks if module view variable value does not match $value 
  * 
  * @param string 	$name 	Module view variable name
