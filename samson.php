@@ -277,11 +277,12 @@ function isvalue( $m, $name, $value = null )
  * 
  * @param string 	$name 		Module view variable name
  * @param mixed 	$value 		Value for checking
- * @param string	$output		Value for outputting in case of success  
+ * @param string	$success	Value for outputting in case of success  
+ * @param string	$failure	Value for outputting in case of failure 
  * @param boolean	$inverse	Value for outputting in case of success
  * @return boolean Соответствует ли указанная переменная представления переданному значению
  */
-function isval( $name, $value = null, $output = null, $inverse = false )
+function isval( $name, $value = null, $success = null, $failure = null, $inverse = false)
 {	
 	// Pointer to current module
 	$m = & m();
@@ -292,8 +293,10 @@ function isval( $name, $value = null, $output = null, $inverse = false )
 	// If inversion is on
 	if( $inverse ) $ok = ! $ok;
 	
-	// If we have output - echo it
-	if( $ok && isset( $output) ) v($output);
+	// If we have success value - output it
+	if( $ok && isset( $success) ) v($success);
+	// If we have failure value - output it
+	else if( isset($failure)) v($failure);
 	
 	return $ok;
 }
@@ -304,31 +307,34 @@ function isval( $name, $value = null, $output = null, $inverse = false )
  *  - if module view variable is not empty string
  *
  * @param string 	$name Имя переменной для проверки
- * @param string	$output	Value for outputting in case of success  
+ * @param string	$success	Value for outputting in case of success
+ * @param string	$failure	Value for outputting in case of failure    
  * @return boolean True if variable exists
  */
-function isv( $name, $output = null ){ return isval($name, null, $output ); }
+function isv( $name, $success = null, $failure = null ){ return isval($name, null, $success, $failure ); }
 
 /**
  * Is Variable DOES NOT exists, also checks:
- *  - if module view variable is not empty array
- *  - if module view variable is not empty string
+ *  - if module view variable is empty array
+ *  - if module view variable is empty string
  *
  * @param string 	$name Имя переменной для проверки
- * @param string	$output	Value for outputting in case of success
+ * @param string	$success	Value for outputting in case of success
+ * @param string	$failure	Value for outputting in case of failure 
  * @return boolean True if variable exists
  */
-function isnv( $name, $output = null ){ return isval($name, null, $output, true ); }
+function isnv( $name, $success = null, $failure = null ){ return isval( $name, null, $success, $failure, true ); }
 
 /**
  * Is NOT value - checks if module view variable value does not match $value 
  * 
- * @param string 	$name 	Module view variable name
- * @param mixed 	$value 	Value for checking
- * @param string	$output	Value for outputting in case of success  
+ * @param string 	$name 	 Module view variable name
+ * @param mixed 	$value 	 Value for checking
+ * @param string	$success Value for outputting in case of success
+ * @param string	$failure Value for outputting in case of failure   
  * @return boolean True if value does NOT match
  */
-function isnval( $name, $value = null, $output = null ){ return isval($name, $value, $output, true ); }
+function isnval( $name, $value = null, $success = null, $failure = null ){ return isval($name, $value, $success, $failure, true ); }
 
 /**
  * Echo HTML link tag with text value from module view variable
@@ -551,6 +557,14 @@ function setlocales(){ \samson\core\SamsonLocale::set( func_get_args() ); }
  * @return string Возвращает текущее значение локали сайта до момента вызова метода
  */
 function locale( $locale = NULL ){ return \samson\core\SamsonLocale::current( $locale ); }
+
+/**
+ * Check if passed locale alias matches current locale and output in success
+ * @param string $locale Locale alias to compare with current locale
+ * @param string $output Output string on success
+ * @return boolean True if passed locale alias matches current locale
+ */
+function islocale( $locale, $output = '' ){ if( \samson\core\SamsonLocale::$current_locale == $locale) { echo $output; return true; } return false; }
 
 /** 
  * @param string $l Locale name
