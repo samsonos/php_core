@@ -379,17 +379,20 @@ function vimg( $src, $id='', $class='', $alt = '', $dummy = null )
 }
 
 /**
- * Вывести дату
+ * Output view variable as date with formating
+ * If view variable exists then output it as date with formatting
  *
- * @param unknown_type $name
- * @param unknown_type $format
+ * @param string $name 	 Module view variable name
+ * @param string $format Date format string
  */
-function vdate( $name, $format = 'd.m.y')
+function vdate( $name, $format = 'd.m.y' )
 {
-	// Получим указатель на текущий модуль
+	// Cache current module
 	$m = & m();
 
+	// If view variable is set - echo with format
 	if ( $m->offsetExists( $name )) echo date( $format, strtotime($m[ $name ]));
+	
 }
 
 /**
