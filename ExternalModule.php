@@ -12,7 +12,11 @@ class ExternalModule extends Module implements iExternalModule
 	/** Correct name for composer generator */
 	const COMPOSER_VENDOR = 'samsonos';
 	
-	/** Указатель на родительский модуль */
+	/** 
+	 * Pointer to parent module 
+	 * @var \samson\core\Module
+	 * @see \samson\core\Module
+	 */
 	public $parent = NULL;
 	
 	/** Virtual module identifier */
@@ -58,6 +62,8 @@ class ExternalModule extends Module implements iExternalModule
 		// Create copy instance
 		$o = new $classname( $this->path, $id );	
 		$o->views = & $this->views;
+		//$o->view_path = $this->view_path;		
+		$o->parent = & $this->parent;
 		$o->controllers = & $this->controllers;
 		
 		return $o;
@@ -120,21 +126,18 @@ class ExternalModule extends Module implements iExternalModule
 	 * @see Module::output()
 	 */
 	public function output( $view_path = null )
-	{		
+	{	
+		//elapsed($this->id.'('.$this->uid.')-'.$this->view_path);
 		// Если этот класс не прямой наследник класса "Подключаемого Модуля"
 		if( isset( $this->parent ) )
-		{			
+		{		
 			// Find full path to view file
-			$_view_path = $this->findView( $view_path );
-			
-			//elapsed( 'Outputting '.$_view_path );		
+			$_view_path = $this->findView( $view_path );			
 			
 			// Если требуемое представление НЕ существует в текущем модуле -
 			// выполним вывод представления для родительского модуля
 			if( !isset($_view_path{0})  )					
-			{
-				//elapsed('Parent - '.$this->parent->id);
-				
+			{			
 				// Merge view data for parent module
 				$this->parent->view_data = array_merge( $this->parent->view_data, $this->view_data );
 				
@@ -142,7 +145,7 @@ class ExternalModule extends Module implements iExternalModule
 				$this->parent->data = & $this->data;
 				
 				// Call parent module rendering
-				return $this->parent->output( $view_path );
+				return $this->parent->output( isset($view_path) ? $view_path : $this->view_path );
 			}
 		}
 	

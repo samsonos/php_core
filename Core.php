@@ -294,7 +294,11 @@ final class Core implements iCore
 								foreach ( $this->module_stack as & $m )
 								{
 									// Если в систему был загружен модуль с родительским классом
-									if( get_class($m) == $parent_class ) $connector->parent = & $m;
+									if( get_class($m) == $parent_class ) 
+									{										
+										$connector->parent = & $m;
+										//elapsed('Parent connection for '.$class_name.'('.$connector->uid.') with '.$parent_class.'('.$m->uid.')');
+									}
 								}
 							}
 				

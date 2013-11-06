@@ -21,6 +21,9 @@ class Module implements iModule, \ArrayAccess, iModuleViewable
 	/** Static module instances collection */	
 	public static $instances = array();	
 	
+	/** Uniquer identifier to check pointers */
+	public $uid;
+	
 	/** Collection for callable controllers of module */
 	protected $controllers = array();
 	
@@ -387,7 +390,10 @@ class Module implements iModule, \ArrayAccess, iModuleViewable
 		$this->id = $id;
 		
 		// Set path to module
-		$this->path( $path );						
+		$this->path( $path );	
+
+		// Generate unique module identifier
+		$this->uid = rand(0, 9999999).'_'.microtime(true);
 		
 		// Add to module identifier to view data stack
 		$this->data['id'] = $this->id;			
