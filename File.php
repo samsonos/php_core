@@ -34,7 +34,8 @@ class File
 		'application/vnd.ms-excel'  => 'xls',		
 		'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' => 'xlsx', 			
 		'application/vnd.openxmlformats-officedocument.wordprocessingml.document' => 'docx',
-		'application/octet-stream' 	=> 'sql'
+		'application/octet-stream' 	=> 'sql',
+		'audio/mpeg'	=> 'mp3'
 	); 
 	
 	/**
