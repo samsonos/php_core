@@ -487,7 +487,7 @@ function url_build()
  * Echo builded from module view parameters URL
  * @see url_build 
  */
-function url_base(){ echo call_user_func_array( 'url_build', func_get_args() ); }
+function url_base(){ $args = func_get_args(); echo call_user_func_array( 'url_build', $args ); }
 
 /**
  * Построить полный URL с учетом относительного пути и текущей локали и вывести его в текущий поток вывода
