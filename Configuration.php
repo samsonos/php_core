@@ -55,7 +55,7 @@ class Config
 		// Получим загруженные в систему классы которые наследуют этот класс
 		foreach ( get_declared_classes() as $class ) if( in_array( 'samson\core\Config', class_parents($class)) ) 
 		{				
-			//trace('Создаем конфигурацию:'.$class);
+			//trace('Создаем конфигурацию:'.$class);		
 			
 			// Создадим экземпляр объекта конфигурации модуля	
 			$o = new $class();	

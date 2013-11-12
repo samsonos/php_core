@@ -21,20 +21,22 @@ class Service extends ExternalModule
 	 * @param $class Classname for getting instance
 	 * @return SingletonModule
 	*/
-	public static function getInstance( $class )
+	public static function & getInstance( $class )
 	{
 		// Получим класс из которого был вызван метод
 		$class = strtolower( isset( $class ) ? $class : e('Classname not specified', E_SAMSON_FATAL_ERROR));
 	
-		// Вернем единственный экземпляр
-		return self::$_factory[ $class ];
+		// Check if service exists
+		if( !isset(self::$_factory[ $class ])) e('Service ## does not exists', E_SAMSON_FATAL_ERROR, $class );
+		// Return service instance
+		else return self::$_factory[ $class ];
 	}
 
 	/** Конструктор */
 	public function __construct( $path = NULL )
 	{
 		// Получим имя класса
-		$class = strtolower(classname(get_class( $this )));
+		$class = strtolower(get_class( $this ));
 			
 		// Проверка на Singleton
 		if( !isset(self::$_factory[ $class ]) ) self::$_factory[ $class ] = $this;
@@ -45,5 +47,5 @@ class Service extends ExternalModule
 	}
 
 	/** Обработчик десериализации объекта */
-	public function __wakeup(){	parent::__wakeup();	self::$_factory[ strtolower(classname(get_class($this))) ] = $this;  }
+	public function __wakeup(){	parent::__wakeup();	self::$_factory[ strtolower(get_class($this)) ] = $this;  }
 }

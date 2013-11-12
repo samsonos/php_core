@@ -1,4 +1,5 @@
 <?php
+//[PHPCOMPRESSOR(remove,start)]
 namespace samson\core;
 
 class Generator
@@ -259,3 +260,4 @@ class Generator
 	private function defnamespace( $name ){ return $this->newline( 'namespace '.$name.';')->newline(); }
 	
 }
+//[PHPCOMPRESSOR(remove,end)]

@@ -54,7 +54,7 @@ define('__SAMSON_VIEW_PATH', __SAMSON_APP_PATH.'/view/');
 define('__SAMSON_DEFAULT_TEMPLATE', __SAMSON_VIEW_PATH.'index.php' );
 
 /** Максимальное время выполнения скрипта */
-define( '__SAMSON_MAX_EXECUTION__', 30 );
+define( '__SAMSON_MAX_EXECUTION__', 60 );
 
 /** Действие контроллера выполнено успешно */
 define( 'A_SUCCESS', TRUE );
@@ -589,15 +589,37 @@ function locale_path( $l = null )
  * @param string $ns		 Пространство имен которому принадлежит класс
  * @return string Исправленное имя класса
  */
-// TODO: Автоматическая замена имени класса с namespace на "_"
 function ns_classname( $class_name, $ns = 'samson\activerecord' )
 {	
-	// If core rendering model is NOT array loading
-	if( s()->render_mode != samson\core\iCore::RENDER_ARRAY ){ 
-		return ( strpos($class_name, __NS_SEPARATOR__) !== false ) ? $class_name : $ns.__NS_SEPARATOR__.$class_name;
+	// If passed class already exists - do nothing
+	if( class_exists($class_name) ) return $class_name;
+	// We must build correcyt class name
+	else 
+	{
+		// If core rendering model is NOT array loading
+		if( s()->render_mode != samson\core\iCore::RENDER_ARRAY )
+		{ 
+			return ( strpos($class_name, __NS_SEPARATOR__) !== false ) ? $class_name : $ns.__NS_SEPARATOR__.$class_name;
+		}
+		// Array loading render model
+		else 
+		{
+			// If classname with namespaces passed - transform it
+			if( strpos($class_name, __NS_SEPARATOR__) !== false ) 
+			{
+				// Get only namespace from classname
+				$ns = trim(nsname($class_name));
+				
+				// Remove starting \ from namespace
+				$ns = $ns{0} == '\\' ? substr( $ns, 1) : $ns;
+				
+				// Transform namespace and class name
+				return str_replace('\\', '_', $ns).'_'.classname( $class_name );
+			}
+			// Add namespace to class name and transform it
+			else return str_replace('\\', '_', $ns).'_'.$class_name;
+		}
 	}
-	// Array loading render model
-	else return classname( $class_name );
 }
 
 /**

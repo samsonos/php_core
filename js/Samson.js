@@ -1,3 +1,5 @@
+var __SAMSONPHP_STARTED = new Date().getTime();
+
 /**
  * Специальный объект для передачи данных в JavaScript из 
  * фреймворка SamsonPHP
@@ -68,7 +70,7 @@ var SamsonPHP =
 	 * @returns {String} Путь к корню текущего веб-приложения
 	 */
 	url_base : function()
-	{ 		
+	{ 	
 		// Результирующая ссылка
 		var result = [];
 		 

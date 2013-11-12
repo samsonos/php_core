@@ -14,7 +14,7 @@ namespace samson\core;
  * @package SamsonPHP
  * @author Vitaly Iegorov <vitalyiegorov@gmail.com> 
  */
-final class Core implements iCore
+class Core implements iCore
 {		
 	/** Module pathes loaded stack */
 	public $load_path_stack = array();
@@ -650,7 +650,7 @@ final class Core implements iCore
 		}	
 		
 		////elapsed('End initing modules');
-		
+		header("HTTP/1.0 200 Ok");
 		// Результат выполнения действия модуля
 		$module_loaded = A_FAILED;
 
@@ -702,8 +702,7 @@ final class Core implements iCore
 			
 			// Добавим специальную системную комманду для инициализации фреймворка в JavaScript
 			$head_html .= '
-			<script type="text/javascript">
-			var __SAMSONPHP_STARTED = new Date().getTime();
+			<script type="text/javascript">			
 			if(SamsonPHP){
 				SamsonPHP._uri = "'.url()->text().'"; 
 				SamsonPHP._moduleID = "'.$this->active->id().'";
