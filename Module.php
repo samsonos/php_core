@@ -580,7 +580,7 @@ class Module implements iModule, \ArrayAccess, iModuleViewable
 	{		
 		// This is object
 		if( is_object( $field ))
-		{	
+		{				
 			// If iModuleViewable implementor is passed
 			if( in_array( ns_classname('iModuleViewable','samson\core'), class_implements($field )) ) $this->_setObject( $field, $value );			
 		}		
