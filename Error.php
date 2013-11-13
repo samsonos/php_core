@@ -192,7 +192,7 @@ class Error
 			if( $error['class'] == '_core_debug') $html .= '<div class="_core_error _core_debug">'.$error['message'].'</div>';
 			else 
 			{
-				$id = rand(0, 999999999);
+				$id = rand(0, 999999999).rand(0,9999999999);
 				// Выведем ошибку
 				$html .= '<div class="_core_error '.$error['class'].'">
 						<input type="checkbox" id="eb_'.$id.'" class="_core_error_check_box">
