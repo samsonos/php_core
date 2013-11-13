@@ -350,9 +350,13 @@ function vhref( $name, $href = null, $class = null, $id = null,  $title = null )
 	$m = & m();
 	
 	// If value can be displayed
-	if( isvalue( $m, $name ) )
+	if( isvalue( $m, $name ) || isvalue( $m, $href ) )
 	{		
-		echo '<a id="'.$id.'" class="'.$class.'" href="'.$href.'" title="'.$title.'" >'.$m[ $name ].'</a>';
+		$name = isset( $m[ $name ] ) ? $m[ $name ] : $name;
+		
+		$href = isset( $m[ $href ] ) ? $m[ $href ] : $href;
+		
+		echo '<a id="'.$id.'" class="'.$class.'" href="'.$href.'" title="'.$title.'" >'.$name.'</a>';
 	}
 }
 
@@ -385,7 +389,7 @@ function vimg( $src, $id='', $class='', $alt = '', $dummy = null )
  * @param string $name 	 Module view variable name
  * @param string $format Date format string
  */
-function vdate( $name, $format = 'd.m.y' )
+function vdate( $name, $format = 'h:i d.m.y' )
 {
 	// Cache current module
 	$m = & m();
@@ -590,36 +594,32 @@ function locale_path( $l = null )
  * @return string Исправленное имя класса
  */
 function ns_classname( $class_name, $ns = 'samson\activerecord' )
-{	
-	// If passed class already exists - do nothing
-	if( class_exists($class_name) ) return $class_name;
-	// We must build correcyt class name
+{		
+	// If core rendering model is NOT array loading
+	if( s()->render_mode != samson\core\iCore::RENDER_ARRAY )
+	{ 
+		return ( strpos($class_name, __NS_SEPARATOR__) !== false ) ? $class_name : $ns.__NS_SEPARATOR__.$class_name;
+	}
+	// Array loading render model
 	else 
 	{
-		// If core rendering model is NOT array loading
-		if( s()->render_mode != samson\core\iCore::RENDER_ARRAY )
-		{ 
-			return ( strpos($class_name, __NS_SEPARATOR__) !== false ) ? $class_name : $ns.__NS_SEPARATOR__.$class_name;
-		}
-		// Array loading render model
-		else 
+		// If first char is namespace - remove it
+		if($class_name{0} == '\\') $class_name = substr( $class_name, 1 );
+				
+		// If class exists - return it
+		if( class_exists( $class_name )) return $class_name;
+		// If classname with namespaces passed - transform it
+		else if( strpos($class_name, __NS_SEPARATOR__) !== false ) 
 		{
-			// If classname with namespaces passed - transform it
-			if( strpos($class_name, __NS_SEPARATOR__) !== false ) 
-			{
-				// Get only namespace from classname
-				$ns = trim(nsname($class_name));
-				
-				// Remove starting \ from namespace
-				$ns = $ns{0} == '\\' ? substr( $ns, 1) : $ns;
-				
-				// Transform namespace and class name
-				return str_replace('\\', '_', $ns).'_'.classname( $class_name );
-			}
-			// Add namespace to class name and transform it
-			else return str_replace('\\', '_', $ns).'_'.$class_name;
+			// Get only namespace from classname
+			$ns = trim(nsname($class_name));		
+			
+			// Transform namespace and class name
+			return str_replace('\\', '_', $ns).'_'.classname( $class_name );
 		}
-	}
+		// Add namespace to class name and transform it
+		else return str_replace('\\', '_', $ns).'_'.$class_name;
+	}	
 }
 
 /**

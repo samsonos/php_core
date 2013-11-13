@@ -61,8 +61,7 @@ class ExternalModule extends Module implements iExternalModule
 		
 		// Create copy instance
 		$o = new $classname( $this->path, $id );	
-		$o->views = & $this->views;
-		//$o->view_path = $this->view_path;		
+		$o->views = & $this->views;	
 		$o->parent = & $this->parent;
 		$o->controllers = & $this->controllers;
 		
