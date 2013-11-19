@@ -361,12 +361,12 @@ function vhref( $name, $href = null, $class = null, $id = null,  $title = null )
 }
 
 /**
- *
- * @param unknown $src
- * @param string $id
- * @param string $class
- * @param string $alt
- * @param string $dummy
+ * Render IMG html tag
+ * @param string $src 	Module view variable name to parse and get path to image
+ * @param string $id	Image identifier
+ * @param string $class	Image CSS class
+ * @param string $alt	Image alt text
+ * @param string $dummy	Dummy image path not set * 
  */
 function vimg( $src, $id='', $class='', $alt = '', $dummy = null )
 {
@@ -378,8 +378,11 @@ function vimg( $src, $id='', $class='', $alt = '', $dummy = null )
 	//
 	elseif( isset($dummy))$src = $dummy;
 
-	// Выведем изображение
-	echo '<img src="'.url()->build($src).'" id="'.$id.'" class="'.$class.'" alt="'.$alt.'" title="'.$alt.'">';
+	// We always build path to images fully independant of web-application or module relatively to base web-app
+	if( $src{0} != '/' ) $src = '/'.$src;
+		
+	// Выведем изображение	
+	echo '<img src="'.$src.'" id="'.$id.'" class="'.$class.'" alt="'.$alt.'" title="'.$alt.'">';
 }
 
 /**
@@ -574,14 +577,16 @@ function locale( $locale = NULL ){ return \samson\core\SamsonLocale::current( $l
 function islocale( $locale, $output = '' ){ if( \samson\core\SamsonLocale::$current_locale == $locale) { echo $output; return true; } return false; }
 
 /** 
- * @param string $l Locale name
+ * Build string with locale to use in URL and file path
+ * @param string $l Locale name to use, if not passed - current locale is used
  * @return string locale path if current locale is not default locale
  */
 function locale_path( $l = null )
 { 
-	
+	// If no locale is passed - get current locale	
 	$l = !isset($l) ? locale() : $l;
 	 
+	// Build path starting with locale 
 	return ($l != \samson\core\SamsonLocale::DEF)? $l.'/' : '';
 }
 

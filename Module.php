@@ -337,8 +337,13 @@ class Module implements iModule, \ArrayAccess, iModuleViewable
 				// Set async responce
 				s()->async(true);				
 				
+				// Send success status
+				header("HTTP/1.0 200 Ok");
+							
 				// Encode event result as json object
 				echo json_encode( $event_result );
+				
+				return A_SUCCESS;
 			}
 		}	
 		

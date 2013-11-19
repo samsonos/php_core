@@ -15,7 +15,7 @@ namespace samson\core;
  * @author Vitaly Iegorov <vitalyiegorov@gmail.com> 
  */
 class Core implements iCore
-{		
+{
 	/** Module pathes loaded stack */
 	public $load_path_stack = array();
 
@@ -74,7 +74,7 @@ class Core implements iCore
 		$ns = nsname( $class );
 		
 		// System module
-		if( $ns == 'samson\core' ) return require ( __SAMSON_PATH__.$class_name.'.php');
+		if( $ns == 'samson\core' ) return require ( __SAMSON_PATH__.$class_name.'.php' );
 		// Other modules
 		else 
 		{
@@ -103,13 +103,14 @@ class Core implements iCore
 			}		
 		}
 	}
-	
-	
-	/**
-	 * Put benchmark record for performance analyzing
-	 * @param string 	$function 	Function name
-	 * @param array 	$args		Function arguments
-	 */
+
+
+    /**
+     * Put benchmark record for performance analyzing
+     * @param string $function  Function name
+     * @param array $args       Function arguments
+     * @param string $class     Classname who called benchmark
+     */
 	public function benchmark( $function = __FUNCTION__, $args = array(), $class = __CLASS__ )
 	{		
 		$this->benchmarks[] = array( 
@@ -245,9 +246,10 @@ class Core implements iCore
 						if( in_array( ns_classname('ExternalModule','samson\core'), class_parents( $class_name )))
 						{	
 							//elapsed('   -- Found iModule ancestor '.$class_name.'('.$ns.') in '.$path);
-							
-							// Create object
-							$connector = new $class_name( $path, $module_id, $ls );
+
+                            // Create object
+                            /** @var \samson\core\ExternalModule $connector */
+                            $connector = new $class_name( $path, $module_id, $ls );
 							$id = $connector->id();
 							
 							// Save namespace module data to load stack
@@ -260,7 +262,7 @@ class Core implements iCore
 							// Check for namespace uniqueness 
 							if( !isset($this->load_stack[ $ns ])) $this->load_stack[ $ns ] = & $ls;
 							// Merge another ns location to existing
-							else $this->load_stack[ $ns ] = array_merge_recursive ( $this->load_stack[ $ns ], & $ls );	
+							else $this->load_stack[ $ns ] = array_merge_recursive ( $this->load_stack[ $ns ], $ls );
 							
 							//else e('Found duplicate ns(##) for class(##) ', E_SAMSON_CORE_ERROR, array( $ns, $class_name)); 
 											
@@ -316,7 +318,9 @@ class Core implements iCore
 		// Chaining
 		return $this;
 	}
-			/** @see \samson\core\iCore::render() */
+	
+	
+	/** @see \samson\core\iCore::render() */
 	public function render( $__view, $__data = array() )
 	{		
 		//[PHPCOMPRESSOR(remove,start)]
@@ -338,11 +342,11 @@ class Core implements iCore
 		//trace('$$__template_view'.$__template_view);
 		
 		// If another template folder defined 
-		if( isset($this->view_path{0}) )
-		{	
+	/*	if( isset($this->view_path{0}) )
+		{
 			// Modify standart view path with another template 
-			$template_view = str_replace( __SAMSON_VIEW_PATH.'/', __SAMSON_VIEW_PATH.'/'.$this->view_path.'/', $template_view );			
-		}	
+			$template_view = str_replace( __SAMSON_VIEW_PATH.'/', __SAMSON_VIEW_PATH.'/'.$this->view_path.'/', $__template_view );
+		}	*/
 			
 		if (locale() != SamsonLocale::DEF)
 		{
@@ -353,7 +357,7 @@ class Core implements iCore
 		// Depending on core view rendering model
 		switch ( $this->render_mode )
 		{
-			// Standart algorithm for view rendering
+			// Standard algorithm for view rendering
 			case self::RENDER_STANDART: 
 				// Trying to find another template path, by default it's an default template path
 				if( file_exists( $__template_view ) ) include( $__template_view ); 
@@ -414,10 +418,11 @@ class Core implements iCore
 		else if( is_callable( $render_handler ) )
 		{
 			// Insert new renderer at the end of the stack
-			array_push( $this->render_stack, $render_handler ); 
+			return array_push( $this->render_stack, $render_handler );
 		}
+
 		// Error
-		else return e('Argument(##) passed for render function not callable', E_SAMSON_CORE_ERROR, $render_handler );
+		return e('Argument(##) passed for render function not callable', E_SAMSON_CORE_ERROR, $render_handler );
 	}
 	 
 	/**	@see iCore::async() */
@@ -434,8 +439,9 @@ class Core implements iCore
 	{
 		// Если передан аргумент
 		if( func_num_args() ){ $this->template_path = $this->active->path().$template;	} 
+
 		// Аргументы не переданы - вернем текущий путь к шаблону системы
-		else return $this->template_path;
+		return $this->template_path;
 	}
 	
 	/** @see iCore::path() */
@@ -576,7 +582,7 @@ class Core implements iCore
 	public function start( $default )
 	{	
 		// Parse URL
-		url();		
+		url();
 		
 		//[PHPCOMPRESSOR(remove,start)]
 		// TODO: Again module load not corresponds to local and system load functionality	
@@ -650,7 +656,7 @@ class Core implements iCore
 		}	
 		
 		////elapsed('End initing modules');
-		header("HTTP/1.0 200 Ok");
+	
 		// Результат выполнения действия модуля
 		$module_loaded = A_FAILED;
 
