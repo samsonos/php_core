@@ -233,7 +233,7 @@ class URL implements iURL
 				// Все остальные аргументы это параметры вызываемого метода
 				default	:
 					// Если в значение аргумента есть запятые - это массив
-					if( strpos( $arg, ',' ) !== FALSE ) $arg = explode( ',', $arg );
+					//if( strpos( $arg, ',' ) !== FALSE ) $arg = explode( ',', $arg );
 			
 				// Добавим аргумент как параметр
 				$this->parameters[] = $arg;

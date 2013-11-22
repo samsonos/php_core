@@ -657,6 +657,9 @@ class Core implements iCore
 		
 		////elapsed('End initing modules');
 	
+		// Send success status
+		header("HTTP/1.0 200 Ok");
+		
 		// Результат выполнения действия модуля
 		$module_loaded = A_FAILED;
 
