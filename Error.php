@@ -77,7 +77,7 @@ class Error
 	
 	/**
 	 * Указатель на внешнюю функцию для обработки завершения работы скрипта
-	 * @var function
+	 * @var callable
 	 */
 	public static $shutdown_handler;
 	
