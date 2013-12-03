@@ -299,8 +299,10 @@ class Module implements iModule, \ArrayAccess, iModuleViewable
 			// Iterate supported methods
 			for ($idx = 0; $idx < sizeof($arguments); $idx++)
 			{
+                $controller_name = self::ASYNC_PREFIX.$arguments[ $idx ];
+
 				// Build async method handler name and try to find method in arguments list
-				$callback = & $this->controllers[ self::ASYNC_PREFIX.$arguments[ $idx ] ];		
+				$callback = & $this->controllers[ $controller_name ];
 
 				// If async controller handler exists
 				if( isset( $callback ) )
@@ -321,7 +323,7 @@ class Module implements iModule, \ArrayAccess, iModuleViewable
 					if( !isset($_event_result['status']) || !$_event_result['status'] )
 					{
 						// Handle event chain fail
-						$_event_result['message'] = "\n".'Event failed: '.self::ASYNC_PREFIX.$arguments[ $idx ];
+						$_event_result['message'] = "\n".'Event failed: '.$controller_name;
 
                         // Add event result array to results collection
                         $event_result = array_merge( $event_result, $_event_result );
