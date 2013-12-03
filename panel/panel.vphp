@@ -1,0 +1,16 @@
+<?php
+/**
+ * Created by Vitaly Iegorov <egorov@samsonos.com>
+ * on 02.12.13 at 17:04
+ */
+?>
+<div class="__samsonos-panel">
+    <ul class="__samsonos-panel_categories">
+        <li class="__samsonos-panel_error "></li>
+        <li class="__samsonos-panel_debug"></li>
+        <li class="__samsonos-panel_profiler"></li>
+        <li class="__samsonos-panel_db"></li>
+    </ul>
+</div>
+ 
+  

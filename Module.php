@@ -317,12 +317,15 @@ class Module implements iModule, \ArrayAccess, iModuleViewable
 					// Anyway convert event result to array
 					if( !is_array($_event_result) ) $_event_result = array($_event_result);
 
-					// If event succesfully completed
+					// If event successfully completed
 					if( !isset($_event_result['status']) || !$_event_result['status'] )
 					{
 						// Handle event chain fail
 						$_event_result['message'] = "\n".'Event failed: '.$callback[1];
-					
+
+                        // Add event result array to results collection
+                        $event_result = array_merge( $event_result, $_event_result );
+
 						// Stop event-chain execution
 						break;
 					}					
