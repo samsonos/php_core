@@ -321,7 +321,7 @@ class Module implements iModule, \ArrayAccess, iModuleViewable
 					if( !isset($_event_result['status']) || !$_event_result['status'] )
 					{
 						// Handle event chain fail
-						$_event_result['message'] = "\n".'Event failed: '.$callback[1];
+						$_event_result['message'] = "\n".'Event failed: '.self::ASYNC_PREFIX.$arguments[ $idx ];
 
                         // Add event result array to results collection
                         $event_result = array_merge( $event_result, $_event_result );
