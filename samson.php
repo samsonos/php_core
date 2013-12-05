@@ -223,7 +223,7 @@ function vi( $name ){ $m = & m();  if( $m->offsetExists( $name )) echo htmlentit
 /**
  * Figure out if module view variable value is correctly set for view output
  * 
- * @param iModule	$m		Pointer to module
+ * @param \samson\core\iModule	$m		Pointer to module
  * @param string 	$name 	View variable name
  * @param mixed 	$value	Value to compare
  * @return boolean If view variable can be displayed in view
@@ -242,11 +242,11 @@ function isvalue( $m, $name, $value = null )
 		switch( gettype( $var ) )
 		{
 			// If this is boolean and it matches $value
-			case 'boolean': return $var === $value; 			
+			case 'boolean': return (isset($value) ? $var == $value : $var);
 			// If this is number and it matches $value
-			case 'integer': return $var === intval($value); 	
+			case 'integer': return (isset($value) ? $var === intval($value): false);
 			// If this is double and it matches $value
-			case 'double':  return $var === doubleval($value); 	
+			case 'double':  return (isset($value) ? $var === doubleval($value): false);
 			// If this is not empty array
 			case 'array':   return sizeof($var); 			
 			// If this is a string and it matches $value or if no $value is set string is not empty
@@ -292,7 +292,7 @@ function isval( $name, $value = null, $success = null, $failure = null, $inverse
 	
 	// Flag for checking module value
 	$ok = isvalue( $m, $name, $value );
-	
+
 	// If inversion is on
 	if( $inverse ) $ok = ! $ok;
 	
