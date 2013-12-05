@@ -17,7 +17,7 @@ namespace samson\core;
  */
 class Core implements iCore
 {
-	/** Module pathes loaded stack */
+	/** Module paths loaded stack */
 	public $load_path_stack = array();
 
 	/** Modules to be loaded stack */
@@ -35,11 +35,11 @@ class Core implements iCore
 	/** Render handlers stack */
 	public $render_stack = array();
 	
-	/** Указатель а обработчик 404 ошибки */
+	/** Pointer to external E404 error handler */
 	protected $e404 = null;
 	
 	/**
-	 * Текущий активный модуль с которым работает ядро
+	 * Pointer to current active module
 	 * @var Module
 	 */
 	protected $active = null;
@@ -47,19 +47,19 @@ class Core implements iCore
 	/** Flag for outputting layout template, used for asynchronous requests */
 	protected $async = FALSE;	
 	
-	/** Главный шаблон системы */
+	/** Path to main system template */
 	protected $template_path = __SAMSON_DEFAULT_TEMPLATE;
 	
-	/** Путь к текущемуу Веб-приложению */
+	/** Path to current web-application */
 	protected $system_path = __SAMSON_CWD__;
 	
-	/** Модификатор пути к представлениям, для шаблонизации представлений */
+	/** View path modifier for templating */
 	protected $view_path = '';
 	
 	/** Collection of performance benchmarks for analyzing */
 	public $benchmarks = array();
 	
-	/** Режим работы с представлениями */
+	/** View path loading mode */
 	public $render_mode = self::RENDER_STANDART;
 	
 	/**  
@@ -157,9 +157,19 @@ class Core implements iCore
 				
 			// Make pointer for pithiness
 			$resources = & $ls['resources'];
+
+            // Collection of paths to ignore on resource collecting
+            $ignore_folders = array(
+                '/'.__SAMSON_CACHE_PATH.'/',
+                '/'.__SAMSON_TEST_PATH.'/',
+                '.git',
+                '.svn',
+                '.settings',
+                '.idea',
+            );
 			
 			// Recursively scan module folders for resources if they not passed
-			$files = ! isset( $files ) ? File::dir( $path ) : $files;			
+			$files = ! isset( $files ) ? File::dir($path, null, '', $files, NULL, 0, $ignore_folders) : $files;
 		
 			// Iterate module files
 			foreach ( $files as $resource )

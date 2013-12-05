@@ -32,8 +32,11 @@ define('__NS_SEPARATOR__', '\\');
 /** Flag that this script runs from remote app */
 define( '__SAMSON_REMOTE_APP', __SAMSON_CWD__ !== $_SERVER['DOCUMENT_ROOT'].'/' );
 
-/** Путь к папке где находятся кеш системы */
+/** Default path to cache folder */
 define('__SAMSON_CACHE_PATH','cache');
+
+/** Default path to tests folder */
+define('__SAMSON_TEST_PATH','test');
 
 /** Путь к файлу с глобальными данными модуля */
 define( '__SAMSON_GLOBAL_FILE', 'global.php' );
