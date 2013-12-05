@@ -9,14 +9,15 @@
 namespace samson\core;
 
 /**
- * Ядро фреймворка SamsonPHP
+ * Core of SamsonPHP
  * 
  * @package SamsonPHP
- * @author Vitaly Iegorov <vitalyiegorov@gmail.com> 
+ * @author 	Vitaly Iegorov <vitalyiegorov@gmail.com>
+ * @version @version@
  */
 class Core implements iCore
 {
-	/** Module pathes loaded stack */
+	/** Module paths loaded stack */
 	public $load_path_stack = array();
 
 	/** Modules to be loaded stack */
@@ -24,18 +25,21 @@ class Core implements iCore
 	
 	/** Modules to be loaded stack */
 	public $load_module_stack = array();
-	
-	/** Стек загруженных в ядро модулей */
+
+    /**
+     * Collection of loaded modules
+     * @var Module[]
+     */
 	public $module_stack = array();
 	
 	/** Render handlers stack */
 	public $render_stack = array();
 	
-	/** Указатель а обработчик 404 ошибки */
+	/** Pointer to external E404 error handler */
 	protected $e404 = null;
 	
 	/**
-	 * Текущий активный модуль с которым работает ядро
+	 * Pointer to current active module
 	 * @var Module
 	 */
 	protected $active = null;
@@ -43,23 +47,23 @@ class Core implements iCore
 	/** Flag for outputting layout template, used for asynchronous requests */
 	protected $async = FALSE;	
 	
-	/** Главный шаблон системы */
+	/** Path to main system template */
 	protected $template_path = __SAMSON_DEFAULT_TEMPLATE;
 	
-	/** Путь к текущемуу Веб-приложению */
+	/** Path to current web-application */
 	protected $system_path = __SAMSON_CWD__;
 	
-	/** Модификатор пути к представлениям, для шаблонизации представлений */
+	/** View path modifier for templating */
 	protected $view_path = '';
 	
 	/** Collection of performance benchmarks for analyzing */
 	public $benchmarks = array();
 	
-	/** Режим работы с представлениями */
+	/** View path loading mode */
 	public $render_mode = self::RENDER_STANDART;
 	
 	/**  
-	 * Automatic class loader based onlazy loading from load_stack
+	 * Automatic class loader based on lazy loading from load_stack
 	 * based on class namespace data
 	 */
 	private function __autoload( $class )
@@ -100,7 +104,9 @@ class Core implements iCore
 					// Require lastarray element
 					return require( end($files) );
 				}
-			}		
+			}
+
+            return '';
 		}
 	}
 
@@ -151,9 +157,19 @@ class Core implements iCore
 				
 			// Make pointer for pithiness
 			$resources = & $ls['resources'];
+
+            // Collection of paths to ignore on resource collecting
+            $ignore_folders = array(
+                '/'.__SAMSON_CACHE_PATH.'/',
+                '/'.__SAMSON_TEST_PATH.'/',
+                '.git',
+                '.svn',
+                '.settings',
+                '.idea',
+            );
 			
 			// Recursively scan module folders for resources if they not passed
-			$files = ! isset( $files ) ? File::dir( $path ) : $files;			
+			$files = ! isset( $files ) ? File::dir($path, null, '', $files, NULL, 0, $ignore_folders) : $files;
 		
 			// Iterate module files
 			foreach ( $files as $resource )
@@ -225,7 +241,7 @@ class Core implements iCore
 			//elapsed('   -- Icluded models/controllers/globals from '.$path);
 			
 			// Iterate only php files
-			foreach ( $ls['php'] as $php) 
+			foreach ( $ls['php'] as $php )
 			{						
 				// We must require regular files and wait to find iModule class ancestor declaration
 				require_once( $php );			
@@ -558,7 +574,7 @@ class Core implements iCore
 		else if( is_callable( $this->e404 ) )
 		{
 			// Вызовем обработчик
-			$result = call_user_func( $this->e404, url()->module(), url()->method() );
+			$result = call_user_func( $this->e404, url()->module, url()->method );
 			
 			// Если метод ничего не вернул - считаем что все ок!
 			return isset( $result ) ? $result : A_SUCCESS;		
@@ -631,21 +647,19 @@ class Core implements iCore
 				
 			// Require local models
 			foreach ( $ls2['models'] as $model ) require( $model );
-		}		
-		//[PHPCOMPRESSOR(remove,end)]
-		
-		//[PHPCOMPRESSOR(remove,start)]
+		}
+
 		$this->benchmark( __FUNCTION__, func_get_args() );		
-		//[PHPCOMPRESSOR(remove,end)]
-			
-		//[PHPCOMPRESSOR(remove,start)]				
+
 		// Проинициализируем оставшиеся конфигурации и подключим внешние модули по ним
 		Config::init( $this );					
 		//[PHPCOMPRESSOR(remove,end)]		
 		
 		// Проинициализируем НЕ ЛОКАЛЬНЫЕ модули
 		foreach ($this->module_stack as $id => $module )
-		{				
+		{
+            /** @var $module Module */
+
 			// Только внешние модули и их оригиналы
 			if( method_exists( $module, 'init') && $module->id() == $id )
 			{			
@@ -664,7 +678,7 @@ class Core implements iCore
 		$module_loaded = A_FAILED;
 
 		// Получим идентификатор модуля из URL и сделаем идентификатор модуля регистро-независимым 
-		$module_name = mb_strtolower( url()->module(), 'UTF-8');		
+		$module_name = mb_strtolower( url()->module, 'UTF-8');
 				
 		// Если не задано имя модуля, установим модуль по умолчанию
 		if( ! isset( $module_name{0} ) ) $module_name = $default;	
@@ -675,12 +689,18 @@ class Core implements iCore
 		if( isset( $this->module_stack[ $module_name ] ) )
 		{	
 			//elapsed('Preforming '.$module_name.'::'.url()->method().' controller action');
-			
-			// Установим требуемый модуль как текущий
-			$this->active = & $this->module_stack[ $module_name ];			
-		
-			// Попытаемся выполнить действие модуля указанное в URL, переданим тип HTTP запроса
-			$module_loaded = $this->active->action( url()->method() );			
+
+            /**
+             * Set found module as current
+             * @var $active Module
+             */
+			$this->active = & $this->module_stack[ $module_name ];
+
+            /**
+             * Try to perform controller action
+             * @var $module_loaded integer
+             */
+            $module_loaded = $this->active->action( url()->method );
 		}
 	
 		// Если мы не выполнили ни одного контроллера, обработаем ошибку 404
@@ -699,11 +719,7 @@ class Core implements iCore
 			
 			// Подготовим HTML код для заполнения шапки шаблона
 			$head_html = '';
-			
-			// Создадим МЕТА теги для выводимой страницы			
-			if( isset($this->active->keywords) ) 	$head_html .= '<meta name="keywords" content="' . $this->active->keywords . '">';
-			if( isset($this->active->description) ) $head_html .= '<meta name="description" content="' . $this->active->description . '">';
-				
+
 			//[PHPCOMPRESSOR(remove,start)]		
 			// Сгенерируем необходимые элементы в HTML шаблоне
 			$template_html = $this->generate_template( $template_html, '','');
@@ -713,7 +729,7 @@ class Core implements iCore
 			$head_html .= '
 			<script type="text/javascript">			
 			if(SamsonPHP){
-				SamsonPHP._uri = "'.url()->text().'"; 
+				SamsonPHP._uri = "'.url()->text.'";
 				SamsonPHP._moduleID = "'.$this->active->id().'";
 				SamsonPHP._url_base = "'.url()->base().'";
 				SamsonPHP._locale = "'.locale().'";
