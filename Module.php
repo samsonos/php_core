@@ -283,11 +283,12 @@ class Module implements iModule, \ArrayAccess, iModuleViewable
 		//trace( array_keys($this->controllers), true );
 		
 		// Get parameters from URL
-		$parameters = url()->parameters();			
+		$parameters = url()->parameters;
 		
 		// NEW ASYNC EVENT CHAIN LOGIC
 		// If this is AJAX request - try to call async handlers
-		if($_SERVER['HTTP_ACCEPT'] == '*/*')
+        // Added support for SamsonJS special header
+		if($_SERVER['HTTP_ACCEPT'] == '*/*' || isset($_SERVER['HTTP_SJSASYNC']))
 		{ 
 			// Copy parameters
 			$arguments = $parameters;
