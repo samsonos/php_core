@@ -307,12 +307,15 @@ class Module implements iModule, \ArrayAccess, iModuleViewable
 
 				// If async controller handler exists
 				if( isset( $callback ) )
-				{						
+				{
 					// Get function arguments without function name
-					$f_args = array_slice( $arguments, $idx + 1 );
+					$f_args = array_slice($arguments, $idx + 1);
 							
 					// Remove used cells from array
-					$arguments = array_slice( $arguments, $idx + 1 );
+					$arguments = array_slice($arguments, $idx + 1);
+
+                    // Decrease index as we change arguments size
+                    $idx--;
 					
 					// Perform event and collect event result data
 					$_event_result = call_user_func_array( $callback, $f_args );	
