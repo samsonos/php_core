@@ -108,15 +108,18 @@ function html_db_form_select_options( $entity_name, $db_obj = NULL, $name_attr =
 	if (is_array($db_obj))
 	{
 		foreach ($db_obj as $item)
-		if (dbSimplify::parse( $entity_name, $item, $item )) $obj_id[] = $item->id;
+		if (is_object($item)) $obj_id[] = $item->id;
+        elseif(dbQuery( $entity_name )->id($item)->first($db_item) ) $obj_id[] = $db_item->id;
 	}
-	elseif (dbSimplify::parse( $entity_name, $db_obj, $db_obj )) $obj_id = $db_obj->id;
+	elseif (is_object($db_obj)) $obj_id = $db_obj->id;
+    elseif(dbQuery( $entity_name )->id($db_obj)->first($db_obj) ) $obj_id = $db_obj->id;
+
 	
 	// Работаем с активаными записями(не удаленными)
 	$query = dbQuery( $entity_name )->cond( 'Active', 1 )->exec(); 
 	
 	// Выполним запрос на получение записей из БД
-	if( dbSimplify::query( $query, $db_objs, TRUE ) )
+	if(dbQuery( $entity_name )->cond( 'Active', 1 )->exec($db_objs) )
 	{
 		// Результирующий массив данных для формирования HTML элемента формы
 		$select_data = array();	
@@ -124,13 +127,8 @@ function html_db_form_select_options( $entity_name, $db_obj = NULL, $name_attr =
 		// Если нужно - добавим пункт не выбрано
 		if( isset($add_unselected) ) $select_data[] = array('id' => 0, 'name' => $add_unselected );
 		
-		// Переберем полученный объекты из БД
-		$db_objs_count = sizeof( $db_objs );
-		for ($i = 0; $i < $db_objs_count; $i++) 
+		foreach ($db_objs as $obj)
 		{
-			// Получим указатель на текущицй объект из выборки
-			$obj = & $db_objs[ $i ];
-			
 			// Добавим данные в массив для HTML представления
 			$select_data[] = array
 			(
