@@ -282,7 +282,7 @@ function isvalue( $m, $name, $value = null )
  * @param mixed 	$value 		Value for checking
  * @param string	$success	Value for outputting in case of success  
  * @param string	$failure	Value for outputting in case of failure 
- * @param boolean	$inverse	Value for outputting in case of success
+ * @param boolean	$inverse	Reverse method logic
  * @return boolean Соответствует ли указанная переменная представления переданному значению
  */
 function isval( $name, $value = null, $success = null, $failure = null, $inverse = false)
