@@ -251,7 +251,7 @@ function isvalue( $m, $name, $value = null )
 			case 'array':   return sizeof($var); 			
 			// If this is a string and it matches $value or if no $value is set string is not empty
 			case 'string':  return  (!isset($value) && isset($var{0})) || 
-									(isset($value) && $var === strval($value)) ; 
+									(isset($value) && $var === strval($value)) ;
 			// If this is an object consider it as ok
 			case 'object': return true;
 			// Not supported for now

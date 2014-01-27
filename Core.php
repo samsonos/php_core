@@ -737,7 +737,7 @@ class Core implements iCore
 			</script>';			
 			
 			// Insert what we have generated
-			$template_html = str_ireplace( '</head>', $head_html.'</head>', $template_html );			
+			$template_html = str_ireplace( '</head>', $head_html."\n".'</head>', $template_html );
 		}
 		
 		// Выведем все что мы на генерили
