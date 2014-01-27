@@ -8,16 +8,7 @@ namespace samson\core;
  * @version 1.0
  */
 class Module implements iModule, \ArrayAccess, iModuleViewable 
-{	
-	/** Controllers naming conventions */
-	
-	/** Procedural controller prefix */
-	const PROC_PREFIX = '_';
-	/** OOP controller prefix */
-	const OBJ_PREFIX = '__';
-	/** AJAX controller prefix */
-	const ASYNC_PREFIX = 'async_';
-	
+{
 	/** Static module instances collection */	
 	public static $instances = array();	
 	
@@ -45,7 +36,7 @@ class Module implements iModule, \ArrayAccess, iModuleViewable
 	/** Path to view for rendering */
 	protected $view_path = self::VD_POINTER_DEF;
 	
-	/** Pointer to view data enty */
+	/** Pointer to view data entry */
 	protected $data = array( self::VD_POINTER_DEF => array( self::VD_HTML => '' ) );
 	
 	/** Collection of data for view rendering, filled with default pointer */
@@ -134,22 +125,32 @@ class Module implements iModule, \ArrayAccess, iModuleViewable
 	
 	
 	/**	@see iModule::title() */
-	public function title( $title = NULL ){ return $this->set( 'title', $title ); }
+	public function title( $title = NULL )
+    {
+        return $this->set( 'title', $title );
+    }
 	
 	/**	@see iModule::id() */
-	public function id(){ return $this->id; }	
+	public function id(){
+        return $this->id;
+    }
 	
 	/** @see iModule::set() */
-	public function set( $field, $value = NULL ){ $this->__set( $field, $value ); return $this;	}
+	public function set( $field, $value = NULL )
+    {
+        $this->__set($field, $value);
+
+        return $this;
+    }
 	
 	/** @see iModuleViewable::toView() */
 	public function toView( $prefix = NULL, array $restricted = array() )
 	{
 		// Get all module data variables
-		$view_data = array_merge( $this->data, get_object_vars( $this ) );
+		$view_data = array_merge($this->data, get_object_vars($this));
 
 		// Remove plain HTML from view data
-		unset( $view_data[ self::VD_HTML ] );
+		unset($view_data[ self::VD_HTML ]);
 		
 		return $view_data;
 	}
@@ -286,15 +287,15 @@ class Module implements iModule, \ArrayAccess, iModuleViewable
 		$parameters = url()->parameters;
 		
 		// NEW ASYNC EVENT CHAIN LOGIC
-		// If this is AJAX request - try to call async handlers
-        // Added support for SamsonJS special header
-		if($_SERVER['HTTP_ACCEPT'] == '*/*' || isset($_SERVER['HTTP_SJSASYNC']))
-		{ 
-			// Copy parameters
-			$arguments = $parameters;
-			array_unshift( $arguments, url()->method );
+            // If this is AJAX request - try to call async handlers
+            // Added support for SamsonJS special header
+            if($_SERVER['HTTP_ACCEPT'] == '*/*' || isset($_SERVER['HTTP_SJSASYNC']))
+            {
+                // Copy parameters
+                $arguments = $parameters;
+                array_unshift( $arguments, url()->method );
 			
-			// Responce
+			// Response
 			$event_result = array();
 			
 			// Iterate supported methods
@@ -424,11 +425,9 @@ class Module implements iModule, \ArrayAccess, iModuleViewable
 			
 		// Find all controller actions
 		$functions = get_defined_functions();
-		foreach ( $functions['user'] as $method )
-		{
-			// Try to find standart controllers
-			switch( strtolower($method) )
-			{
+		foreach ($functions['user'] as $method) {
+			// Try to find standard controllers
+			switch (strtolower($method)) {
 				// Ignore special controllers
 				case $this->id.self::CTR_UNI		:
 				case $this->id.self::CTR_POST		:
@@ -449,11 +448,9 @@ class Module implements iModule, \ArrayAccess, iModuleViewable
 		}		
 		
 		// Iterate class methods
-		foreach ( get_class_methods( $this ) as $method )
-		{		
+		foreach (get_class_methods($this) as $method) {
 			// Try to find standart controllers			
-			switch( strtolower($method) )
-			{
+			switch(strtolower($method)) {
 				// Ignore special controllers
 				case self::CTR_UNI:
 				case self::CTR_POST	:
@@ -614,7 +611,7 @@ class Module implements iModule, \ArrayAccess, iModuleViewable
 		{
 			// If first argument is object or array - pass method name as second parameter
 			if( is_object($arguments[0]) || is_array($arguments[0]) ) $this->__set( $arguments[0], $method );
-			// Standart logic
+			// Standard logic
 			else  $this->__set( $method, $arguments[0] );
 		}
 		

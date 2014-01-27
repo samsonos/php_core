@@ -28,6 +28,15 @@ interface iModule
 	
 	/** Delete controller name */
 	const CTR_DELETE = '__delete';
+
+    /** Controllers naming conventions */
+
+    /** Procedural controller prefix */
+    const PROC_PREFIX = '_';
+    /** OOP controller prefix */
+    const OBJ_PREFIX = '__';
+    /** AJAX controller prefix */
+    const ASYNC_PREFIX = 'async_';
 	
 	/**
 	 * Установить заголовок страницы
