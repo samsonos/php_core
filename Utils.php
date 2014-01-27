@@ -602,8 +602,8 @@ function mail_send( $to, $from = 'info@samsonos.com', $message = '', $subject = 
 	// Установим необходимые заголовки
 	$headers  = 'MIME-Version: 1.0' . "\r\n";
 	$headers .= 'Content-type: text/html; charset=UTF-8' . "\r\n";
-	"Content-Type: multipart/mixed; boundary=\"".$strSid."\"\n\n";
-	$strHeader .= "This is a multi-part message in MIME format.\n";
+	//"Content-Type: multipart/mixed; boundary=\"".$strSid."\"\n\n";
+	//$strHeader .= "This is a multi-part message in MIME format.\n";
 	$headers .= 'From: '.$from_user.'<'.$from.'>'."\r\n";
 
 	// Добавим в сообщение HTML тэги
@@ -688,4 +688,32 @@ function get_child_classes( $parent )
 	}
 	
 	return $ancestors;
+}
+
+/**
+ * Функция для генерации пароля
+ * @param int $count Голичество символом в пароле
+ * @return string Сгенерированный пароль
+ */
+function generate_password( $count )
+{
+    $symbols = array('a','b','c','d','e','f',
+        'g','h','i','j','k','l',
+        'm','n','o','p','r','s',
+        't','u','v','x','y','z',
+        'A','B','C','D','E','F',
+        'G','H','I','J','K','L',
+        'M','N','O','P','R','S',
+        'T','U','V','X','Y','Z',
+        '1','2','3','4','5','6',
+        '7','8','9','0');
+    // Генерируем пароль
+    $pass = "";
+    for($i = 0; $i < $count; $i++)
+    {
+        // Вычисляем случайный индекс массива
+        $index = rand(0, sizeof($symbols) - 1);
+        $pass .= $symbols[$index];
+    }
+    return $pass;
 }
