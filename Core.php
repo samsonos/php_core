@@ -93,18 +93,22 @@ class Core implements iCore
 			}			
 			
 			// If we have php files in this entry to search for needed class
-			if( isset($ls['php']) && sizeof($ls['php']) )
-			{				
-				// Simple method - trying to find class by classname
-				if( $files = preg_grep( '/\/'.$class_name.'\.php/i', $ls['php']))
-				{
-					// Проверим на однозначность
-					if( sizeof($files) > 1 ) return e('Cannot autoload class(##), too many files matched ##', E_SAMSON_CORE_ERROR, array($class,$files) );
-										
-					// Require lastarray element
-					return require( end($files) );
-				}
-			}
+            foreach (array('php','models') as $key) {
+                // Pointer to module files list
+                $fileSource = & $ls[$key];
+                if( isset($fileSource) && sizeof($fileSource) )
+                {
+                    // Simple method - trying to find class by classname
+                    if( $files = preg_grep( '/\/'.$class_name.'\.php/i', $fileSource))
+                    {
+                        // Проверим на однозначность
+                        if( sizeof($files) > 1 ) return e('Cannot autoload class(##), too many files matched ##', E_SAMSON_CORE_ERROR, array($class,$files) );
+
+                        // Require lastarray element
+                        return require_once( end($files) );
+                    }
+                }
+            }
 
             return '';
 		}
@@ -646,7 +650,7 @@ class Core implements iCore
 			}
 				
 			// Require local models
-			foreach ( $ls2['models'] as $model ) require( $model );
+			foreach ( $ls2['models'] as $model ) require_once( $model );
 		}
 
 		$this->benchmark( __FUNCTION__, func_get_args() );		
