@@ -82,6 +82,23 @@ class URL implements iURL
 	 * @deprecated Используйте поле класса $parameters
 	 */
 	public function parameters(){return $this->parameters;}
+
+    /**
+     * Check if current module from URL identifier matches passed module identifier and output on success
+     * @param string    $module Module name to match
+     * @param string    $output String for output
+     * @return boolean True if current module from URL identifier matches passed module identifier
+     */
+    public function is($module, $output = '')
+    {
+        if ($this->module == $module) {
+            echo $output;
+
+            return true;
+        }
+
+        return false;
+    }
 	
 	/** @see iURL::bookmark() */
 	public function bookmark( $name = NULL, $return = false )
