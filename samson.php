@@ -395,13 +395,13 @@ function vimg( $src, $id='', $class='', $alt = '', $dummy = null )
  * @param string $name 	 Module view variable name
  * @param string $format Date format string
  */
-function vdate( $name, $format = 'h:i d.m.y' )
+function vdate( $name, $format = 'h:i d.m.y', $function = 'date' )
 {
 	// Cache current module
 	$m = & m();
 
 	// If view variable is set - echo with format
-	if ( $m->offsetExists( $name )) echo date( $format, strtotime($m[ $name ]));
+	if ( $m->offsetExists( $name )) echo $function( $format, strtotime($m[ $name ]));
 	
 }
 
