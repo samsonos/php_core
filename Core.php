@@ -732,7 +732,7 @@ class Core implements iCore
 			// Добавим специальную системную комманду для инициализации фреймворка в JavaScript
 			$head_html .= '
 			<script type="text/javascript">			
-			if(SamsonPHP){
+			if(SamsonPHP != undefined){
 				SamsonPHP._uri = "'.url()->text.'";
 				SamsonPHP._moduleID = "'.$this->active->id().'";
 				SamsonPHP._url_base = "'.url()->base().'";
