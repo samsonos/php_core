@@ -353,7 +353,7 @@ class Module implements iModule, \ArrayAccess, iModuleViewable
 				header("HTTP/1.0 200 Ok");
 							
 				// Encode event result as json object
-				echo json_encode( $event_result );
+				echo json_encode( $event_result, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP );
 				
 				return A_SUCCESS;
 			}
