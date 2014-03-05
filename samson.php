@@ -7,63 +7,7 @@
  */
 
 // Константы фреймворка SamsonPHP
-
-/**  Отметка времени начала работы фреймворка */
-define('__SAMSON_T_STARTED__', microtime(TRUE));
-
-/** Установим версию фреймворка */
-define('__SAMSON_VERSION__', '5.1.1');
-
-/** Совместимость с PHP 5 */
-if(!defined('__DIR__')) define( '__DIR__', dirname(__FILE__));
- 
-/** Получим путь к фреймфорку SamsonPHP */
-define( '__SAMSON_PATH__', __DIR__.'/' );
-
-/** Получим текущий каталог веб-приложения */
-define('__SAMSON_CWD__', str_ireplace('\\', '/', getcwd().'/' ) );
-
-/** Получим путь к текущему веб-приложению относительно корня сайта */
-define('__SAMSON_BASE__', str_ireplace( $_SERVER['DOCUMENT_ROOT'], '', __SAMSON_CWD__ ) );
-
-/** Объявим константу для раздели пути в namespace */
-define('__NS_SEPARATOR__', '\\');
-
-/** Flag that this script runs from remote app */
-define( '__SAMSON_REMOTE_APP', __SAMSON_CWD__ !== $_SERVER['DOCUMENT_ROOT'].'/' );
-
-/** Default path to cache folder */
-define('__SAMSON_CACHE_PATH','cache');
-
-/** Default path to tests folder */
-define('__SAMSON_TEST_PATH','tests');
-
-/** Путь к файлу с глобальными данными модуля */
-define( '__SAMSON_GLOBAL_FILE', 'global.php' );
-
-/** Путь к папке где находятся файлы системы */
-define('__SAMSON_APP_PATH','app');
-
-/** Путь к папке где находятся контроллеры системы */
-define('__SAMSON_CONTOROLLER_PATH', __SAMSON_APP_PATH.'/controller/');
-
-/** Путь к папке где находятся модели системы */
-define('__SAMSON_MODEL_PATH', __SAMSON_APP_PATH.'/model/');
-
-/**  Путь к папке где находятся представления системы */
-define('__SAMSON_VIEW_PATH', __SAMSON_APP_PATH.'/view/');
-
-/** Путь к файлу с главным шаблоном системы */
-define('__SAMSON_DEFAULT_TEMPLATE', __SAMSON_VIEW_PATH.'index.php' );
-
-/** Максимальное время выполнения скрипта */
-define( '__SAMSON_MAX_EXECUTION__', 60 );
-
-/** Действие контроллера выполнено успешно */
-define( 'A_SUCCESS', TRUE );
-
-/** Действие контроллера НЕ выполнено */
-define( 'A_FAILED', FALSE );
+require('constants.php');
 
 // Установим временную локаль
 date_default_timezone_set(date_default_timezone_get() );
@@ -251,7 +195,7 @@ function isvalue( $m, $name, $value = null )
 			case 'array':   return sizeof($var); 			
 			// If this is a string and it matches $value or if no $value is set string is not empty
 			case 'string':  return  (!isset($value) && isset($var{0})) || 
-									(isset($value) && $var === strval($value)) ;
+									(isset($value) && $var === strval($value)) ; 
 			// If this is an object consider it as ok
 			case 'object': return true;
 			// Not supported for now
@@ -282,7 +226,7 @@ function isvalue( $m, $name, $value = null )
  * @param mixed 	$value 		Value for checking
  * @param string	$success	Value for outputting in case of success  
  * @param string	$failure	Value for outputting in case of failure 
- * @param boolean	$inverse	Reverse method logic
+ * @param boolean	$inverse	Value for outputting in case of success
  * @return boolean Соответствует ли указанная переменная представления переданному значению
  */
 function isval( $name, $value = null, $success = null, $failure = null, $inverse = false)
@@ -395,13 +339,13 @@ function vimg( $src, $id='', $class='', $alt = '', $dummy = null )
  * @param string $name 	 Module view variable name
  * @param string $format Date format string
  */
-function vdate( $name, $format = 'h:i d.m.y', $function = 'date' )
+function vdate( $name, $format = 'h:i d.m.y' )
 {
 	// Cache current module
 	$m = & m();
 
 	// If view variable is set - echo with format
-	if ( $m->offsetExists( $name )) echo $function( $format, strtotime($m[ $name ]));
+	if ( $m->offsetExists( $name )) echo date( $format, strtotime($m[ $name ]));
 	
 }
 
