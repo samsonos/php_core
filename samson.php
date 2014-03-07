@@ -416,82 +416,52 @@ function output( $view, array $vars = NULL, $prefix = NULL )
 function & url(){ static $_v; return ( $_v = isset($_v) ? $_v : new \samson\core\URL()); }
 
 /**
- * Построить полный URL с учетом относительного пути и вывести его в текущий поток вывода
- * Функция может принимать любое количество аргументов начиная со второго, и их значения будут
- * переданы в URL пути как параметры.
+ * Build URL relative to current web-application, method accepts any number of arguments,
+ * every argument starting from 2-nd firstly considered as module view parameter, if no such
+ * parameters is found - its used as string.
  *
- * Каждый переданный параметр начиная со 2-го, расценивается как переменная представления модуля
- * и в случаи её отсутствия просто выводится как строка
+ * If current locale differs from default locale, current locale prepended to the beginning of URL
  *
  * @see URL::build()
  *
- * @return string Полный URL с параметрами
+ * @return string Builded URL
  */
 function url_build()
 {
+    // Get cached URL builder for speedup
 	static $_v;
-
 	$_v = isset($_v) ? $_v : url();
 
+    // Get passed arguments
 	$args = func_get_args();
 
+    // If we have current locale set
+    if (\samson\core\SamsonLocale::current() != \samson\core\SamsonLocale::DEF) {
+        // Add locale as first url parameter
+        array_unshift($args, \samson\core\SamsonLocale::current());
+    }
+
+    // Call URL builder with parameters
 	return call_user_func_array( array( $_v, 'build' ), $args );
 }
 
 /** 
- * Echo builded from module view parameters URL
+ * Echo builded URL from passed parameters
  * @see url_build 
  */
-function url_base(){ $args = func_get_args(); echo call_user_func_array( 'url_build', $args ); }
-
-/**
- * Построить полный URL с учетом относительного пути и текущей локали и вывести его в текущий поток вывода
- * Функция может принимать любое количество аргументов начиная со второго, и их значения будут
- * переданы в URL пути как параметры.
- *
- * Каждый переданный параметр начиная со 2-го, расценивается как переменная представления модуля
- * и в случаи её отсутствия просто выводится как строка
- *
- * @see URL::build()
- *
- * @param string $url Начальный URL-Путь для построения
- * @return string Полный URL с параметрами
- */
-function url_locale_base( $url = '' )
+function url_base()
 {
-	static $_v;
-
-	$_v = isset($_v) ? $_v : url();
-
-	$args = func_get_args();
-	
-	if (locale() != '') $args=array_merge(array(locale()), $args);
-
-	echo call_user_func_array( array( $_v, 'build' ), $args );
+    // Call URL builder and echo its result
+    echo call_user_func_array( 'url_build', func_get_args() );
 }
 
 /**
- * Построить полный URL с учетом относительного пути для текущего модуля и вывести его в текущий поток вывода
- * Функция может принимать любое количество аргументов, и их значения будут переданы в URL пути как параметры.
- *
- * Каждый переданный параметр расценивается как переменная представления модуля и в случаи её отсутствия просто
- * выводится как строка
- *
- * @see URL::build()
- *
- * @return string Полный URL с параметрами
+ * Echo builded URL from passed parameters, prepending first parameter as current module identifier
+ * @see url_build()
  */
 function module_url()
 {
-	static $_v;
-
-	$_v = isset($_v) ? $_v : url();
-
-	$func_args = func_get_args();
-
-	$args = array_merge( array( $_v->module()), $func_args );
-
-	echo call_user_func_array( array( $_v, 'build' ), $args );
+	echo call_user_func_array('url_build', array_merge(array(url()->module), func_get_args()));
 }
 
 /**

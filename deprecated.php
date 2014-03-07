@@ -15,3 +15,14 @@
 function path( $path, iModule & $module = NULL ) {
 	$m = isset($module) ? $module : s()->module(); return $m->path().$path;
 }
+
+/**
+ * @deprecated Just use url_base()
+ * @param string $url Начальный URL-Путь для построения
+ * @return string Полный URL с параметрами
+ */
+function url_locale_base( $url = '' )
+{
+    // Call URL builder
+    return call_user_func_array( 'url_base', func_get_args() );
+}

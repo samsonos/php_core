@@ -153,31 +153,3 @@ class SamsonLocale
 		return false; 
 	} 
 }
-
-// Установим текущую локаль из сессии, если оно там имеется
-//if( isset( $_SESSION['__SAMSON_LOCALE__'] ) ) SamsonLocale::$current_locale = strtolower($_SESSION['__SAMSON_LOCALE__']);
-
-/*if ( strpos($_SERVER["REQUEST_URI"], '/locale/')!==FALSE)
-{
-	SamsonLocale::find();
-	// Розпарсим URL 
-		$url = parse_url( $_SERVER["REQUEST_URI"] ); 	
-		
-		// Отрежем путь к текущему веб-приложению из пути и декодируем другие символы
-		$url = trim( urldecode( $url['path'] ));	
-
-		// Получим массив переданных аргументов маршрута системы из URL
-		// Отфильтруем не пустые элементы, не переживая что мы упустим поряд их следования
-		// так номера элементов в массиве сохраняются
-		$url_args = explode( '/', $url );	
-		
-		$key = array_search('locale', $url_args);	
-		$search = '/locale';	
-		if (isset($url_args[$key+1]))  
-		{
-			SamsonLocale::current($url_args[$key+1]);
-			$search .= '/'.$url_args[$key+1];
-		}
-
-		$_SERVER["REQUEST_URI"] = str_replace($search, '', $_SERVER["REQUEST_URI"]);	
-}*/
