@@ -13,7 +13,9 @@ class ModuleConnector extends ExternalModule
 	public function __construct()
 	{
 		e('Module(##) - Class(##) is deprecated use parent class(##) instead', E_SAMSON_CORE_ERROR, array( $this->id, __CLASS__,get_parent_class(__CLASS__)));
-	
-		parent::__construct( func_get_args() );
+
+        $args = func_get_args();
+
+		parent::__construct($args);
 	}
 }

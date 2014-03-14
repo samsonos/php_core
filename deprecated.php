@@ -23,6 +23,8 @@ function path( $path, iModule & $module = NULL ) {
  */
 function url_locale_base( $url = '' )
 {
+    $args = func_get_args();
+
     // Call URL builder
-    return call_user_func_array( 'url_base', func_get_args() );
+    return call_user_func_array( 'url_base', $args );
 }

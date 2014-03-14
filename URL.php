@@ -163,7 +163,8 @@ class URL implements iURL
 	public function build( $url = '' )
 	{			
 		// Получим все аргументы функции начиная с 2-го
-		$args = array_slice( func_get_args(), 1 );			
+        $args = func_get_args();
+		$args = array_slice( $args, 1 );
 		
 		// Получим все сущности переданные в URL, разбив их в массив по символу "/",
 		// чистим полученный массив от пустых элементов,		

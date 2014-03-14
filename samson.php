@@ -451,8 +451,10 @@ function url_build()
  */
 function url_base()
 {
+    $args = func_get_args();
+
     // Call URL builder and echo its result
-    echo call_user_func_array( 'url_build', func_get_args() );
+    echo call_user_func_array('url_build', $args);
 }
 
 /**
@@ -461,7 +463,9 @@ function url_base()
  */
 function module_url()
 {
-	echo call_user_func_array('url_build', array_merge(array(url()->module), func_get_args()));
+    $args = func_get_args();
+
+	echo call_user_func_array('url_build', array_merge(array(url()->module), $args));
 }
 
 /**
@@ -475,7 +479,10 @@ function module_url()
  *
  * @see SamsonLocale::set()
  */
-function setlocales(){ \samson\core\SamsonLocale::set( func_get_args() ); }
+function setlocales(){
+    $args = func_get_args();
+    \samson\core\SamsonLocale::set($args);
+}
 
 /**
  * Установить/Получить текущую локализацию сайта
