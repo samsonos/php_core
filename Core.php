@@ -125,7 +125,7 @@ class Core implements iCore
 	{		
 		$this->benchmarks[] = array( 
 				microtime(true)-__SAMSON_T_STARTED__, 	// Time elapsed from start
-				$class.'::'.$function, 		// Function class::name
+				$class.'::'.$function, 		            // Function class::name
 				$args, 									// Function arguments
 				memory_get_usage(true) 					// Memmory
 		);		
@@ -732,7 +732,7 @@ class Core implements iCore
 			// Добавим специальную системную комманду для инициализации фреймворка в JavaScript
 			$head_html .= '
 			<script type="text/javascript">			
-			if(SamsonPHP != undefined){
+			if(typeof SamsonPHP != "undefined"){
 				SamsonPHP._uri = "'.url()->text.'";
 				SamsonPHP._moduleID = "'.$this->active->id().'";
 				SamsonPHP._url_base = "'.url()->base().'";
