@@ -17,6 +17,15 @@ namespace samson\core;
  */
 class Core implements iCore
 {
+    /** Collection of paths ignored by resources collector */
+    public static $resourceIgnorePath = array(
+        '.git',
+        '.svn',
+        '.settings',
+        '.idea',
+        '/vendor/'
+    );
+
 	/** Module paths loaded stack */
 	public $load_path_stack = array();
 
@@ -161,20 +170,9 @@ class Core implements iCore
 				
 			// Make pointer for pithiness
 			$resources = & $ls['resources'];
-
-            // Collection of paths to ignore on resource collecting
-            $ignore_folders = array(
-                '/'.__SAMSON_CACHE_PATH.'/',
-                '/'.__SAMSON_TEST_PATH.'/',
-                '.git',
-                '.svn',
-                '.settings',
-                '.idea',
-				'vendor',
-            );
 			
 			// Recursively scan module folders for resources if they not passed
-			$files = ! isset( $files ) ? File::dir($path, null, '', $files, NULL, 0, $ignore_folders) : $files;
+			$files = ! isset( $files ) ? File::dir($path, null, '', $files, NULL, 0, self::$resourceIgnorePath) : $files;
 		
 			// Iterate module files
 			foreach ( $files as $resource )
@@ -609,7 +607,7 @@ class Core implements iCore
 		// TODO: Again module load not corresponds to local and system load functionality	
 		
 		// Search for remote web applications if this is local web application
-		$files = File::dir( $this->system_path );
+		$files = File::dir( $this->system_path, null, '', $files, NULL, 0, self::$resourceIgnorePath );
 		foreach ( preg_grep('/\.htaccess/iu', $files) as $web_app_path )
 		{
 			// If path not to local web application
@@ -754,7 +752,11 @@ class Core implements iCore
 	//[PHPCOMPRESSOR(remove,start)]
 	/** Конструктор */
 	public function __construct()
-	{		
+	{
+        // TODO: Change Constant path with prepended slashes and add them to variable definition
+        self::$resourceIgnorePath[] = '/'.__SAMSON_CACHE_PATH.'/';
+        self::$resourceIgnorePath[] = '/'.__SAMSON_TEST_PATH.'/';
+
 		//elapsed('Constructor');		
 		$this->benchmark( __FUNCTION__, func_get_args() );			
 		
