@@ -170,6 +170,7 @@ class Core implements iCore
                 '.svn',
                 '.settings',
                 '.idea',
+				'vendor',
             );
 			
 			// Recursively scan module folders for resources if they not passed
