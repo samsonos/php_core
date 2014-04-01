@@ -19,11 +19,14 @@ class Core implements iCore
 {
     /** Collection of paths ignored by resources collector */
     public static $resourceIgnorePath = array(
+
         '.git',
         '.svn',
         '.settings',
         '.idea',
-        '/vendor/'
+        'vendor',
+        __SAMSON_CACHE_PATH,
+        __SAMSON_TEST_PATH,
     );
 
 	/** Module paths loaded stack */
@@ -753,10 +756,6 @@ class Core implements iCore
 	/** Конструктор */
 	public function __construct()
 	{
-        // TODO: Change Constant path with prepended slashes and add them to variable definition
-        self::$resourceIgnorePath[] = '/'.__SAMSON_CACHE_PATH.'/';
-        self::$resourceIgnorePath[] = '/'.__SAMSON_TEST_PATH.'/';
-
 		//elapsed('Constructor');		
 		$this->benchmark( __FUNCTION__, func_get_args() );			
 		
