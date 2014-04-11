@@ -25,6 +25,7 @@ class Core implements iCore
         '.settings',
         '.idea',
         'vendor',
+        'upload',
         __SAMSON_CACHE_PATH,
         __SAMSON_TEST_PATH,
     );

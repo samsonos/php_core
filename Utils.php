@@ -157,7 +157,7 @@ function nsname( $class_name ){ return substr( $class_name, 0, strrpos( $class_n
  * @param int 	$c		Регистр в которой необходимо преобразовать ключи массива
  * @return array Массив с преобразованными ключами
  */
-function & array_change_key_case_unicode( array & $arr, $c = CASE_LOWER) 
+function & array_change_key_case_unicode( array $arr, $c = CASE_LOWER)
 {	
 	// Результирующий массив
 	$ret = array();
