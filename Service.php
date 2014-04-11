@@ -17,6 +17,9 @@ class Service extends ExternalModule
 	/** Factory instances */
 	protected static $_factory = array();
 
+    /** Ancestor field that must be ignored */
+    protected static $ancestorIgnoreData = array('vid'=>'', 'uid'=>'', 'cache_path'=>'');
+
     /** Flag for gathering all ancestor data on instance creation */
     public $gatherAncestorData = true;
 
@@ -42,20 +45,32 @@ class Service extends ExternalModule
      */
     protected static function gatherAncestorsData(& $baseObject, & $currentObject)
     {
+        //trace('Gathering ancestor data for service: "'.get_class($currentObject).'"');
         // If this is not a Service(base class) instance creation
         $parentClass = strtolower(get_parent_class($currentObject));
         if(strtolower(__CLASS__) != $parentClass) {
             // Get parent class instance
             $parentInstance = & self::$_factory[$parentClass];
             if(isset($parentInstance)) {
-                // Iterate all current ancestor object fields
-                foreach(get_object_vars($parentInstance) as $field => $value) {
+                //trace('-Using parent class "'.$parentClass.'"');
+                // Iterate all current ancestor object fields except ignored
+                foreach (array_diff_key(get_object_vars($parentInstance), self::$ancestorIgnoreData) as $field => $value) {
                     // If ancestor has field set and it is not set in base instance
                     if (isset($parentInstance->$field) && !isset($baseObject->$field)) {
-                        // Set ancestors value
-                        $baseObject->$field = $parentInstance->$field;
+                         $baseObject->$field = $parentInstance->$field;
                     }
                 }
+
+                // Merger service requirements
+                if (isset($parentInstance->requirements)) {
+                    $baseObject->requirements = array_unique(array_merge($baseObject->requirements, $parentInstance->requirements));
+                }
+
+                // Set parent service
+                $baseObject->parent = & $parentInstance;
+
+                // Go deeper in recursion
+                self::gatherAncestorsData($baseObject, $parentInstance);
             }
         }
     }
