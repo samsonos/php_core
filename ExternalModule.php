@@ -18,6 +18,9 @@ class ExternalModule extends Module implements iExternalModule
 	 * @see \samson\core\Module
 	 */
 	public $parent = NULL;
+
+    /** Vendor composer value */
+    protected $vendor;
 	
 	/** Virtual module identifier */
 	protected $vid = null;	
@@ -227,10 +230,17 @@ class ExternalModule extends Module implements iExternalModule
 			if(!is_int($k)) $require->$k = $v;
 			else $require->$v = '*.*.*';
 		}
+
+        // If no vendor is specified
+        if(!isset($this->vendor)) {
+            // Generate vendor from namespace
+            $reflector = new \ReflectionClass(get_class($this));
+            $vendor = str_replace( '\\', '_', str_replace('samson\\', '', $reflector->getNamespaceName()));
+        }
 	
 		// Сформируем файл-конфигурацию для composer
 		$composer = str_replace( array('\\\\','\\/'), '/', json_encode( array(
-				'name'		=> self::COMPOSER_VENDOR.'/'.$this->id,
+				'name'		=> self::COMPOSER_VENDOR.'/'.$vendor,
 				'author' 	=> $this->author,
 				'version'	=> $this->version,
 				'require'	=> $require
