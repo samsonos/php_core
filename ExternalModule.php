@@ -237,13 +237,25 @@ class ExternalModule extends Module implements iExternalModule
             $reflector = new \ReflectionClass(get_class($this));
             $vendor = str_replace( '\\', '_', str_replace('samson\\', '', $reflector->getNamespaceName()));
         }
+
+        // Default license
+        $license = 'Open Software License (\"OSL\") v 3.0';
+        // If module has license file - consider first license file line as license name
+        if (file_exists($this->path().'/license.md')) {
+            // Read license file
+            $lines = file($this->path().'/license.md');
+
+            // Get first line
+            $license = $lines[0];
+        }
 	
 		// Сформируем файл-конфигурацию для composer
 		$composer = str_replace( array('\\\\','\\/'), '/', json_encode( array(
 				'name'		=> self::COMPOSER_VENDOR.'/'.$vendor,
 				'author' 	=> $this->author,
 				'version'	=> $this->version,
-				'require'	=> $require
+				'require'	=> $require,
+                'license'   => $license,
 		), 64 ));		
 	
 		// Проверим если файл конфигурации для composer не существует или конфигурация изменилась
