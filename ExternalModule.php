@@ -227,8 +227,18 @@ class ExternalModule extends Module implements iExternalModule
 		// Обработаем список зависимостей
 		foreach ( $this->requirements as $k => $v )
 		{
-			if(!is_int($k)) $require->$k = $v;
-			else $require->$v = '*.*.*';
+            // Get module name
+            $moduleName = strtolower(!is_int($k) ? $k : $v);
+            // Get module version
+            $version = !is_int($k) ? $v : '*.*.*';
+
+            // If no vendor is specified - use default vendor
+            if (strpos($moduleName,'\\') === false) {
+                $moduleName = self::COMPOSER_VENDOR.'/'.$moduleName;
+            }
+
+            // Set object parameter
+            $require->$moduleName = $version;
 		}
 
         // If no vendor is specified
