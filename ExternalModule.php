@@ -256,6 +256,7 @@ class ExternalModule extends Module implements iExternalModule
 				'version'	=> $this->version,
 				'require'	=> $require,
                 'license'   => $license,
+                'homepage'  => $this->homepage,
 		), 64 ));		
 	
 		// Проверим если файл конфигурации для composer не существует или конфигурация изменилась
