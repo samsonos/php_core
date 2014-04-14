@@ -775,9 +775,6 @@ class Core implements iCore
 		
 		// TODO: Сделать полноценную загрузку core и local через load
 
-		// Создадим специальный модуль для PHP
-		new PHP( __SAMSON_PATH__ );	
-		
 		// Load samson\core module
 		new System( __SAMSON_PATH__ );		
 
