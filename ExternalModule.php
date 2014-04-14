@@ -232,6 +232,13 @@ class ExternalModule extends Module implements iExternalModule
             // Get module version
             $version = !is_int($k) ? $v : '*.*.*';
 
+            // If this module exists
+            if (isset(Module::$instances[ $moduleName ])){
+                // Generate module namespace
+                $reflector = new \ReflectionClass(get_class(Module::$instances[ $moduleName ]));
+                $moduleName = str_replace( '\\', '_', str_replace('samson\\', '', $reflector->getNamespaceName()));
+            }
+
             // If no vendor is specified - use default vendor
             if (strpos($moduleName,'\\') === false) {
                 $moduleName = self::COMPOSER_VENDOR.'/'.$moduleName;
