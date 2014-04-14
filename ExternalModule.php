@@ -175,8 +175,8 @@ class ExternalModule extends Module implements iExternalModule
 			}
 	
 			// Получим регистро не зависимое имя модуля
-			$_module = mb_strtolower( $module, 'UTF-8' );			
-				
+			$_module = mb_strtolower( $module, 'UTF-8' );
+
 			// Проверим загружен ли требуемый модуль в ядро
 			if( !isset( Module::$instances[ $_module ] ) )
 			{				

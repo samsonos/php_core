@@ -73,14 +73,14 @@ class Core implements iCore
 	public $benchmarks = array();
 	
 	/** View path loading mode */
-	public $render_mode = self::RENDER_STANDART;
+	public static $render_mode = self::RENDER_STANDART;
 	
 	/**  
 	 * Automatic class loader based on lazy loading from load_stack
 	 * based on class namespace data
 	 */
-	private function __autoload( $class )
-	{	
+	private function __autoload($class)
+	{
 		//[PHPCOMPRESSOR(remove,start)]
 		$this->benchmark( __FUNCTION__, func_get_args() );		
 		//[PHPCOMPRESSOR(remove,end)]
@@ -103,7 +103,7 @@ class Core implements iCore
 			{ 
 				end( $this->load_path_stack );
 				$ls = & $this->load_path_stack[ key( $this->load_path_stack ) ];
-			}			
+			}
 			
 			// If we have php files in this entry to search for needed class
             foreach (array('php','models') as $key) {
@@ -121,6 +121,14 @@ class Core implements iCore
                         return require_once( end($files) );
                     }
                 }
+            }
+
+            // We have not found class in current module, try using PSR-* loader
+            $composerPath = 'vendor/'.classnameToComposer($class).'/'.classname($class).'.php';
+
+            // Try to load path from composer
+            if(file_exists($composerPath)) {
+                return require_once($composerPath);
             }
 
             return '';
@@ -241,9 +249,9 @@ class Core implements iCore
 
 			// Controllers, models and global files must be required immediately
 			// because they can consist of just functions, no lazy load available
-			if(file_exists($path.__SAMSON_GLOBAL_FILE))	require($path.__SAMSON_GLOBAL_FILE);		
-			foreach ($ls['controllers'] as $php) require($php);
-			foreach ($ls['models'] as $php) require($php);
+			if(file_exists($path.__SAMSON_GLOBAL_FILE))	require_once($path.__SAMSON_GLOBAL_FILE);
+			foreach ($ls['controllers'] as $php) require_once($php);
+			foreach ($ls['models'] as $php) require_once($php);
 			
 			//elapsed('   -- Icluded models/controllers/globals from '.$path);
 			
@@ -378,7 +386,7 @@ class Core implements iCore
 		}
 		
 		// Depending on core view rendering model
-		switch ( $this->render_mode )
+		switch ( self::$render_mode )
 		{
 			// Standard algorithm for view rendering
 			case self::RENDER_STANDART: 
@@ -776,7 +784,7 @@ class Core implements iCore
 		// TODO: Сделать полноценную загрузку core и local через load
 
 		// Load samson\core module
-		new System( __SAMSON_PATH__ );		
+		new System( __SAMSON_PATH__ );
 
 		// Manually include system module to load stack
 		$path = __SAMSON_PATH__;
@@ -791,6 +799,33 @@ class Core implements iCore
 		Config::load();
 	}
 	//[PHPCOMPRESSOR(remove,end)]
+
+    /**
+     * Load system from composer.json
+     * @return $this Chaining
+     */
+    public function composer()
+    {
+        // If we have composer configuration file
+        if (file_exists('composer.json')) {
+            // Read file into object
+            $composerObject = json_decode(file_get_contents('composer.json'), true);
+
+            // If composer has requirements configured
+            if (isset($composerObject['require'])) {
+                // Iterate requirements
+                foreach ($composerObject['require'] as $requirement => $version) {
+                    if($requirement != 'samsonos/core') {
+                        // Load module
+                        $this->load('vendor/'.$requirement.'/');
+                    }
+                }
+            }
+        }
+
+        return $this;
+    }
+
 	
 	/** Магический метод для десериализации объекта */
 	public function __wakeup(){	$this->active = & $this->module_stack['local']; }

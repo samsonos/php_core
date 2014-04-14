@@ -216,8 +216,8 @@ class URL implements iURL
 		$url = $url['path'];
 		
 		// Отрежем путь к текущему веб-приложению из пути и декодируем другие символы
-		$url = trim( urldecode( substr( $url, strlen( __SAMSON_BASE__ ))));	
-		
+		$url = trim( urldecode( substr( $url, strlen( __SAMSON_BASE__ ))));
+
 		// Установим базовый путь к приложению
 		$this->base = __SAMSON_BASE__;
 
