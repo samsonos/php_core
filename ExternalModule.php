@@ -245,7 +245,7 @@ class ExternalModule extends Module implements iExternalModule
         if(!isset($this->vendor)) {
             // Generate vendor from namespace
             $reflector = new \ReflectionClass(get_class($this));
-            $vendor = str_replace( '\\', '_', str_replace('samson\\', '', $reflector->getNamespaceName()));
+            $vendor = str_replace('samson\\', '', $reflector->getNamespaceName());
         }
 
         // Default license
