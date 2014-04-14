@@ -20,6 +20,11 @@ define( '__SAMSON_PATH__', __DIR__.'/' );
 /** Получим текущий каталог веб-приложения */
 define('__SAMSON_CWD__', str_ireplace('\\', '/', getcwd().'/' ) );
 
+// Fix for apache mod_vhost_alias
+if (strlen(__SAMSON_CWD__) - strlen($_SERVER['DOCUMENT_ROOT']) > 5) {
+    $_SERVER['DOCUMENT_ROOT'] = dirname($_SERVER['SCRIPT_FILENAME']);
+}
+
 /** Получим путь к текущему веб-приложению относительно корня сайта */
 define('__SAMSON_BASE__', str_ireplace( $_SERVER['DOCUMENT_ROOT'], '', __SAMSON_CWD__ ) );
 
