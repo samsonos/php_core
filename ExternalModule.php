@@ -256,7 +256,7 @@ class ExternalModule extends Module implements iExternalModule
             $lines = file($this->path().'/license.md');
 
             // Get first line
-            $license = $lines[0];
+            $license = str_replace('\n','',$lines[0]);
         }
 	
 		// Сформируем файл-конфигурацию для composer
