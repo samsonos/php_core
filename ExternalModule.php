@@ -230,7 +230,7 @@ class ExternalModule extends Module implements iExternalModule
             // Get module name
             $moduleName = strtolower(!is_int($k) ? $k : $v);
             // Get module version
-            $version = !is_int($k) ? $v : '*.*.*';
+            $version = !is_int($k) ? $v : 'dev-master';
 
             // If this module exists
             if (isset(Module::$instances[ $moduleName ])){
