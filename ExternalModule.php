@@ -249,7 +249,7 @@ class ExternalModule extends Module implements iExternalModule
         }
 
         // Default license
-        $license = 'Open Software License (\"OSL\") v 3.0';
+        $license = 'Open Software License (OSL) v 3.0';
         // If module has license file - consider first license file line as license name
         if (file_exists($this->path().'/license.md')) {
             // Read license file
