@@ -19,9 +19,6 @@ class ExternalModule extends Module implements iExternalModule
 	 */
 	public $parent = NULL;
 
-    /** Vendor composer value */
-    protected $vendor;
-	
 	/** Virtual module identifier */
 	protected $vid = null;	
 	
@@ -46,11 +43,6 @@ class ExternalModule extends Module implements iExternalModule
 		
 		// Call parent constructor
 		parent::__construct( $this->id, $path, $resources );
-		
-		//[PHPCOMPRESSOR(remove,start)]
-		// Создадим конфигурацию для composer
-		$this->composer();
-		//[PHPCOMPRESSOR(remove,end)]	
 	}
 	
 	/** @see \samson\core\iExternalModule::copy() */
@@ -213,74 +205,5 @@ class ExternalModule extends Module implements iExternalModule
 		$this->set( $params );
 	
 		return TRUE;
-	}
-	
-	/** Создать файл конфигурации для composer */
-	private function composer()
-	{
-		// Check if this is existing external module
-		if( !isset($this->path{0}) ) return true;
-	
-		// Преобразуем массив зависисмостей в объект
-		$require = new \stdClass();
-	
-		// Обработаем список зависимостей
-		foreach ( $this->requirements as $k => $v )
-		{
-            // Get module name
-            $moduleName = strtolower(!is_int($k) ? $k : $v);
-            // Get module version
-            $version = !is_int($k) ? $v : 'dev-master';
-
-            // If this module exists
-            if (isset(Module::$instances[ $moduleName ])){
-                // Generate module namespace
-                $reflector = new \ReflectionClass(get_class(Module::$instances[ $moduleName ]));
-                $moduleName = str_replace( '\\', '_', str_replace('samson\\', '', $reflector->getNamespaceName()));
-            }
-
-            // If no vendor is specified - use default vendor
-            if (strpos($moduleName,'\\') === false) {
-                $moduleName = self::COMPOSER_VENDOR.'/'.$moduleName;
-            }
-
-            // Set object parameter
-            $require->$moduleName = $version;
-		}
-
-        // If no vendor is specified
-        if(!isset($this->vendor)) {
-            // Generate vendor from namespace
-            $reflector = new \ReflectionClass(get_class($this));
-            $vendor = str_replace( '\\', '_', str_replace('samson\\', '', $reflector->getNamespaceName()));
-        }
-
-        // Default license
-        $license = 'Open Software License (OSL) v 3.0';
-        // If module has license file - consider first license file line as license name
-        if (file_exists($this->path().'/license.md')) {
-            // Read license file
-            $lines = file($this->path().'/license.md');
-
-            // Get first line
-            $license = str_replace('"', '', trim(preg_replace('/\s+/',' ',$lines[0])));
-        }
-	
-		// Сформируем файл-конфигурацию для composer
-		$composer = str_replace( array('\\\\','\\/'), '/', json_encode( array(
-				'name'		=> self::COMPOSER_VENDOR.'/'.$vendor,
-				'author' 	=> $this->author,
-				'version'	=> $this->version,
-				'require'	=> $require,
-                'license'   => $license,
-                'homepage'  => $this->homepage,
-		), 64 ));		
-	
-		// Проверим если файл конфигурации для composer не существует или конфигурация изменилась
-		if( ! file_exists( $this->path.'/composer.json' ) || ( md5(file_get_contents( $this->path.'/composer.json' )) != md5($composer)) )
-		{
-			// Запишем файл конфигурации composer
-			file_put_contents( $this->path.'/composer.json', $composer );
-		}
 	}
 }

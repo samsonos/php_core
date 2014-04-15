@@ -29,12 +29,6 @@ class Module implements iModule, \ArrayAccess, iModuleViewable
 	/** Unique module identifier */
 	protected $id = '';
 	
-	/** Default module author */
-	protected $author = 'Vitaly Iegorov <egorov@samsonos.com>';
-
-    /** Default module homepage */
-    protected $homepage = 'http://samsonos.com/';
-	
 	/** Default module version */
 	protected $version = '0.0.1';
 	
