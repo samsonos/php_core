@@ -26,7 +26,6 @@ require( 'CompressableService.php');
 require( 'SamsonLocale.php' );
 require( 'Core.php' );
 require( 'Forms.php' );
-require( 'AJAX.php' );
 require( 'File.php' );
 require( 'deprecated.php' );
 /**/
