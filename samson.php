@@ -526,7 +526,7 @@ function locale_path( $l = null )
 function ns_classname( $class_name, $ns = 'samson\activerecord' )
 {
 	// If core rendering model is NOT array loading
-	if( \samson\Core\Core::$render_mode != samson\core\iCore::RENDER_ARRAY )
+	if( s()->render_mode != samson\core\iCore::RENDER_ARRAY )
 	{
 		return ( strpos($class_name, __NS_SEPARATOR__) !== false ) ? $class_name : $ns.__NS_SEPARATOR__.$class_name;
 	}
