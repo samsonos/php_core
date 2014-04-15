@@ -815,8 +815,22 @@ class Core implements iCore
                 // Iterate requirements
                 foreach ($composerObject['require'] as $requirement => $version) {
                     if($requirement != 'samsonos/core') {
+
+                        // Build path to module
+                        $path = __SAMSON_VENDOR_PATH.$requirement;
+
+                        // If path with underscores does not exists
+                        if (!file_exists($path)) {
+                            // Try path without underscore
+                            $path = str_replace('_', '/', $path);
+                            if (!file_exists($path)) {
+                                e('Cannot load module: "'.$requirement.'" - Path not found');
+                                continue;
+                            }
+                        }
+
                         // Load module
-                        $this->load(__SAMSON_VENDOR_PATH.$requirement.'/');
+                        $this->load($path);
                     }
                 }
             }
