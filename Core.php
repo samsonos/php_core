@@ -816,7 +816,7 @@ class Core implements iCore
                 foreach ($composerObject['require'] as $requirement => $version) {
                     if($requirement != 'samsonos/core') {
                         // Load module
-                        $this->load('vendor/'.$requirement.'/');
+                        $this->load(__SAMSON_VENDOR_PATH.$requirement.'/');
                     }
                 }
             }

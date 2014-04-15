@@ -9,7 +9,12 @@ namespace samson\core;
 define('__SAMSON_T_STARTED__', microtime(TRUE));
 
 /** Установим версию фреймворка */
-define('__SAMSON_VERSION__', '5.1.1');
+define('__SAMSON_VERSION__', '6.0.0');
+
+/** If no specific vendor path is defined */
+if (!defined('__SAMSON_VENDOR_PATH')) {
+    define('__SAMSON_VENDOR_PATH', 'vendor/');
+}
 
 /** Совместимость с PHP 5 */
 if(!defined('__DIR__')) define( '__DIR__', dirname(__FILE__));
