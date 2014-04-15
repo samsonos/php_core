@@ -19,7 +19,6 @@ class Core implements iCore
 {
     /** Collection of paths ignored by resources collector */
     public static $resourceIgnorePath = array(
-
         '.git',
         '.svn',
         '.settings',
@@ -73,7 +72,7 @@ class Core implements iCore
 	public $benchmarks = array();
 	
 	/** View path loading mode */
-	public static $render_mode = self::RENDER_STANDART;
+	public $render_mode = self::RENDER_STANDART;
 	
 	/**  
 	 * Automatic class loader based on lazy loading from load_stack
@@ -386,7 +385,7 @@ class Core implements iCore
 		}
 		
 		// Depending on core view rendering model
-		switch ( self::$render_mode )
+		switch ( $this->render_mode )
 		{
 			// Standard algorithm for view rendering
 			case self::RENDER_STANDART: 
