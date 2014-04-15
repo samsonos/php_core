@@ -23,7 +23,6 @@ require( 'Service.php');
 require( 'CompressableLocalModule.php');
 require( 'CompressableExternalModule.php');
 require( 'CompressableService.php');
-require( 'CompressableModule.php' );
 require( 'SamsonLocale.php' );
 require( 'Core.php' );
 require( 'Forms.php' );
