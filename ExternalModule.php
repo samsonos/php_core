@@ -150,7 +150,7 @@ class ExternalModule extends Module implements iExternalModule
 	/**	@see iExternalModule::prepare() */
 	public function prepare()
 	{		
-		// Переберем все связи модуля
+		/*// Переберем все связи модуля
 		foreach ( $this->requirements as $module => $version )
 		{
 			// Поумолчания установим такое отношение по версии модуля
@@ -160,7 +160,7 @@ class ExternalModule extends Module implements iExternalModule
 			if( !isset( $module{0} ) ) { $module = $version; $version = '0.0.1'; }
 	
 			// Определим версию и знаки
-			if( preg_match( '/\s*((?<sign>\>\=|\<\=\>|\<)*(?<version>.*))\s*/iu', $version, $matches ))
+			if( preg_match( '/\s*((?<sign>\>\=|\<\=\>|\<)*(?<version>.*))\s*//*iu', $version, $matches ))
 			{
 				$version_sign = isset($matches['sign']{0}) ? $matches['sign'] : $version_sign;
 				$version = $matches['version'];
@@ -188,7 +188,7 @@ class ExternalModule extends Module implements iExternalModule
 						)
 				);
 			}
-		}
+		}*/
 	
 		// Вернем результат проверки модуля
 		return TRUE;
