@@ -1,7 +1,5 @@
 <?php
 
-use Samson\ActiveRecord\dbSimplify;
-
 /**
  * Универсальный генератор HTML элемента формы SELECT для выбора элемента
  * из БД принадлежащего определоенному классу, сущности
@@ -16,7 +14,7 @@ use Samson\ActiveRecord\dbSimplify;
 function html_db_form_select_from_array( $entity_name, array $db_array, $db_obj = NULL, $name_attr = 'Name', $desc_attr = 'Description', $id_attr = NULL  )
 {
 	// Попытаемся безопасно получить указатель на переданный объект из БД
-	if(dbSimplify::parse( $entity_name, $db_obj, $db_obj )) $obj_id = $db_obj->id;
+	if(Samson\ActiveRecord\dbSimplify::parse( $entity_name, $db_obj, $db_obj )) $obj_id = $db_obj->id;
 	// Иначе оставим идкентификатор выбранного элемента как есть
 	else $obj_id = $db_obj;
 	
