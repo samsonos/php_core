@@ -16,6 +16,11 @@ if (!defined('__SAMSON_VENDOR_PATH')) {
     define('__SAMSON_VENDOR_PATH', 'vendor/');
 }
 
+/** SamsonPHP copyright */
+if (!defined('__SAMSON_COPYRIGHT')) {
+    define('__SAMSON_COPYRIGHT', '<!-- This site is working under SamsonPHP framework http:://samsonphp.com  -->');
+}
+
 /** Совместимость с PHP 5 */
 if(!defined('__DIR__')) define( '__DIR__', dirname(__FILE__));
 

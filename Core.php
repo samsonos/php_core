@@ -560,14 +560,9 @@ class Core implements iCore
 		// Выполним вставку главного тега <base> от которого зависят все ссылки документа
 		// также подставим МЕТА-теги для текущего модуля и сгенерированный минифицированный CSS
 		$template_html = str_ireplace( '<head>', '<head>'.$head_html, $template_html );
-		
-		// Так сказать - копирайт =)
-		$body_html = '<!-- Сайт разработан компанией SamsonOS -->';
-		$body_html .= '<!-- PHP фреймфорк SamsonPHP http:://samsonos.com  -->';
-		$body_html .= '<!-- Нравится PHP/HTML, хочешь узнать много нового и зарабатывать на этом деньги? Пиши info@samsonos.com -->';
-		
+
 		// Вставим указатель JavaScript ресурсы в конец HTML документа
-		$template_html = str_ireplace( '</html>', '</html>'.$body_html, $template_html );
+		$template_html = str_ireplace( '</html>', '</html>'.__SAMSON_COPYRIGHT, $template_html );
 		
 		return $template_html;
 	}
