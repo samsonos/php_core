@@ -812,14 +812,16 @@ class Core implements iCore
                     if($requirement != 'samsonos/php_core') {
 
                         // Try developer relative path
-                        $path = '../../vendor/';
+                        $path = '../../vendor/'.$requirement;
+                        // If path with underscores does not exists
                         if (!file_exists($path)) {
-                            // Build path to module
-                            $path = __SAMSON_VENDOR_PATH;
+                            // Try path without underscore
+                            $path = str_replace('_', '/', $path);
+                            if (!file_exists($path)) {
+                                // Build path to module
+                                $path = __SAMSON_VENDOR_PATH.$requirement;
+                            }
                         }
-
-                        // Build path to module
-                        $path .= $requirement;
 
                         // If path with underscores does not exists
                         if (!file_exists($path)) {
