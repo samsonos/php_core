@@ -811,8 +811,12 @@ class Core implements iCore
                 foreach ($composerObject['require'] as $requirement => $version) {
                     if($requirement != 'samsonos/php_core') {
 
-                        // Build path to module
-                        $path = __SAMSON_VENDOR_PATH.$requirement;
+                        // Try developer relative path
+                        $path = '../../vendor';
+                        if (!file_exists($path)) {
+                            // Build path to module
+                            $path = __SAMSON_VENDOR_PATH.$requirement;
+                        }
 
                         // If path with underscores does not exists
                         if (!file_exists($path)) {
