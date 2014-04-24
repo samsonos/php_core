@@ -28,7 +28,14 @@ class SamsonLocale
 	 * Используется для дополнительного контроля за локализациями
 	 * @var array
 	 */
-	private static $supported = array( SamsonLocale::DEF, SamsonLocale::EN, SamsonLocale::UA, SamsonLocale::RU );
+	private static $supported = array( 
+		SamsonLocale::DEF, 
+		SamsonLocale::EN, 
+		SamsonLocale::UA, 
+		SamsonLocale::RO,
+		SamsonLocale::CH,
+		SamsonLocale::RU 
+	);
 	
 	/**
 	 * Коллекция названий поддерживаемых локализаций
