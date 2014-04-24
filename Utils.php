@@ -491,8 +491,8 @@ function utf8_ucfirst( $string, $encoding = 'utf-8'  )
 	$firstChar = mb_substr($string, 0, 1, $encoding);
 	
 	$then = mb_substr($string, 1, $strlen - 1, $encoding);
-	
-	return mb_strtoupper($firstChar, $encoding) . $then;	
+
+	return mb_strtoupper($firstChar, $encoding) . $then;
 }
 
 /**
