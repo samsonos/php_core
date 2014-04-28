@@ -38,7 +38,10 @@ if (strlen(__SAMSON_CWD__) - strlen($_SERVER['DOCUMENT_ROOT']) > 5) {
 /** Получим путь к текущему веб-приложению относительно корня сайта */
 define('__SAMSON_BASE__', str_ireplace( $_SERVER['DOCUMENT_ROOT'], '', __SAMSON_CWD__ ) );
 
-/** Объявим константу для раздели пути в namespace */
+/**
+ * Объявим константу для раздели пути в namespace
+ * @deprecated use samson\core\AutoLoader::NS_SEPARATOR
+ */
 define('__NS_SEPARATOR__', '\\');
 
 /** Flag that this script runs from remote app */
@@ -76,3 +79,6 @@ define( 'A_SUCCESS', TRUE );
 
 /** Действие контроллера НЕ выполнено */
 define( 'A_FAILED', FALSE );
+
+/** Check if this is very old PHP version */
+define('__SAMSON_PHP_OLD', version_compare(PHP_VERSION, '5.3.0') >= 0);

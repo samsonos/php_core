@@ -326,3 +326,4 @@ class Error
 		);
 	}
 }
+

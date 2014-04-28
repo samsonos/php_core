@@ -132,25 +132,6 @@ function pathname( $path )
 function normalizepath( $path ){ return str_replace( array('\\\\','///', '//','\\'), '/', $path );}
 
 /**
- * Return only class name without namespace
- * @param string $class_name class name
- * @return string class name without namespace
- */
-function classname( $class_name )
-{
-	if( ($p = strrpos( $class_name, __NS_SEPARATOR__ )) !== false ) $class_name = substr( $class_name, $p + 1 );
-	 
-	return $class_name;
-}
-
-/**
- * Return only namespace name from class name
- * @param string $class_name class name
- * @return string Namespace name
- */
-function nsname( $class_name ){ return substr( $class_name, 0, strrpos( $class_name, __NS_SEPARATOR__ ));}
-
-/**
  * Изменить регистр ключей массива, с поддержкой UNICODE
  * 
  * @param array $arr	Массив для преобразования ключей
