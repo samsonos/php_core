@@ -22,6 +22,8 @@ class SamsonLocale
 	const RO = 'ro';
 	/** Китайская локализация */
 	const CH = 'ch';
+    /** Корейская локализация */
+    const KO = 'ko';
 	
 	/**
 	 * Коллекция поддерживаемых локализаций
@@ -34,7 +36,8 @@ class SamsonLocale
 		SamsonLocale::UA, 
 		SamsonLocale::RO,
 		SamsonLocale::CH,
-		SamsonLocale::RU 
+		SamsonLocale::RU,
+        SamsonLocale::KO,
 	);
 	
 	/**
