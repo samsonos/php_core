@@ -36,7 +36,9 @@ if (strlen(__SAMSON_CWD__) - strlen($_SERVER['DOCUMENT_ROOT']) > 5) {
 }
 
 /** Получим путь к текущему веб-приложению относительно корня сайта */
-define('__SAMSON_BASE__', str_ireplace( $_SERVER['DOCUMENT_ROOT'], '', __SAMSON_CWD__ ) );
+if(!defined('__SAMSON_BASE__')) {
+    define('__SAMSON_BASE__', str_ireplace( $_SERVER['DOCUMENT_ROOT'], '', __SAMSON_CWD__ ) );
+}
 
 /** Объявим константу для раздели пути в namespace */
 define('__NS_SEPARATOR__', '\\');
