@@ -801,10 +801,12 @@ class Core implements iCore
      */
     public function composer()
     {
+        $path = $this->path().'composer.json';
+
         // If we have composer configuration file
-        if (file_exists('composer.json')) {
+        if (file_exists($path)) {
             // Read file into object
-            $composerObject = json_decode(file_get_contents('composer.json'), true);
+            $composerObject = json_decode(file_get_contents($path), true);
 
             // If composer has requirements configured
             if (isset($composerObject['require'])) {
