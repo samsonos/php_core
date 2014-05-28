@@ -30,6 +30,9 @@ define( '__SAMSON_PATH__', __DIR__.'/' );
 /** Получим текущий каталог веб-приложения */
 define('__SAMSON_CWD__', str_ireplace('\\', '/', getcwd().'/' ) );
 
+/** Объявим константу для раздели пути в namespace */
+define('__NS_SEPARATOR__', '\\');
+
 // Fix for apache mod_vhost_alias
 if (strlen(__SAMSON_CWD__) - strlen($_SERVER['DOCUMENT_ROOT']) > 5) {
     $_SERVER['DOCUMENT_ROOT'] = dirname($_SERVER['SCRIPT_FILENAME']);
@@ -40,11 +43,8 @@ if(!defined('__SAMSON_BASE__')) {
     define('__SAMSON_BASE__', str_ireplace( $_SERVER['DOCUMENT_ROOT'], '', __SAMSON_CWD__ ) );
 }
 
-/** Объявим константу для раздели пути в namespace */
-define('__NS_SEPARATOR__', '\\');
-
 /** Flag that this script runs from remote app */
-define( '__SAMSON_REMOTE_APP', __SAMSON_CWD__ !== $_SERVER['DOCUMENT_ROOT'].'/' );
+define( '__SAMSON_REMOTE_APP', __SAMSON_BASE__ !== '/' );
 
 /** Default path to cache folder */
 define('__SAMSON_CACHE_PATH','cache');

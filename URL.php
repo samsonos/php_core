@@ -85,16 +85,25 @@ class URL implements iURL
 
     /**
      * Check if current module from URL identifier matches passed module identifier and output on success
-     * @param string    $module Module name to match
+     * @param string    $modules Module name to match
      * @param string    $output String for output
      * @return boolean True if current module from URL identifier matches passed module identifier
      */
-    public function is($module, $output = '')
+    public function is($modules, $output = '')
     {
-        if ($this->module == $module) {
-            echo $output;
+        // If module is not array - make it
+        if (!is_array($modules)) {
+            $modules = array($modules);
+        }
 
-            return true;
+        // Iterate passed modules
+        foreach ($modules as $module) {
+            // If URL module or current system module matches passed module name
+            if (($this->module == $module) || (s()->module()->id == $module)) {
+                echo $output;
+
+                return true;
+            }
         }
 
         return false;
