@@ -107,11 +107,12 @@ class Error
 	 */
 	public function shutdown()
 	{		
+		//[PHPCOMPRESSOR(remove,start)]
 		// TODO: Create core shutdown routines
 		if( !s()->async() )
 		{
 			// Fix performance
-			//[PHPCOMPRESSOR(remove,start)]
+			
 			s()->benchmark( __FUNCTION__, func_get_args() );
 
             $template_html = '<!-- Total time elapsed:'.round( microtime(TRUE) - __SAMSON_T_STARTED__, 3 ).'s -->';
@@ -142,10 +143,10 @@ class Error
 				$l = $data[0];
 				$m = $data[3];
 			}
-			//[PHPCOMPRESSOR(remove,end)]
 			
-			echo $template_html;			
+			echo $template_html;						
 		}
+		//[PHPCOMPRESSOR(remove,end)]
 		
 		// Если установлен обработчик завершения выполнения скрипта - вызовем его
 		if( isset( self::$shutdown_handler ) && ( call_user_func( self::$shutdown_handler ) === false )) return null;		
