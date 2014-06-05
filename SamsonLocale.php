@@ -88,8 +88,11 @@ class SamsonLocale
             $_locale = strtolower($locale);
 
 			// Добавим в коллекцию доступных локализаций переданные
-			if ( in_array($_locale, self::$supported) && !in_array($_locale, self::$locales)) {
-                self::$locales[] = $_locale;
+			if ( in_array($_locale, self::$supported)) {
+                // Ignore duplicare locale setting
+                if (!in_array($_locale, self::$locales)) {
+                    self::$locales[] = $_locale;
+                }
             }
 			// Проверим разрешаемые локали
 			else die('Устанавливаемая локализация "'.$locale.'" - не предусмотрена в SamsonLocale');		
