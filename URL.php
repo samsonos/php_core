@@ -157,8 +157,8 @@ class URL implements iURL
 	public function redirect( $url = NULL )
 	{
 		// Сформируем полный путь для переадресации
-		$full_url = $this->base.$url;
-		
+		$full_url = $this->base.locale_path().$url;
+
 		// Перейдем к форме авторизации		
 		header('Location: '.$full_url );
 			
