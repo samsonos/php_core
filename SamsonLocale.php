@@ -1,11 +1,13 @@
 <?php
 namespace samson\core;
 
+//[PHPCOMPRESSOR(remove,start)]
 // I default locale is not defined
 if (!defined('DEFAULT_LOCALE')) {
     // Define default locale
     define('DEFAULT_LOCALE', SamsonLocale::RU);
 }
+//[PHPCOMPRESSOR(remove,end)]
 
 /**
  * Класс для поддержки локализации веб-приложения
