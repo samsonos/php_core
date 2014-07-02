@@ -164,6 +164,7 @@ class URL implements iURL
 			
 		// Добавим клиентскон перенаправление в случаи не срабатывания серверного
 		echo '<script type="text/javascript">window.location.href="' . $full_url . '";</script>';
+        die;
 	}	
 	
 	/**	 
