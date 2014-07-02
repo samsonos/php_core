@@ -204,7 +204,7 @@ class URL implements iURL
  		
 		// Вернем полный URL-путь относительно текущего хоста и веб-приложения
 		// Соберем все отфильтрованные сущности URL использую разделитель "/"
-		return 'http://'.$_SERVER['HTTP_HOST'].$this->base.implode( '/', $url_params );
+		return __SAMSON_PROTOCOL.$_SERVER['HTTP_HOST'].$this->base.implode( '/', $url_params );
 	}
 	
 	/**
