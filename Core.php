@@ -787,11 +787,6 @@ class Core implements iCore
             // Read file into object
             $composerObject = json_decode(file_get_contents($path), true);
 
-            // Require composer Class autoloader
-            if (file_exists('vendor/autoload.php')) {
-               require 'vendor/autoload.php';
-            }
-
             // If composer has requirements configured
             if (isset($composerObject['require'])) {
                 // Iterate requirements

@@ -9,7 +9,7 @@
  * Generic SamsonPHP class auto loader
  * @author Vitaly Egorov <egorov@samsonos.com>
  * @copyright 2014 SamsonOS
- * @version 0.1.0
+ * @version 1.0.0
  */
 class AutoLoader 
 {
@@ -88,7 +88,7 @@ class AutoLoader
      *
      * @param string $className Class name without namespace
      * @param string $nameSpace Namespace name without class name
-     * @param string $file Variable tot return path to class file location on success
+     * @param string $file Variable to return path to class file location on success
      *
      * @return bool True if class file is found
      */
@@ -99,7 +99,7 @@ class AutoLoader
 
         // Iterate all possible file structures
         $path = '';
-        foreach (array('php', 'js', 'css', 'social') as $type) {
+        foreach (array('php', 'js', 'cms', 'social') as $type) {
             // Build all possible module location for backward compatibility
             $path1 = __SAMSON_VENDOR_PATH.str_replace('samson/', 'samsonos/', $ns);
             $path2 = __SAMSON_VENDOR_PATH.str_replace('samson/', 'samsonos/'.$type.'/', $ns);
@@ -183,6 +183,12 @@ class AutoLoader
     }
 }
 
-// Set this loader
+// If default composer autoloader exists
+if (file_exists('vendor/autoload.php')) {
+    // Load it automatically before all other loaders - we want to follow PSR-0 standard
+    require 'vendor/autoload.php';
+}
+
+// Add SamsonPHP default autoloader
 spl_autoload_register(array('\samson\core\AutoLoader','load'));
  

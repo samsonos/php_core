@@ -10,11 +10,11 @@
 require('constants.php');
 
 // Set default timezone
-date_default_timezone_set(date_default_timezone_get() );
+date_default_timezone_set(date_default_timezone_get());
 
 // Set default execution time limit
 set_time_limit( __SAMSON_MAX_EXECUTION__ );
-ini_set( 'max_execution_time', __SAMSON_MAX_EXECUTION__ );
+ini_set('max_execution_time', __SAMSON_MAX_EXECUTION__);
 
 // Start session
 session_start();

@@ -8,8 +8,8 @@ namespace samson\core;
 /**  Отметка времени начала работы фреймворка */
 define('__SAMSON_T_STARTED__', microtime(TRUE));
 
-/** Установим версию фреймворка */
-define('__SAMSON_VERSION__', '6.0.0');
+/** Constant for storing flag that current PHP version is really old */
+define('__SAMSON_PHP_OLD', version_compare(PHP_VERSION, '5.3.0', '<'));
 
 /** If no specific vendor path is defined */
 if (!defined('__SAMSON_VENDOR_PATH')) {
