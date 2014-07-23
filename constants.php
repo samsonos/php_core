@@ -16,6 +16,15 @@ if (!defined('__SAMSON_VENDOR_PATH')) {
     define('__SAMSON_VENDOR_PATH', 'vendor/');
 }
 
+/** If not specified development vendor path */
+if (!defined('__SAMSON_DEV_VENDOR_PATH')) {
+    /**
+     * Use standard relative path to add ability of using local module version
+     * for their quick development
+     */
+    define('__SAMSON_DEV_VENDOR_PATH', '../../vendor/');
+}
+
 /** SamsonPHP copyright */
 if (!defined('__SAMSON_COPYRIGHT')) {
     define('__SAMSON_COPYRIGHT', '<!-- This site is working under SamsonPHP framework http:://samsonphp.com  -->');

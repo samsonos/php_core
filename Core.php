@@ -79,7 +79,7 @@ class Core implements iCore
 	 * Automatic class loader based on lazy loading from load_stack
 	 * based on class namespace data
 	 */
-	private function __autoload($class)
+	/*private function __autoload($class)
 	{
 		//[PHPCOMPRESSOR(remove,start)]
 		$this->benchmark( __FUNCTION__, func_get_args() );		
@@ -133,7 +133,7 @@ class Core implements iCore
 
             return '';
 		}
-	}
+	}*/
 
 
     /**
@@ -249,19 +249,32 @@ class Core implements iCore
 
 			// Controllers, models and global files must be required immediately
 			// because they can consist of just functions, no lazy load available
-			if(file_exists($path.__SAMSON_GLOBAL_FILE))	require_once($path.__SAMSON_GLOBAL_FILE);
-			foreach ($ls['controllers'] as $php) require_once($php);
-			foreach ($ls['models'] as $php) require_once($php);
-			
-			//elapsed('   -- Icluded models/controllers/globals from '.$path);
+			if (file_exists($path.__SAMSON_GLOBAL_FILE)) {
+                require_once($path.__SAMSON_GLOBAL_FILE);
+                elapsed('   -- Included globals from '.$path.__SAMSON_GLOBAL_FILE);
+            }
+
+            // Iterate and include all module controllers
+			foreach ($ls['controllers'] as $php) {
+                elapsed('   -- Including controllers from '.$path.__SAMSON_GLOBAL_FILE);
+                require_once($php);
+            }
+
+            // Iterate and include all module models
+			foreach ($ls['models'] as $php) {
+                elapsed('   -- Including models from '.$path.__SAMSON_GLOBAL_FILE);
+                require_once($php);
+            }
 			
 			// Iterate only php files
-			foreach ( $ls['php'] as $php )
-			{						
-				// We must require regular files and wait to find iModule class ancestor declaration
-				require_once( $php );			
+			foreach ($ls['php'] as $php) {
 
-				//elapsed('   -- Icluded '.$php.' from '.$path);
+                elapsed('   -- Icluding '.$php.' from '.$path);
+
+				// We must require regular files and wait to find iModule class ancestor declaration
+				require_once( $php );
+
+                elapsed('   -- Icluded '.$php.' from '.$path);
 					
 				// If we have new class declared after requiring
 				$n_classes = get_declared_classes();
@@ -271,12 +284,12 @@ class Core implements iCore
 					$classes = $n_classes;
 				
 					// Iterate new declared classes
-					foreach ( $new_classes as $class_name )
-					{
+					foreach ( $new_classes as $class_name ) {
+
 						// If this is ExternalModule ancestor
 						if( in_array( ns_classname('ExternalModule','samson\core'), class_parents( $class_name )))
 						{	
-							//elapsed('   -- Found iModule ancestor '.$class_name.'('.$ns.') in '.$path);
+							elapsed('   -- Found iModule ancestor '.$class_name.'('.AutoLoader::getOnlyNameSpace($class_name).') in '.$path);
 
                             // Create object
                             /** @var \samson\core\ExternalModule $connector */
@@ -749,7 +762,7 @@ class Core implements iCore
 		if( isset($db[1]) ) $this->system_path = normalizepath( pathname($db[1]['file']) ).'/';	
 				 		
 		// Установим обработчик автоматической загрузки классов
-		spl_autoload_register( array( $this, '__autoload'));								
+		//spl_autoload_register( array( $this, '__autoload'));
 		
 		// Свяжем коллекцию загруженных модулей в систему со статической коллекцией
 		// Созданных экземпляров класса типа "Модуль"
@@ -794,6 +807,9 @@ class Core implements iCore
                 foreach ($composerObject['require'] as $requirement => $version) {
                     // Ignore core module and work only with samsonos/* modules before they are not PSR- optimized
                     if(($requirement != 'samsonos/php_core') && (strpos($requirement, 'samsonos/') !== false)) {
+
+                        elapsed('Loading module '.$requirement);
+
                         // Try developer relative path
                         $path = '../../vendor/'.$requirement;
                         // If path with underscores does not exists

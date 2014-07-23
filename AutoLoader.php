@@ -168,9 +168,11 @@ class AutoLoader
 
             // Load class by file name
             if (file_exists($path)) {
+                elapsed('Autoloading class '.$class.' at '.$path);
                 require_once($path);
             // old school compatibility will be removed when old modules will be updated
             } else if(self::oldModule($className, $nameSpace, $path)) {
+                elapsed('Autoloading(old style) class '.$class.' at '.$path);
                 require_once($path);
                 // Handle old module loading
             } else { // Signal error
