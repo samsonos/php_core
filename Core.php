@@ -808,12 +808,17 @@ class Core implements iCore
             // Read file into object
             $composerObject = json_decode(file_get_contents($path), true);
 
+            // Require composer Class autoloader
+            if (file_exists('vendor/autoload.php')) {
+               require 'vendor/autoload.php';
+            }
+
             // If composer has requirements configured
             if (isset($composerObject['require'])) {
                 // Iterate requirements
                 foreach ($composerObject['require'] as $requirement => $version) {
-                    if($requirement != 'samsonos/php_core') {
-
+                    // Ignore core module and work only with samsonos/* modules before they are not PSR- optimized
+                    if(($requirement != 'samsonos/php_core') && (strpos($requirement, 'samsonos/') != false)) {
                         // Try developer relative path
                         $path = '../../vendor/'.$requirement;
                         // If path with underscores does not exists
