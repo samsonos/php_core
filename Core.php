@@ -428,7 +428,7 @@ class Core implements iCore
 		
 		// Очистим буффер
 		ob_end_clean();
-		
+
 		// Iterating throw render stack, with one way template processing
 		foreach ( $this->render_stack as & $renderer )
 		{
@@ -448,6 +448,7 @@ class Core implements iCore
 		// If we have an argument, check if its a function
 		else if( is_callable( $render_handler ) )
 		{
+            //TODO: Add position to insert renderer
 			// Insert new renderer at the end of the stack
 			return array_push( $this->render_stack, $render_handler );
 		}
@@ -677,9 +678,7 @@ class Core implements iCore
 				$module->init();
 				////elapsed('End - Initializing module: '.$id);
 			}
-		}	
-		
-		////elapsed('End initing modules');
+		}
 	
 		// Send success status
 		header("HTTP/1.0 200 Ok");
@@ -711,50 +710,30 @@ class Core implements iCore
              * @var $module_loaded integer
              */
             $module_loaded = $this->active->action( url()->method );
-		}
-	
-		// Если мы не выполнили ни одного контроллера, обработаем ошибку 404
-		if( $module_loaded === A_FAILED ) $module_loaded = $this->e404();		
-	
-		////elapsed('Start outputing');
-		
-		// Сюда соберем весь вывод системы
-		$template_html = '';		
-	
-		// Если вывод разрешен - выведем шаблон на экран
-		if( ! $this->async && ($module_loaded !== A_FAILED) )
-		{					
-			// Прорисуем главный шаблон
-			$template_html = $this->render( $this->template_path, $this->active->toView() );
-			
-			// Подготовим HTML код для заполнения шапки шаблона
-			$head_html = '';
+		} else { // No controller has been executed
+            // Call e404 routine
+            $module_loaded = $this->e404();
+        }
 
-			//[PHPCOMPRESSOR(remove,start)]		
-			// Сгенерируем необходимые элементы в HTML шаблоне
-			$template_html = $this->generate_template( $template_html, '','');
+		// Сюда соберем весь вывод системы
+		$html = '';
+	
+		// If this is not asynchronous response and controller has been executed
+		if (!$this->async && ($module_loaded !== A_FAILED)) {
+
+			// Render main template
+            $html = $this->render($this->template_path, $this->active->toView());
+
+			//[PHPCOMPRESSOR(remove,start)]
+            // TODO: Replace this block with renderer logic
+			// Add special sugar to template HTML
+            $html = $this->generate_template($html, '','');
 			//[PHPCOMPRESSOR(remove,end)]
-			
-			// Добавим специальную системную комманду для инициализации фреймворка в JavaScript
-			$head_html .= '
-			<script type="text/javascript">			
-			if(typeof SamsonPHP != "undefined"){
-				SamsonPHP._uri = "'.url()->text.'";
-				SamsonPHP._moduleID = "'.$this->active->id().'";
-				SamsonPHP._url_base = "'.url()->base().'";
-				SamsonPHP._locale = "'.locale().'";
-			}
-			</script>';			
-			
-			// Insert what we have generated
-			$template_html = str_ireplace( '</head>', $head_html."\n".'</head>', $template_html );
 		}
 		
-		// Выведем все что мы на генерили
-		echo $template_html;			
-		
-		////elapsed('End routing');
-	}		
+		// Output results to client
+		echo $html;
+    }
 
 	//[PHPCOMPRESSOR(remove,start)]
 	/** Конструктор */
