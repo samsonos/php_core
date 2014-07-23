@@ -98,25 +98,30 @@ class AutoLoader
         $ns = str_replace(self::NS_SEPARATOR, '/', $nameSpace);
 
         // Iterate all possible file structures
-        $path = '';
+        $path = null;
         foreach (array('php', 'js', 'cms', 'social') as $type) {
             // Build all possible module location for backward compatibility
-            $path1 = __SAMSON_VENDOR_PATH.str_replace('samson/', 'samsonos/', $ns);
-            $path2 = __SAMSON_VENDOR_PATH.str_replace('samson/', 'samsonos/'.$type.'/', $ns);
-            $path3 = __SAMSON_VENDOR_PATH.str_replace('samson/', 'samsonos/'.$type.'_', $ns);
+            $locations = array(
+                __SAMSON_DEV_VENDOR_PATH.str_replace('samson/', 'samsonos/', $ns),
+                __SAMSON_DEV_VENDOR_PATH.str_replace('samson/', 'samsonos/'.$type.'/', $ns),
+                __SAMSON_DEV_VENDOR_PATH.str_replace('samson/', 'samsonos/'.$type.'_', $ns),
+                __SAMSON_VENDOR_PATH.str_replace('samson/', 'samsonos/', $ns),
+                __SAMSON_VENDOR_PATH.str_replace('samson/', 'samsonos/'.$type.'/', $ns),
+                __SAMSON_VENDOR_PATH.str_replace('samson/', 'samsonos/'.$type.'_', $ns)
+            );
 
-            if (file_exists($path1)) {
-                $path = $path1;
-                break;
-            } else if (file_exists($path2)) {
-                $path = $path2;
-                break;
-            } else if (file_exists($path3)) {
-                $path = $path3;
-                break;
-            } else {
-                return e('Class location ## not found by namespace ##', E_SAMSON_CORE_ERROR, array($className, $ns));
+            // Iterate all locations and try to find correct existing path
+            foreach($locations as $location) {
+                if(file_exists($location)) {
+                    $path = $location;
+                    break;
+                }
             }
+        }
+
+        // If class not found
+        if(!isset($path)) {
+            return e('Class location ## not found by namespace ##', E_SAMSON_CORE_ERROR, array($className, $ns));
         }
 
         $path .= '/';
