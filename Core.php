@@ -831,7 +831,7 @@ class Core implements iCore
                             // Try path without underscore
                             $path = str_replace('_', '/', $path);
                             if (!file_exists($path)) {
-                                return e('Cannot load module: "##" - Path not found', E_SAMSON_FATAL_ERROR, $requirement);
+                                return e('Cannot load module(from ##): "##" - Path not found', E_SAMSON_FATAL_ERROR, array($path, $requirement));
                             }
                         }
 
