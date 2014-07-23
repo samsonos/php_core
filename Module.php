@@ -619,7 +619,7 @@ class Module implements iModule, \ArrayAccess, iModuleViewable
 	}
 	
 	/** Обработчик сериализации объекта */
-	public function __sleep(){	return array( 'id', 'path', 'author', 'version', 'data', 'controllers', 'views' );	}
+	public function __sleep(){	return array( 'id', 'path', 'version', 'data', 'controllers', 'views' );	}
 	/** Обработчик десериализации объекта */
 	public function __wakeup()
 	{		

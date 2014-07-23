@@ -30,22 +30,24 @@ define( '__SAMSON_PATH__', __DIR__.'/' );
 /** Получим текущий каталог веб-приложения */
 define('__SAMSON_CWD__', str_ireplace('\\', '/', getcwd().'/' ) );
 
+/** Объявим константу для раздели пути в namespace */
+define('__NS_SEPARATOR__', '\\');
+
 // Fix for apache mod_vhost_alias
 if (strlen(__SAMSON_CWD__) - strlen($_SERVER['DOCUMENT_ROOT']) > 5) {
     $_SERVER['DOCUMENT_ROOT'] = dirname($_SERVER['SCRIPT_FILENAME']);
 }
 
 /** Получим путь к текущему веб-приложению относительно корня сайта */
-define('__SAMSON_BASE__', str_ireplace( $_SERVER['DOCUMENT_ROOT'], '', __SAMSON_CWD__ ) );
-
-/**
- * Объявим константу для раздели пути в namespace
- * @deprecated use samson\core\AutoLoader::NS_SEPARATOR
- */
-define('__NS_SEPARATOR__', '\\');
+if(!defined('__SAMSON_BASE__')) {
+    define('__SAMSON_BASE__', str_ireplace( $_SERVER['DOCUMENT_ROOT'], '', __SAMSON_CWD__ ) );
+}
 
 /** Flag that this script runs from remote app */
-define( '__SAMSON_REMOTE_APP', __SAMSON_CWD__ !== $_SERVER['DOCUMENT_ROOT'].'/' );
+define( '__SAMSON_REMOTE_APP', __SAMSON_BASE__ !== '/' );
+
+/** Get HTTP protocol **/
+define('__SAMSON_PROTOCOL', (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' || $_SERVER['SERVER_PORT'] == 443) ? "https://" : "http://" );
 
 /** Default path to cache folder */
 define('__SAMSON_CACHE_PATH','cache');
@@ -79,6 +81,3 @@ define( 'A_SUCCESS', TRUE );
 
 /** Действие контроллера НЕ выполнено */
 define( 'A_FAILED', FALSE );
-
-/** Check if this is very old PHP version */
-define('__SAMSON_PHP_OLD', version_compare(PHP_VERSION, '5.3.0') >= 0);

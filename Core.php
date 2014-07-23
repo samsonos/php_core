@@ -25,6 +25,7 @@ class Core implements iCore
         '.idea',
         'vendor',
         'upload',
+		'out',
         __SAMSON_CACHE_PATH,
         __SAMSON_TEST_PATH,
     );
@@ -800,17 +801,24 @@ class Core implements iCore
      */
     public function composer()
     {
+        $path = $this->path().'composer.json';
+
         // If we have composer configuration file
-        if (file_exists('composer.json')) {
+        if (file_exists($path)) {
             // Read file into object
-            $composerObject = json_decode(file_get_contents('composer.json'), true);
+            $composerObject = json_decode(file_get_contents($path), true);
+
+            // Require composer Class autoloader
+            if (file_exists('vendor/autoload.php')) {
+               require 'vendor/autoload.php';
+            }
 
             // If composer has requirements configured
             if (isset($composerObject['require'])) {
                 // Iterate requirements
                 foreach ($composerObject['require'] as $requirement => $version) {
-                    if($requirement != 'samsonos/php_core') {
-
+                    // Ignore core module and work only with samsonos/* modules before they are not PSR- optimized
+                    if(($requirement != 'samsonos/php_core') && (strpos($requirement, 'samsonos/') !== false)) {
                         // Try developer relative path
                         $path = '../../vendor/'.$requirement;
                         // If path with underscores does not exists
@@ -828,7 +836,7 @@ class Core implements iCore
                             // Try path without underscore
                             $path = str_replace('_', '/', $path);
                             if (!file_exists($path)) {
-                                return e('Cannot load module: "##" - Path not found', E_SAMSON_FATAL_ERROR, $requirement);
+                                return e('Cannot load module(from ##): "##" - Path not found', E_SAMSON_FATAL_ERROR, array($path, $requirement));
                             }
                         }
 

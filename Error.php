@@ -107,20 +107,18 @@ class Error
 	 */
 	public function shutdown()
 	{		
+		//[PHPCOMPRESSOR(remove,start)]
 		// TODO: Create core shutdown routines
 		if( !s()->async() )
-		{			
-			// Профайлинг PHP
-			$template_html = '<!-- Total time elapsed:'.round( microtime(TRUE) - __SAMSON_T_STARTED__, 3 ).'s -->';
-			if( function_exists('db')) $template_html .= '<!-- '.db()->profiler().' -->';
-			$template_html .= '<!-- Memory used: '.round(memory_get_peak_usage(true)/1000000,1).' МБ -->';		
-
-			
+		{
 			// Fix performance
-			//[PHPCOMPRESSOR(remove,start)]
-			s()->benchmark( __FUNCTION__, func_get_args() );		
 			
-			$template_html .= '<!-- Benchmark table: -->';
+			s()->benchmark( __FUNCTION__, func_get_args() );
+
+            $template_html = '<!-- Total time elapsed:'.round( microtime(TRUE) - __SAMSON_T_STARTED__, 3 ).'s -->';
+            if( function_exists('db')) $template_html .= '<!-- '.db()->profiler().' -->';
+            $template_html .= '<!-- Memory used: '.round(memory_get_peak_usage(true)/1000000,1).' МБ -->';
+            $template_html .= '<!-- Benchmark table: -->';
 
 			$l = 0;
 			$m = 0;
@@ -145,10 +143,10 @@ class Error
 				$l = $data[0];
 				$m = $data[3];
 			}
-			//[PHPCOMPRESSOR(remove,end)]
 			
-			echo $template_html;			
+			echo $template_html;						
 		}
+		//[PHPCOMPRESSOR(remove,end)]
 		
 		// Если установлен обработчик завершения выполнения скрипта - вызовем его
 		if( isset( self::$shutdown_handler ) && ( call_user_func( self::$shutdown_handler ) === false )) return null;		

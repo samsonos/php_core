@@ -1,6 +1,14 @@
 <?php
 namespace samson\core;
 
+//[PHPCOMPRESSOR(remove,start)]
+// I default locale is not defined
+if (!defined('DEFAULT_LOCALE')) {
+    // Define default locale
+    define('DEFAULT_LOCALE', SamsonLocale::RU);
+}
+//[PHPCOMPRESSOR(remove,end)]
+
 /**
  * Класс для поддержки локализации веб-приложения
  *
@@ -11,27 +19,41 @@ namespace samson\core;
 class SamsonLocale
 {
 	/** Локализация по умолчанию */
-	const DEF = '';
+	const DEF = DEFAULT_LOCALE;
 	/** Украинская локализация */
 	const UA = 'ua';
 	/** Английская локализация */
 	const EN = 'en';
 	/** Русская локализация */
 	const RU = 'ru';
+	/** Румынская локализация */
+	const RO = 'ro';
+	/** Китайская локализация */
+	const CH = 'ch';
+    /** Корейская локализация */
+    const KO = 'ko';
 	
 	/**
 	 * Коллекция поддерживаемых локализаций
 	 * Используется для дополнительного контроля за локализациями
 	 * @var array
 	 */
-	private static $supported = array( SamsonLocale::DEF, SamsonLocale::EN, SamsonLocale::UA, SamsonLocale::RU );
-	
-	/**
-	 * Коллекция названий поддерживаемых локализаций
-	 * @var array
-	 */
-	public static $alias = array( SamsonLocale::DEF=>'РУС', SamsonLocale::EN=>'ENG', SamsonLocale::UA=>'УКР', SamsonLocale::RU=>'РУС' );
-	
+	private static $supported = array( 
+		SamsonLocale::DEF, 
+		SamsonLocale::EN, 
+		SamsonLocale::UA, 
+		SamsonLocale::RO,
+		SamsonLocale::CH,
+		SamsonLocale::RU,
+        SamsonLocale::KO,
+	);
+
+    /**
+     * Alias for binding default web-application locale
+     * @var string
+     */
+    public static $defaultLocale = DEFAULT_LOCALE;
+
 	/**
 	 * Текущая локализация веб-приложения
 	 * @var string
@@ -43,7 +65,7 @@ class SamsonLocale
 	 * Локаль по умолчанию RU, имеет представление пустышку - ''
 	 * @var array
 	 */
-	public static $locales = array('');
+	public static $locales = array();
 	
 	/**
 	 * Проверить текущей значение установленной локали, и если выставлена
@@ -66,13 +88,20 @@ class SamsonLocale
 	 * 
 	 * @param array $available_locales Коллекция с доступными локализациями веб-приложения
 	 */
-	public static function set( array $available_locales )
+	public static function set(array $available_locales)
 	{
 		// Переберем локализации
 		foreach ( $available_locales as $locale )
 		{
+            $_locale = strtolower($locale);
+
 			// Добавим в коллекцию доступных локализаций переданные
-			if( in_array( strtolower($locale), self::$supported ) ) self::$locales[] = strtolower($locale);
+			if ( in_array($_locale, self::$supported)) {
+                // Ignore duplicare locale setting
+                if (!in_array($_locale, self::$locales)) {
+                    self::$locales[] = $_locale;
+                }
+            }
 			// Проверим разрешаемые локали
 			else die('Устанавливаемая локализация "'.$locale.'" - не предусмотрена в SamsonLocale');		
 		}			
@@ -93,29 +122,24 @@ class SamsonLocale
 	 * @return string 	Возвращается значение текущей локализации веб-приложения до момента 
 	 * 					вызова данного метода 
 	 */
-	public static function current( $locale = NULL )
+	public static function current($locale = null)
 	{
 		// Сохраним старое значение локали
-		$_locale = self::$current_locale;	
-		
-		// Если ничего не передано - вернем текущее значение локали 
-		if( !isset($locale) ) return $_locale;
-		// Нам передано значение локали 
-		else 
-		{	
-			// Только большой регистр
-			$locale = strtolower( $locale );
-			// Если требуется установть доступную локализацию
-			//if( in_array( $locale, self::$locales ) ) self::$current_locale = $locale;
-			// Установим локализацию по умолчанию
-			//else self::$current_locale = SamsonLocale::DEF;
-			self::$current_locale = $locale;
+		$_locale = self::$current_locale;
+
+		// If nothing is passed just return current locale
+		if (!isset($locale)) {
+            return $_locale;
+
+        } else { // Switch locale
+            // Save new locale
+			self::$current_locale = strtolower($locale);
 			
 			// Запишем текущее значение локализации
 			$_SESSION['__SAMSON_LOCALE__'] = self::$current_locale;					
 			
 			// Вернем текущее значение локали сайта до момента візова метода
-			return $_locale;
+			return self::$current_locale;
 		}	
 	}
 	
@@ -133,8 +157,8 @@ class SamsonLocale
 			if( ($key = array_search( $locale, $args )) !== FALSE )
 			{
 				// Change current locale
-				self::current( $locale );
-				
+				self::current($locale);
+
 				// If this is not default locale(empty string) - remove it from URL arguments
 				if( $locale != self::DEF )
 				{
@@ -149,7 +173,11 @@ class SamsonLocale
 				return true;				
 			}			
 		}
+
+        // If we are here - this is default locale
+        // Switch to current web-application $default locale
+        self::current(self::DEF);
 		
-		return false; 
+		return false;
 	} 
 }

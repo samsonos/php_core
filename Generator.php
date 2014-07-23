@@ -241,6 +241,27 @@ class Generator
 			 
 		file_put_contents( $name, $code );
 	}
+
+    /**
+     * Add function definition
+     * @param string $name Function name
+     * @return \samson\activerecord\Generator Chaining
+     */
+    public function deffunction($name)
+    {
+        return $this->newline('function '.$name.'()')
+        ->newline('{')
+        ->tabs('',1);
+    }
+
+    /**
+     * Close current function context
+     * @return\samson\activerecord\Generator
+     */
+    public function endfunction()
+    {
+        return $this->newline('}')->newline('');
+    }
 	
 	/**
 	 * Constructor

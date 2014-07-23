@@ -85,16 +85,25 @@ class URL implements iURL
 
     /**
      * Check if current module from URL identifier matches passed module identifier and output on success
-     * @param string    $module Module name to match
+     * @param string    $modules Module name to match
      * @param string    $output String for output
      * @return boolean True if current module from URL identifier matches passed module identifier
      */
-    public function is($module, $output = '')
+    public function is($modules, $output = '')
     {
-        if ($this->module == $module) {
-            echo $output;
+        // If module is not array - make it
+        if (!is_array($modules)) {
+            $modules = array($modules);
+        }
 
-            return true;
+        // Iterate passed modules
+        foreach ($modules as $module) {
+            // If URL module or current system module matches passed module name
+            if (($this->module == $module) || (s()->module()->id == $module)) {
+                echo $output;
+
+                return true;
+            }
         }
 
         return false;
@@ -148,13 +157,14 @@ class URL implements iURL
 	public function redirect( $url = NULL )
 	{
 		// Сформируем полный путь для переадресации
-		$full_url = $this->base.$url;
-		
+		$full_url = $this->base.locale_path().$url;
+
 		// Перейдем к форме авторизации		
 		header('Location: '.$full_url );
 			
 		// Добавим клиентскон перенаправление в случаи не срабатывания серверного
 		echo '<script type="text/javascript">window.location.href="' . $full_url . '";</script>';
+        die;
 	}	
 	
 	/**	 
@@ -194,7 +204,7 @@ class URL implements iURL
  		
 		// Вернем полный URL-путь относительно текущего хоста и веб-приложения
 		// Соберем все отфильтрованные сущности URL использую разделитель "/"
-		return 'http://'.$_SERVER['HTTP_HOST'].$this->base.implode( '/', $url_params );
+		return __SAMSON_PROTOCOL.$_SERVER['HTTP_HOST'].$this->base.implode( '/', $url_params );
 	}
 	
 	/**
