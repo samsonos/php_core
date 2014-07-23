@@ -99,7 +99,7 @@ class AutoLoader
 
         // Iterate all possible file structures
         $path = null;
-        foreach (array('php', 'js', 'cms', 'social') as $type) {
+        foreach (array('php', 'js', 'cms', 'social', 'commerce') as $type) {
             // Build all possible module location for backward compatibility
             $locations = array(
                 __SAMSON_DEV_VENDOR_PATH.str_replace('samson/', 'samsonos/', $ns),
@@ -107,14 +107,15 @@ class AutoLoader
                 __SAMSON_DEV_VENDOR_PATH.str_replace('samson/', 'samsonos/'.$type.'_', $ns),
                 __SAMSON_VENDOR_PATH.str_replace('samson/', 'samsonos/', $ns),
                 __SAMSON_VENDOR_PATH.str_replace('samson/', 'samsonos/'.$type.'/', $ns),
-                __SAMSON_VENDOR_PATH.str_replace('samson/', 'samsonos/'.$type.'_', $ns)
+                __SAMSON_VENDOR_PATH.str_replace('samson/', 'samsonos/'.$type.'_', $ns),
+                __SAMSON_CWD__.__SAMSON_MODEL_PATH
             );
 
             // Iterate all locations and try to find correct existing path
             foreach($locations as $location) {
                 if(file_exists($location)) {
                     $path = $location;
-                    break;
+                    break 2;
                 }
             }
         }
@@ -160,8 +161,6 @@ class AutoLoader
      */
     public static function load($class)
     {
-        ('auto loading class: '.$class.'<br>');
-
         // Get just class name without ns
         $className = self::getOnlyClass($class);
         // Get just ns without class name

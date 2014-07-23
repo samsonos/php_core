@@ -26,6 +26,7 @@ class Core implements iCore
         'vendor',
         'upload',
 		'out',
+        'i18n',
         __SAMSON_CACHE_PATH,
         __SAMSON_TEST_PATH,
     );
@@ -259,10 +260,10 @@ class Core implements iCore
 		
 		// If we hasn't scanned resources at this path
 		if ($this->resources( $path, $ls )) {
-			//elapsed('   -- Gathered resources from '.$path);
+			elapsed('   -- Gathered resources from '.$path);
 			
-			// Let's fix collection of loaded classes 
-			$classes = get_declared_classes();	
+			// Let's fix collection of loaded classes
+			$classes = get_declared_classes();
 
 			// Controllers, models and global files must be required immediately
 			// because they can consist of just functions, no lazy load available
@@ -282,8 +283,6 @@ class Core implements iCore
                 elapsed('   -- Including models from '.$path.$php);
                 require_once($php);
             }
-
-            elapsed($path);
 			
 			// Iterate only php files
 			foreach ($ls['php'] as $php) {
@@ -371,7 +370,7 @@ class Core implements iCore
 						}
 					}
 				}
-			}		
+			}
 			//elapsed('End loading module from '.$path);				
 		}
 		// Another try to load same path
@@ -641,56 +640,11 @@ class Core implements iCore
 	{	
 		// Parse URL
 		url();
-		
-		//[PHPCOMPRESSOR(remove,start)]
-		// TODO: Again module load not corresponds to local and system load functionality	
-		
-		/*// Search for remote web applications if this is local web application
-		$files = File::dir( $this->system_path, null, '', $files, NULL, 0, self::$resourceIgnorePath );
-		foreach ( preg_grep('/\.htaccess/iu', $files) as $web_app_path )
-		{
-			// If path not to local web application
-			$web_app_path = pathname( $web_app_path ).'/';
-			if( $web_app_path != $this->system_path )
-			{
-				// Create copy of files collection
-				$_files = $files;
-				$files = array();
-					
-				// Save only local web application files
-				foreach ( $_files as $resource ) if( strpos( $resource, $web_app_path ) === false ) $files[] = $resource;
-			}
-		}*/
-		
-		/*// Инициализируем локальные модуль
-		if( $this->resources( $this->system_path, $ls2, $files ))
-		{
-			// Create local module and set it as active
-			$this->active = new CompressableLocalModule( 'local', $this->system_path, $ls2 );
-				
-			// Set main template path
-			$this->template( $this->template_path );
-				
-			// Manually include local module to load stack
-			$this->load_stack['local'] = $ls2;
-			$this->load_module_stack[ 'local' ] = $ls2;
-				
-			// Require local controllers
-			foreach ( $ls2['controllers'] as $controler )
-			{
-				require( $controler );
-		
-				// Get local module name
-				$local_module = strtolower(basename( $controler, '.php' ));
-					
-				// Create new local compressable module
-				new CompressableLocalModule( $local_module, $this->system_path, $ls2 );
-			}
-				
-			// Require local models
-			foreach ( $ls2['models'] as $model ) require_once( $model );
-		}*/
 
+        // Set main template path
+        $this->template($this->template_path);
+
+		//[PHPCOMPRESSOR(remove,start)]
 		$this->benchmark( __FUNCTION__, func_get_args() );		
 
 		// Проинициализируем оставшиеся конфигурации и подключим внешние модули по ним
@@ -805,15 +759,17 @@ class Core implements iCore
 	}
 	//[PHPCOMPRESSOR(remove,end)]
 
+    private function loadModule($path)
+    {
+
+    }
+
     /**
      * Load system from composer.json
      * @return $this Chaining
      */
     public function composer()
     {
-        // Load loacl module
-        $this->load($this->system_path);
-
         $path = $this->path().'composer.json';
 
         // If we have composer configuration file
@@ -857,6 +813,43 @@ class Core implements iCore
                     }
                 }
             }
+
+            // Iterate all files in app folder to find local modules
+            foreach (File::dir($this->system_path.__SAMSON_APP_PATH) as $file) {
+                if(is_dir($file)) {
+
+                }
+            }
+
+            // Load local modules
+            if ($this->resources($this->system_path, $ls2)) {
+
+                // Create local module and set it as active
+                $this->active = new CompressableLocalModule('local', $this->system_path, $ls2);
+
+                // Manually include local module to load stack
+                $this->load_stack['local'] = $ls2;
+                $this->load_module_stack[ 'local' ] = $ls2;
+
+                // Iterate local controllers
+                foreach ($ls2['controllers'] as $controller) {
+                    require($controller);
+
+                    // Get local module name
+                    $module = strtolower(basename( $controller, '.php' ));
+
+                    // Create new local module
+                    new CompressableLocalModule($module, $this->system_path, $ls2);
+                }
+
+                // Require local models
+                foreach ($ls2['models'] as $model) {
+                    require_once($model);
+                }
+            }
+
+        } else { // Signal configuration error
+            return e('Project does not have composer.json', E_SAMSON_FATAL_ERROR);
         }
 
         return $this;

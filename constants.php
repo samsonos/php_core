@@ -70,6 +70,9 @@ define( '__SAMSON_GLOBAL_FILE', 'global.php' );
 /** Путь к папке где находятся файлы системы */
 define('__SAMSON_APP_PATH','app');
 
+/** Generic path to local modules path */
+define('__SAMSON_MODULE_PATH','app');
+
 /** Путь к папке где находятся контроллеры системы */
 define('__SAMSON_CONTOROLLER_PATH', __SAMSON_APP_PATH.'/controller/');
 
