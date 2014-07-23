@@ -1,7 +1,7 @@
 {
     "name":"samsonos/php_core",
     "description": "SamsonPHP framework core module",
-    "keywords":"php, framework, samsonos, samsonphp",
+    "keywords": [ "php, framework, samsonos, samsonphp"],
     "authors":[
         {
             "name":"Vitaly Iegorov",
