@@ -185,10 +185,28 @@ class Core implements iCore
 			
 			// Recursively scan module folders for resources if they not passed
 			$files = ! isset( $files ) ? File::dir($path, null, '', $files, NULL, 0, self::$resourceIgnorePath) : $files;
+
+            // Check if we have found web-application in module folders
+            foreach ( preg_grep('/\.htaccess/iu', $files) as $web_app_path )
+            {
+                // If path not to local web application
+                $web_app_path = pathname( $web_app_path ).'/';
+                if( $web_app_path != $this->system_path ) {
+                    // Create copy of files collection
+                    $_files = $files;
+                    $files = array();
+
+                    // Save only local web application files
+                    foreach ($_files as $resource) {
+                        if( strpos( $resource, $web_app_path ) === false ) {
+                            $files[] = $resource;
+                        }
+                    }
+                }
+            }
 		
 			// Iterate module files
-			foreach ( $files as $resource )
-			{
+			foreach ($files as $resource) {
 				// No cache folders
 				if( strpos( $resource, '/'.__SAMSON_CACHE_PATH.'/') === false )
 				{
@@ -239,9 +257,8 @@ class Core implements iCore
 		
 		//elapsed('Start loading from '.$path);
 		
-		// If we han't scanned resources at this path
-		if( $this->resources( $path, $ls ) )
-		{					
+		// If we hasn't scanned resources at this path
+		if ($this->resources( $path, $ls )) {
 			//elapsed('   -- Gathered resources from '.$path);
 			
 			// Let's fix collection of loaded classes 
@@ -256,20 +273,22 @@ class Core implements iCore
 
             // Iterate and include all module controllers
 			foreach ($ls['controllers'] as $php) {
-                elapsed('   -- Including controllers from '.$path.__SAMSON_GLOBAL_FILE);
+                elapsed('   -- Including controllers from '.$path.$php);
                 require_once($php);
             }
 
             // Iterate and include all module models
 			foreach ($ls['models'] as $php) {
-                elapsed('   -- Including models from '.$path.__SAMSON_GLOBAL_FILE);
+                elapsed('   -- Including models from '.$path.$php);
                 require_once($php);
             }
+
+            elapsed($path);
 			
 			// Iterate only php files
 			foreach ($ls['php'] as $php) {
 
-                elapsed('   -- Icluding '.$php.' from '.$path);
+                //elapsed('   -- Icluding '.$php.' from '.$path);
 
 				// We must require regular files and wait to find iModule class ancestor declaration
 				require_once( $php );
@@ -318,8 +337,7 @@ class Core implements iCore
 							if( !isset($ns{0}) ) e('Module ## has no namespace', E_SAMSON_CORE_ERROR,  $id, $ns );
 											
 							// If module configuration loaded - set module params
-							if( isset( Config::$data[ $id ] ) ) foreach ( Config::$data[ $id ] as $k => $v) 
-							{
+							if( isset( Config::$data[ $id ] ) ) foreach ( Config::$data[ $id ] as $k => $v) {
 								// Assisgn only own class properties no view data set anymore
 								if( property_exists( $class_name, $k ))	$connector->$k = $v;
 								//else e('## - Cannot assign parameter(##), it is not defined as class(##) property', E_SAMSON_CORE_ERROR, array($id, $k, $class_name));								
@@ -627,7 +645,7 @@ class Core implements iCore
 		//[PHPCOMPRESSOR(remove,start)]
 		// TODO: Again module load not corresponds to local and system load functionality	
 		
-		// Search for remote web applications if this is local web application
+		/*// Search for remote web applications if this is local web application
 		$files = File::dir( $this->system_path, null, '', $files, NULL, 0, self::$resourceIgnorePath );
 		foreach ( preg_grep('/\.htaccess/iu', $files) as $web_app_path )
 		{
@@ -642,9 +660,9 @@ class Core implements iCore
 				// Save only local web application files
 				foreach ( $_files as $resource ) if( strpos( $resource, $web_app_path ) === false ) $files[] = $resource;
 			}
-		}
+		}*/
 		
-		// Инициализируем локальные модуль
+		/*// Инициализируем локальные модуль
 		if( $this->resources( $this->system_path, $ls2, $files ))
 		{
 			// Create local module and set it as active
@@ -671,7 +689,7 @@ class Core implements iCore
 				
 			// Require local models
 			foreach ( $ls2['models'] as $model ) require_once( $model );
-		}
+		}*/
 
 		$this->benchmark( __FUNCTION__, func_get_args() );		
 
@@ -793,6 +811,9 @@ class Core implements iCore
      */
     public function composer()
     {
+        // Load loacl module
+        $this->load($this->system_path);
+
         $path = $this->path().'composer.json';
 
         // If we have composer configuration file

@@ -136,6 +136,7 @@ class AutoLoader
 
             // If we have found several files matching this class
             if (sizeof($files) > 1) {
+                elapsed($files);
                 return e('Cannot autoload class(##), too many files matched ##', E_SAMSON_CORE_ERROR, array($className,$files) );
             }
 
