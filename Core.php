@@ -818,7 +818,7 @@ class Core implements iCore
                 // Iterate requirements
                 foreach ($composerObject['require'] as $requirement => $version) {
                     // Ignore core module and work only with samsonos/* modules before they are not PSR- optimized
-                    if(($requirement != 'samsonos/php_core') && (strpos($requirement, 'samsonos/') != false)) {
+                    if(($requirement != 'samsonos/php_core') && ((strpos($requirement, 'samson/') != false) || (strpos($requirement, 'samsonos/') != false)) {
                         // Try developer relative path
                         $path = '../../vendor/'.$requirement;
                         // If path with underscores does not exists
