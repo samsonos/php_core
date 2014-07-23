@@ -8,9 +8,6 @@
             "email":"egorov@samsonos.com"
         }
     ],
-    "require":{
-        "php" : ">=5.3.*"
-    },
     "license":"Open Software License (OSL) v 3.0",
     "homepage":"http://samsonphp.com/"
 }

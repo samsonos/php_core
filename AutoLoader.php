@@ -154,6 +154,8 @@ class AutoLoader
      */
     public static function load($class)
     {
+        ('auto loading class: '.$class.'<br>');
+
         // Get just class name without ns
         $className = self::getOnlyClass($class);
         // Get just ns without class name
@@ -166,17 +168,17 @@ class AutoLoader
 
             // Load class by file name
             if (file_exists($path)) {
-                require($path);
+                require_once($path);
             // old school compatibility will be removed when old modules will be updated
             } else if(self::oldModule($className, $nameSpace, $path)) {
-                require($path);
+                require_once($path);
                 // Handle old module loading
             } else { // Signal error
                 return e('Class name ## not found', E_SAMSON_CORE_ERROR, $class);
             }
 
         } else { // Load core classes separately using this class location
-            require(__DIR__.'/'.$className.'.php');
+            require_once(__DIR__.'/'.$className.'.php');
         }
 
         return true;

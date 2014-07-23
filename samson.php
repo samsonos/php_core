@@ -27,7 +27,7 @@ require('AutoLoader.php');
 
 // Load files with functions
 require( 'shortcuts.php' );
-require( 'Utils.php' );
+require( 'Utils2.php' );
 require( 'View.php' );
 require( 'deprecated.php' );
 
