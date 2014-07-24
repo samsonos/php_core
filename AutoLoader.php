@@ -198,6 +198,8 @@ if (file_exists('vendor/autoload.php')) {
     require 'vendor/autoload.php';
 }
 
+ //[PHPCOMPRESSOR(remove,start)]
 // Add SamsonPHP default autoloader
 spl_autoload_register(array('\samson\core\AutoLoader','load'));
+//[PHPCOMPRESSOR(remove,end)]
  

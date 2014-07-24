@@ -27,6 +27,7 @@ class Core implements iCore
         'upload',
 		'out',
         'i18n',
+        __SAMSON_MODULE_PATH,
         __SAMSON_CACHE_PATH,
         __SAMSON_TEST_PATH,
     );
@@ -619,10 +620,7 @@ class Core implements iCore
 			
 			// Если метод ничего не вернул - считаем что все ок!
 			return isset( $result ) ? $result : A_SUCCESS;		
-		}
-		// Стандартное поведение
-		else 
-		{
+		} else { // Стандартное поведение
 			//elapsed('e404');
 			// Установим HTTP заголовок что такой страницы нет
 			header('HTTP/1.0 404 Not Found');
@@ -759,11 +757,6 @@ class Core implements iCore
 	}
 	//[PHPCOMPRESSOR(remove,end)]
 
-    private function loadModule($path)
-    {
-
-    }
-
     /**
      * Load system from composer.json
      * @return $this Chaining
@@ -814,14 +807,28 @@ class Core implements iCore
                 }
             }
 
-            // Iterate all files in app folder to find local modules
-            foreach (File::dir($this->system_path.__SAMSON_APP_PATH) as $file) {
+            // Iterate all files in local modules folder to find local modules
+            foreach (File::dir($this->system_path.__SAMSON_MODULE_PATH) as $file) {
+                // If this is folder
                 if(is_dir($file)) {
-
+                    // Load local module to core
+                    $this->load($file, basename($file));
                 }
             }
 
-            // Load local modules
+            // Iterate all old styled controllers
+            foreach (File::dir($this->system_path.__SAMSON_CONTOROLLER_PATH) as $file) {
+                // Operate only with files
+                if(is_file($file)) {
+                    // Load local module to core
+                    $this->load($file, basename($file, '.php'));
+                }
+            }
+
+            // Load generic local module
+            $this->load($this->system_path, 'local');
+
+            /*// Load generic local module
             if ($this->resources($this->system_path, $ls2)) {
 
                 // Create local module and set it as active
@@ -846,7 +853,7 @@ class Core implements iCore
                 foreach ($ls2['models'] as $model) {
                     require_once($model);
                 }
-            }
+            }*/
 
         } else { // Signal configuration error
             return e('Project does not have composer.json', E_SAMSON_FATAL_ERROR);
