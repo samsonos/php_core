@@ -71,19 +71,34 @@ class ResourceMap
     public $entryPoint;
 
     /** @var array Collection of gathered resources grouped by extension */
-    public $resources;
+    public $resources = array();
 
     /** @var  array Collection of controllers actions by entry point */
-    public $controllers;
+    public $controllers = array();
 
     /** @var  array Old-fashion model files collection by entry point */
-    public $models;
+    public $models = array();
 
     /** @var  array Collection of views by entry point */
-    public $views;
+    public $views = array();
 
     /** @var  array Collection of classes by entry point */
-    public $classes;
+    public $classes = array();
+
+    /** @var array Collection of CSS resources */
+    public $css = array();
+
+    /** @var array Collection of LESS resources */
+    public $less = array();
+
+    /** @var array Collection of SASS resources */
+    public $sass = array();
+
+    /** @var array Collection of JS resources */
+    public $js = array();
+
+    /** @var array Collection of COFFEE resources */
+    public $coffee = array();
 
     /** @var array Collection of folders that should be ignored in anyway */
     public $ignoreFolders = array('.svn', '.git', '.idea', __SAMSON_CACHE_PATH);
@@ -195,7 +210,7 @@ class ResourceMap
                     $rt = pathinfo($file, PATHINFO_EXTENSION );
 
                     // Check if resource type array cell created
-                    if (!isset($resources[$rt])) {
+                    if (!isset($this->resources[$rt])) {
                         $this->resources[$rt] = array();
                     }
 
@@ -204,7 +219,15 @@ class ResourceMap
                 }
             }
 
-            trace($this, true);
+            // Iterate all defined object variables
+            foreach (get_object_vars($this) as $var => $value) {
+                // If we have matched resources with that type
+                if(isset($this->resources[$var])) {
+                    // Bind object variable to resources collection
+                    $this->$var = & $this->resources[$var];
+                }
+            }
+
         } else { // Signal error
             return e('Cannot build ResourceMap from ## - path does not exists', E_SAMSON_CORE_ERROR, $path);
         }
