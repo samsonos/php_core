@@ -27,7 +27,6 @@ class Core implements iCore
         'upload',
 		'out',
         'i18n',
-        __SAMSON_APP_PATH,
         __SAMSON_MODULE_PATH,
         __SAMSON_CACHE_PATH,
         __SAMSON_TEST_PATH,
@@ -171,8 +170,7 @@ class Core implements iCore
 		if( !file_exists( $path ) ) return e( 'loading module from ## - path doesn\'t exists',E_SAMSON_CORE_ERROR,$path, $this );
 				
 		// If this module is not queued for loading
-		if( ! isset( $this->load_path_stack[ $path ] ) )
-		{
+		if( ! isset( $this->load_path_stack[ $path ] ) ) {
 			// Save this path entry
 			$this->load_path_stack[ $path ] = '';				
 						
@@ -210,6 +208,7 @@ class Core implements iCore
 		
 			// Iterate module files
 			foreach ($files as $resource) {
+                //elapsed('Analyzing resource: "'.$resource.'"');
 				// No cache folders
 				if( strpos( $resource, '/'.__SAMSON_CACHE_PATH.'/') === false )
 				{
@@ -245,7 +244,10 @@ class Core implements iCore
 			
 			// New data
 			return true;
-		}
+
+		} else { // Return path resources
+            $ls = $this->load_path_stack[ $path ];
+        }
 		
 		// Cached data
 		return false;
@@ -265,11 +267,14 @@ class Core implements iCore
             // If no module id is specified - use controller file name as module identifier
             $module_id = isset($module_id) ? $module_id : basename($path, '.php');
 
+            // Get local resources
+            $this->resources($this->system_path, $ls);
+
             // Include module controller file
             require_once($path);
 
-            // Create module object, pass custom created resourses map with only one controller
-            new CompressableExternalModule($this->system_path, $module_id, array('controllers' => array($path)));
+            // Create module object, pass local resources map
+            new CompressableExternalModule($this->system_path, $module_id, $ls);
 
             //[PHPCOMPRESSOR(remove,start)]
             //elapsed('Loaded only controller module #'.$module_id.' from: "'.$path.'"');
@@ -829,23 +834,7 @@ class Core implements iCore
                 }
             }
 
-            // Iterate all files in local modules folder to find local modules
-            foreach (File::dir($this->system_path.__SAMSON_MODULE_PATH) as $file) {
-                // If this is folder
-                if(is_dir($file)) {
-                    // Load local module to core
-                    $this->load($file, basename($file));
-                }
-            }
-
-            // Iterate all old styled controllers
-            foreach (File::dir($this->system_path.__SAMSON_CONTOROLLER_PATH) as $file) {
-                // Operate only with files
-                if(is_file($file)) {
-                    // Load local module to core
-                    $this->load($file, basename($file, '.php'));
-                }
-            }
+            ResourceMap::get($this->system_path);
 
             // Load generic local module with all web-application resources
             if ($this->resources($this->system_path, $ls2)) {
@@ -863,7 +852,23 @@ class Core implements iCore
                 }
             }
 
-            trace($this->module_stack, true);
+            // Iterate all files in local modules folder to find local modules
+            foreach (File::dir($this->system_path.__SAMSON_MODULE_PATH) as $file) {
+                // If this is folder
+                if(is_dir($file)) {
+                    // Load local module to core
+                    $this->load($file, basename($file));
+                }
+            }
+
+            // Iterate all old styled controllers
+            foreach (File::dir($this->system_path.__SAMSON_CONTOROLLER_PATH) as $file) {
+                // Operate only with files
+                if(is_file($file)) {
+                    // Load local module to core
+                    $this->load($file, basename($file, '.php'));
+                }
+            }
 
         } else { // Signal configuration error
             return e('Project does not have composer.json', E_SAMSON_FATAL_ERROR);
