@@ -31,18 +31,25 @@ class ExternalModule extends Module implements iExternalModule
 	 * @param string 	$vid		Virtual module identifier
 	 * @param array 	$resources	Module resources list 
 	 */
-	public function  __construct( $path, $vid = null, $resources = NULL )
+	public function  __construct($path, $vid = null, $resources = NULL )
 	{			
 		// Module identifier not specified - set it to NameSpace\Classname
-		if( !isset( $this->id{0} )) $this->id = uni_classname(get_class($this));	
-		
+		if (!isset($this->id{0}) && !isset($vid)) {
+            // Generate identifier from module class
+            $this->id = AutoLoader::className(get_class($this));
+        } else if (!isset($this->id{0}) && isset($vid)) { // If identifier is passed and no id is set
+            // Set passed vid as module identifier
+            $this->id = $vid;
+        }
+
+        // TODO: never using virtual identifiers anymore? do we still need them?
 		// Save this module under virtual identifier
-		if( isset($vid) ) self::$instances[ ($this->vid = $vid) ] = & $this;
+		if(isset($vid) ) self::$instances[ ($this->vid = $vid) ] = & $this;
 		// Otherwise equal it to real identifier
 		else $this->vid = $this->id;
 		
 		// Call parent constructor
-		parent::__construct( $this->id, $path, $resources );
+		parent::__construct($this->id, $path, $resources );
 	}
 	
 	/** @see \samson\core\iExternalModule::copy() */
@@ -149,47 +156,7 @@ class ExternalModule extends Module implements iExternalModule
 	
 	/**	@see iExternalModule::prepare() */
 	public function prepare()
-	{		
-		/*// Переберем все связи модуля
-		foreach ( $this->requirements as $module => $version )
-		{
-			// Поумолчания установим такое отношение по версии модуля
-			$version_sign = '>=';
-				
-			// Если не указана версия модуля - правильно получим имя модуля и установим версию
-			if( !isset( $module{0} ) ) { $module = $version; $version = '0.0.1'; }
-	
-			// Определим версию и знаки
-			if( preg_match( '/\s*((?<sign>\>\=|\<\=\>|\<)*(?<version>.*))\s*//*iu', $version, $matches ))
-			{
-				$version_sign = isset($matches['sign']{0}) ? $matches['sign'] : $version_sign;
-				$version = $matches['version'];
-			}
-	
-			// Получим регистро не зависимое имя модуля
-			$_module = mb_strtolower( $module, 'UTF-8' );
-
-			// Проверим загружен ли требуемый модуль в ядро
-			if( !isset( Module::$instances[ $_module ] ) )
-			{				
-				return e( 'Failed loading module(##) - Required module(##) not found', E_SAMSON_FATAL_ERROR, array( $this->id, $module) );
-			}
-			// Модуль определен сравним его версию
-			else if ( version_compare( Module::$instances[ $_module ]->version, $version, $version_sign ) === false )
-			{
-				return e( 'Ошибка загрузки модуля(##) в ядро - Версия связанного модуля(##) не подходит ## ## ##',
-						E_SAMSON_FATAL_ERROR,
-						array(
-								$this->id,
-								$_module,
-								$version,
-								$version_sign,
-								Module::$instances[ $_module ]->version
-						)
-				);
-			}
-		}*/
-	
+	{
 		// Вернем результат проверки модуля
 		return TRUE;
 	}

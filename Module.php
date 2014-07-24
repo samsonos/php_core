@@ -377,6 +377,8 @@ class Module implements iModule, \ArrayAccess, iModuleViewable
 			// If method is specified - add it to universal controller parameters list
 			if(isset(url()->method{0})) array_unshift( $parameters, url()->method );		
 		}
+
+        //elapsed('Performing #'.$this->id.' controller action -'.$controller);
 		
 		// Perform controller action
 		$action_result = isset( $controller ) ? call_user_func_array( $controller, $parameters ) : A_FAILED;		
@@ -393,7 +395,7 @@ class Module implements iModule, \ArrayAccess, iModuleViewable
 	 * @param array 	$resources	Module resources list 
 	 */
 	public function __construct( $id, $path = NULL, $resources = NULL )
-	{	
+	{
 		// Set defautl view context name
 		$this->view_context = self::VD_POINTER_DEF;
 		

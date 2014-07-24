@@ -27,6 +27,7 @@ class Core implements iCore
         'upload',
 		'out',
         'i18n',
+        __SAMSON_APP_PATH,
         __SAMSON_MODULE_PATH,
         __SAMSON_CACHE_PATH,
         __SAMSON_TEST_PATH,
@@ -251,68 +252,87 @@ class Core implements iCore
 	}
 
 	/** @see \samson\core\iCore::load() */
-	public function load( $path = NULL, $module_id = NULL )
+	public function load($path = NULL, $module_id = NULL)
 	{	
 		//[PHPCOMPRESSOR(remove,start)]
 		$this->benchmark( __FUNCTION__, func_get_args() );		
 		//[PHPCOMPRESSOR(remove,end)]
 		
 		//elapsed('Start loading from '.$path);
-		
-		// If we hasn't scanned resources at this path
-		if ($this->resources( $path, $ls )) {
-			elapsed('   -- Gathered resources from '.$path);
-			
-			// Let's fix collection of loaded classes
-			$classes = get_declared_classes();
+
+        // If just file is passed then we count it as old-style only controller module
+        if(is_file($path)) {
+            // If no module id is specified - use controller file name as module identifier
+            $module_id = isset($module_id) ? $module_id : basename($path, '.php');
+
+            // Include module controller file
+            require_once($path);
+
+            // Create module object, pass custom created resourses map with only one controller
+            new CompressableExternalModule($this->system_path, $module_id, array('controllers' => array($path)));
+
+            //[PHPCOMPRESSOR(remove,start)]
+            //elapsed('Loaded only controller module #'.$module_id.' from: "'.$path.'"');
+            //[PHPCOMPRESSOR(remove,end)]
+
+        } else if ($this->resources($path, $ls)) { // If we hasn't scanned resources at this path
+
+			//elapsed('   -- Gathered resources from '.$path);
 
 			// Controllers, models and global files must be required immediately
 			// because they can consist of just functions, no lazy load available
 			if (file_exists($path.__SAMSON_GLOBAL_FILE)) {
                 require_once($path.__SAMSON_GLOBAL_FILE);
-                elapsed('   -- Included globals from '.$path.__SAMSON_GLOBAL_FILE);
+               //elapsed('   -- Included globals from '.$path.__SAMSON_GLOBAL_FILE);
             }
 
             // Iterate and include all module controllers
 			foreach ($ls['controllers'] as $php) {
-                elapsed('   -- Including controllers from '.$path.$php);
+               //elapsed('   -- Including controllers from '.$path.$php);
                 require_once($php);
             }
 
             // Iterate and include all module models
 			foreach ($ls['models'] as $php) {
-                elapsed('   -- Including models from '.$path.$php);
+               //elapsed('   -- Including models from '.$path.$php);
                 require_once($php);
             }
-			
+
+            // Let's fix collection of loaded classes
+            $classes = get_declared_classes();
+
+            //[PHPCOMPRESSOR(remove,start)]
+           //elapsed(' -- Starting to search for iModule ancestor in "'.$path.'"');
+            //[PHPCOMPRESSOR(remove,end)]
+
 			// Iterate only php files
 			foreach ($ls['php'] as $php) {
 
-                //elapsed('   -- Icluding '.$php.' from '.$path);
-
 				// We must require regular files and wait to find iModule class ancestor declaration
-				require_once( $php );
+				require_once($php);
 
-                elapsed('   -- Icluded '.$php.' from '.$path);
+                //[PHPCOMPRESSOR(remove,start)]
+                //elapsed('   -- Icluded '.$php);
+                //[PHPCOMPRESSOR(remove,end)]
 					
 				// If we have new class declared after requiring
 				$n_classes = get_declared_classes();
-				if( sizeof($new_classes = array_diff( $n_classes, $classes )))
-				{
+				if (sizeof($new_classes = array_diff($n_classes, $classes))) {
 					// Save new loaded classes list
 					$classes = $n_classes;
 				
 					// Iterate new declared classes
-					foreach ( $new_classes as $class_name ) {
+					foreach ($new_classes as $class_name) {
 
-						// If this is ExternalModule ancestor
-						if( in_array( ns_classname('ExternalModule','samson\core'), class_parents( $class_name )))
-						{	
-							elapsed('   -- Found iModule ancestor '.$class_name.'('.AutoLoader::getOnlyNameSpace($class_name).') in '.$path);
+                        // If core class has been auto loaded when module class has been loaded
+                        if(AutoLoader::getOnlyNameSpace($class_name) == 'samson\core') {
+                            continue; // Ignore core classes at module loading
+                        } else if(in_array(AutoLoader::className('samson\core\ExternalModule'), class_parents($class_name))) {
+							//elapsed('   -- Found iModule ancestor '.$class_name.'('.AutoLoader::getOnlyNameSpace($class_name).') in '.$path);
 
                             // Create object
                             /** @var \samson\core\ExternalModule $connector */
-                            $connector = new $class_name( $path, $module_id, $ls );
+                            $connector = new $class_name($path, $module_id, $ls);
 							$id = $connector->id();
 							
 							// Save namespace module data to load stack
@@ -647,16 +667,14 @@ class Core implements iCore
 
 		// Проинициализируем оставшиеся конфигурации и подключим внешние модули по ним
 		Config::init( $this );					
-		//[PHPCOMPRESSOR(remove,end)]		
-		
+		//[PHPCOMPRESSOR(remove,end)]
+
 		// Проинициализируем НЕ ЛОКАЛЬНЫЕ модули
-		foreach ($this->module_stack as $id => $module )
-		{
+		foreach ($this->module_stack as $id => $module ) {
             /** @var $module Module */
 
 			// Только внешние модули и их оригиналы
-			if( method_exists( $module, 'init') && $module->id() == $id )
-			{			
+			if (method_exists($module, 'init') && $module->id() == $id) {
 				////elapsed('Start - Initializing module: '.$id);
 				$module->init();
 				////elapsed('End - Initializing module: '.$id);
@@ -678,31 +696,35 @@ class Core implements iCore
 		//elapsed('Trying to get '.$module_name.' controller');
 		
 		// Если модуль был успешно загружен и находится в стеке модулей ядра
-		if( isset( $this->module_stack[ $module_name ] ) )
-		{	
-			//elapsed('Preforming '.$module_name.'::'.url()->method().' controller action');
+		if (isset($this->module_stack[ $module_name ])) {
+			//elapsed('Preforming '.$module_name.'::'.url()->method.' controller action');
 
             /**
              * Set found module as current
              * @var $active Module
              */
-			$this->active = & $this->module_stack[ $module_name ];
+			$this->active = & $this->module_stack[$module_name];
 
             /**
              * Try to perform controller action
              * @var $module_loaded integer
              */
-            $module_loaded = $this->active->action( url()->method );
+            $module_loaded = $this->active->action(url()->method);
+
 		} else { // No controller has been executed
             // Call e404 routine
             $module_loaded = $this->e404();
         }
+
+        //elapsed('Controller action result: '.$module_loaded);
 
 		// Сюда соберем весь вывод системы
 		$html = '';
 	
 		// If this is not asynchronous response and controller has been executed
 		if (!$this->async && ($module_loaded !== A_FAILED)) {
+
+            //elapsed('Rendering main template: '.$this->template_path);
 
 			// Render main template
             $html = $this->render($this->template_path, $this->active->toView());
@@ -770,7 +792,7 @@ class Core implements iCore
             // Read file into object
             $composerObject = json_decode(file_get_contents($path), true);
 
-            elapsed('Loading from composer.json');
+           //elapsed('Loading from composer.json');
             // If composer has requirements configured
             if (isset($composerObject['require'])) {
                 // Iterate requirements
@@ -778,7 +800,7 @@ class Core implements iCore
                     // Ignore core module and work only with samsonos/* modules before they are not PSR- optimized
                     if(($requirement != 'samsonos/php_core') && (strpos($requirement, 'samsonos/') !== false)) {
 
-                        elapsed('Loading module '.$requirement);
+                       //elapsed('Loading module '.$requirement);
 
                         // Try developer relative path
                         $path = '../../vendor/'.$requirement;
@@ -825,10 +847,7 @@ class Core implements iCore
                 }
             }
 
-            // Load generic local module
-            $this->load($this->system_path, 'local');
-
-            /*// Load generic local module
+            // Load generic local module with all web-application resources
             if ($this->resources($this->system_path, $ls2)) {
 
                 // Create local module and set it as active
@@ -838,22 +857,13 @@ class Core implements iCore
                 $this->load_stack['local'] = $ls2;
                 $this->load_module_stack[ 'local' ] = $ls2;
 
-                // Iterate local controllers
-                foreach ($ls2['controllers'] as $controller) {
-                    require($controller);
-
-                    // Get local module name
-                    $module = strtolower(basename( $controller, '.php' ));
-
-                    // Create new local module
-                    new CompressableLocalModule($module, $this->system_path, $ls2);
-                }
-
-                // Require local models
+                // Require local models files
                 foreach ($ls2['models'] as $model) {
                     require_once($model);
                 }
-            }*/
+            }
+
+            trace($this->module_stack, true);
 
         } else { // Signal configuration error
             return e('Project does not have composer.json', E_SAMSON_FATAL_ERROR);

@@ -23,6 +23,22 @@ class AutoLoader
     protected static $nameSpaces = array();
 
     /**
+     * Convert class name to old PHP format not supporting name spaces
+     * @param string $className Class name to convert
+     * @return string Class name in old format where "\" replaced with "_"
+     */
+    public static function oldClassName($className)
+    {
+        // If class name has first symbol as NS_SEPARATOR - remove it to avoid ugly classes _samson_core_...
+        if ($className{0} == self::NS_SEPARATOR) {
+            $className = substr($className, 1);
+        }
+
+        // Convert NS_SEPARATOR to namespace
+        $className = strtolower(str_replace(self::NS_SEPARATOR, '_', $className));
+    }
+
+    /**
      * Generate "correct" class name dependently on the current PHP version,
      * if PHP version is lower 5.3.0 it does not supports namespaces and function
      * will convert class name with namespace to class name
@@ -34,18 +50,7 @@ class AutoLoader
     public static function className($className)
     {
         // If this is an old PHP version - remove namespaces
-        if (__SAMSON_PHP_OLD === true) {
-
-            // If class name has first symbol as NS_SEPARATOR - remove it to avoid ugly classes _samson_core_...
-            if ($className{0} == self::NS_SEPARATOR) {
-                $className = substr($className, 1);
-            }
-
-            // Convert NS_SEPARATOR to namespace
-            $className = strtolower(str_replace(self::NS_SEPARATOR, '_', $className));
-        }
-
-        return $className;
+        return __SAMSON_PHP_OLD ? self::oldClassName($className) : $className;
     }
 
     /**
@@ -173,11 +178,11 @@ class AutoLoader
 
             // Load class by file name
             if (file_exists($path)) {
-                elapsed('Autoloading class '.$class.' at '.$path);
+                //elapsed('Autoloading class '.$class.' at '.$path);
                 require_once($path);
             // old school compatibility will be removed when old modules will be updated
             } else if(self::oldModule($className, $nameSpace, $path)) {
-                elapsed('Autoloading(old style) class '.$class.' at '.$path);
+                //elapsed('Autoloading(old style) class '.$class.' at '.$path);
                 require_once($path);
                 // Handle old module loading
             } else { // Signal error

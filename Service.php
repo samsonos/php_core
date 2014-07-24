@@ -76,7 +76,7 @@ class Service extends ExternalModule
     }
 
 	/** Конструктор */
-	public function __construct( $path = NULL )
+	public function __construct($path = NULL)
 	{
 		// Получим имя класса
 		$class = strtolower(get_class( $this ));
@@ -93,7 +93,7 @@ class Service extends ExternalModule
 		else e('Attempt to create another instance of Factory class: ##', E_SAMSON_FATAL_ERROR, $class );
 			
 		// Вызовем родительский конструктор
-		parent::__construct( $path );
+		parent::__construct($path);
 	}
 
 	/** Обработчик десериализации объекта */
