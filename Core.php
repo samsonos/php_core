@@ -157,12 +157,34 @@ class Core implements iCore
 	
 	/** @see \samson\core\iCore::resources() */
 	public function resources( & $path, & $ls = array(), & $files = null )
-	{	
-		//[PHPCOMPRESSOR(remove,start)]
-		$this->benchmark( __FUNCTION__, func_get_args() );
-		//[PHPCOMPRESSOR(remove,end)]
+	{
+        //[PHPCOMPRESSOR(remove,start)]
+        $this->benchmark( __FUNCTION__, func_get_args() );
+        //[PHPCOMPRESSOR(remove,end)]
+
+        if (!isset( $this->load_path_stack[$path])) {
+            // Get the resource map for this entry point
+            $resourceMap = ResourceMap::get($path);
+            // Collection for gathering all resources located at module path, grouped by extension
+            $ls['resources'] = $resourceMap->resources;
+            $ls['controllers'] = $resourceMap->controllers;
+            $ls['models'] = $resourceMap->models;
+            $ls['views'] = $resourceMap->views;
+            $ls['php'] = $resourceMap->php;
+
+            trace($ls['php'], true);
+
+            // Save path resources data
+            $this->load_path_stack[ $path ] = & $ls;
+
+            return true;
+        } else {
+            $ls = $this->load_path_stack[ $path ];
+        }
+
+        return false;
 		
-		$path = normalizepath( $path.'/' );		
+		/*$path = normalizepath( $path.'/' );
 		
 		//trace('Collecting resources from '.$path);
 		
@@ -250,7 +272,7 @@ class Core implements iCore
         }
 		
 		// Cached data
-		return false;
+		return false;*/
 	}
 
 	/** @see \samson\core\iCore::load() */
@@ -263,7 +285,7 @@ class Core implements iCore
 		//elapsed('Start loading from '.$path);
 
         // If just file is passed then we count it as old-style only controller module
-        if(is_file($path)) {
+        if (is_file($path)) {
             // If no module id is specified - use controller file name as module identifier
             $module_id = isset($module_id) ? $module_id : basename($path, '.php');
 
@@ -280,13 +302,31 @@ class Core implements iCore
             //elapsed('Loaded only controller module #'.$module_id.' from: "'.$path.'"');
             //[PHPCOMPRESSOR(remove,end)]
 
-        } else if ($this->resources($path, $ls)) { // If we hasn't scanned resources at this path
+        } else { // If we have recieved normal entry point for loading
 
+            // Load resource map for this entry point
+            $resourceMap = ResourceMap::get($path);
+
+            elapsed($resourceMap->entryPoint);
+            elapsed($resourceMap->module);
+
+            // Get module controller class name
+            $moduleClass = $resourceMap->module[0];
+
+            // Require class into PHP
+            require($resourceMap->module[1]);
+
+            /** @var \samson\core\ExternalModule $connector */
+            $connector = new $moduleClass($path, $module_id, $resourceMap->toLoadStackFormat());
+
+            elapsed('Created module:'.$connector->id);
+
+        }
 			//elapsed('   -- Gathered resources from '.$path);
 
 			// Controllers, models and global files must be required immediately
 			// because they can consist of just functions, no lazy load available
-			if (file_exists($path.__SAMSON_GLOBAL_FILE)) {
+			/*if (file_exists($path.__SAMSON_GLOBAL_FILE)) {
                 require_once($path.__SAMSON_GLOBAL_FILE);
                //elapsed('   -- Included globals from '.$path.__SAMSON_GLOBAL_FILE);
             }
@@ -337,6 +377,7 @@ class Core implements iCore
 
                             // Create object
                             /** @var \samson\core\ExternalModule $connector */
+            /*
                             $connector = new $class_name($path, $module_id, $ls);
 							$id = $connector->id();
 							
@@ -396,11 +437,11 @@ class Core implements iCore
 						}
 					}
 				}
-			}
+			}*/
 			//elapsed('End loading module from '.$path);				
-		}
+		/*}
 		// Another try to load same path
-		else e('Path ## has all ready been loaded', E_SAMSON_CORE_ERROR, $path );
+		else e('Path ## has all ready been loaded', E_SAMSON_CORE_ERROR, $path );*/
 		
 		// Chaining
 		return $this;

@@ -30,11 +30,13 @@ class ResourceMap
     public static function find($entryPoint, & $pointer = null)
     {
         // Pointer to find ResourceMap for this entry point
-        $pointer = & self::$gathered[$entryPoint];
+        $_pointer = & self::$gathered[$entryPoint];
 
         // If we have already build resource map for this entry point
-        if (isset($pointer)) {
-            // Return existing ResourceMap
+        if (isset($_pointer)) {
+            // Return pointer value
+            $pointer = $_pointer;
+
             return true;
         }
 
@@ -76,6 +78,9 @@ class ResourceMap
     /** @var  array Collection of controllers actions by entry point */
     public $controllers = array();
 
+    /** @var string Path to \samson\core\Module ancestor */
+    public $module;
+
     /** @var  array Old-fashion model files collection by entry point */
     public $models = array();
 
@@ -96,6 +101,9 @@ class ResourceMap
 
     /** @var array Collection of JS resources */
     public $js = array();
+
+    /** @var array Collection of other PHP resources */
+    public $php = array();
 
     /** @var array Collection of COFFEE resources */
     public $coffee = array();
@@ -133,6 +141,46 @@ class ResourceMap
     }
 
     /**
+     * Determines if file is an SamsonPHP Module Class ancestor file
+     *
+     * @param string $path Path to file for checking
+     * @param string $class Variable to return module controller class name
+     *
+     * @return bool True if file is a SamsonPHP view file
+     */
+    public function isModule($path, & $class = '')
+    {
+        // If this is a .php file
+        if(strpos($path, '.php') !== false) {
+            // Class name space, by default - global namespace
+            $namespace = '\\';
+            // Open file handle for reading
+            $file = fopen($path, 'r');
+            // Read lines from file
+            for($i = 0; $i<self::CLASS_FILE_LINES_LIMIT; $i++) {
+                // Read one line from a file
+                $line = fgets($file);
+                // Read one line from a file and try to find namespace definition
+                if ($namespace == '\\' && preg_match('/^\s*namespace\s+(?<namespace>[^;]+)/iu', $line, $matches)) {
+                    $namespace .= $matches['namespace'].'\\';
+                // Read one line from a file and try to find extends class pattern
+                } else if (preg_match('/^\s*class\s+(?<class>[a-z0-9]+)\s+extends\s+(?<parent>[a-z0-9\\\]*(ExternalModule|Service))/iu', $line, $matches)) {
+                    // Check if this is not a SamsonPHP core class
+                    if(strpos('CompressableExternalModule, ExternalModule,Service', $matches['class']) === false) {
+                        // Store module class name
+                        $class = $namespace.$matches['class'];
+
+                        return true;
+                    } else {
+                        return false;
+                    }
+                }
+            }
+            fclose($file);
+        }
+    }
+
+    /**
      * Determines if file is an SamsonPHP model file
      * @param string $path Path to file for checking
      * @return bool True if file is a SamsonPHP model file
@@ -144,35 +192,41 @@ class ResourceMap
     }
 
     /**
+     * Determines if file is an PHP file
+     * @param string $path Path to file for checking
+     * @return bool True if file is a PHP  file
+     */
+    public function isPHP($path)
+    {
+        // Just match file extension
+        return strpos($path, '.php') !== false;
+    }
+
+    /**
      * Determines if file is an SamsonPHP controller file
      * @param string $path Path to file for checking
      * @return bool True if file is a SamsonPHP view file
      */
     public function isController($path)
     {
-        // If this is a .php file
-        if(strpos($path, '.php') !== false) {
+        // Check old-style by location and new-style function type by file name
+        return strpos($path, __SAMSON_CONTOROLLER_PATH) !== false || basename($path, '.php') == 'controller';
+    }
 
-            // Try to match using old-style method by location
-            if (strpos($path, __SAMSON_CONTOROLLER_PATH) !== false) {
-                return true;
-            } else if(basename($path, '.php') == 'controller') { // New function style controller by file name
-                return true;
-            } else { // Harder way - analyzing files
-                elapsed('Reading controller '.$path);
-                $file = fopen($path, 'r');
-                // Read lines from file
-                for($i = 0; $i<self::CLASS_FILE_LINES_LIMIT; $i++) {
-                    // Read one line from a file and try to find extends class pattern
-                    if (preg_match('/extends\s+ExternalModule/iu', fgets($file))) {
-                        return true;
-                    }
-                }
-                fclose($file);
-            }
-        }
-
-        return false;
+    /**
+     * Convert Resource map to old-style "load_stack_*" format
+     * @deprecated
+     * @return array Collection of resources in old format
+     */
+    public function toLoadStackFormat()
+    {
+        return array(
+            'resources' => $this->resources,
+            'controllers' => $this->controllers,
+            'models' => $this->models,
+            'views' => $this->views,
+            'php' => $this->php
+        );
     }
 
     /**
@@ -183,7 +237,7 @@ class ResourceMap
     public function build($path = null)
     {
         //[PHPCOMPRESSOR(remove,start)]
-        s()->benchmark( __FUNCTION__, func_get_args(), __CLASS__);
+        //s()->benchmark( __FUNCTION__, func_get_args(), __CLASS__);
         //[PHPCOMPRESSOR(remove,end)]
 
         // If no other path is passed use current entry point and convert it to *nix path format
@@ -198,6 +252,7 @@ class ResourceMap
             $files = array();
             //TODO: Ignore cms folder - ignore another web-applications or not parse current root web-application path
             foreach (File::dir($this->entryPoint, null, '', $files, NULL, 0, $this->ignoreFolders) as $file) {
+                $class = '';
                 // We can determine SamsonPHP view files by 100%
                 if($this->isView($file)) {
                     $this->views[] = $file;
@@ -205,6 +260,10 @@ class ResourceMap
                     $this->models[] = $file;
                 } else if($this->isController($file)) {
                     $this->controllers[] = $file;
+                } else if($this->isModule($file, $class)) {
+                    $this->module = array($class, $file);
+                } else if($this->isPHP($file)) {
+                    $this->php[] = $file;
                 } else { // Save resource by file extension
                     // Get extension as resource type
                     $rt = pathinfo($file, PATHINFO_EXTENSION );
