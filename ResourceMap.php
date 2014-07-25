@@ -81,6 +81,9 @@ class ResourceMap
     /** @var string Path to \samson\core\Module ancestor */
     public $module;
 
+    /** @var  array Collection of old-fashion global namespace module files by entry point */
+    public $globals = array();
+
     /** @var  array Old-fashion model files collection by entry point */
     public $models = array();
 
@@ -203,6 +206,17 @@ class ResourceMap
     }
 
     /**
+     * Determines if file is an SamsonPHP global namespace file
+     * @param string $path Path to file for checking
+     * @return bool True if file is a SamsonPHP global namespace file
+     */
+    public function isGlobal($path)
+    {
+        // Check old-style by file name
+        return basename($path, '.php') == 'global';
+    }
+
+    /**
      * Determines if file is an SamsonPHP controller file
      * @param string $path Path to file for checking
      * @return bool True if file is a SamsonPHP view file
@@ -256,6 +270,8 @@ class ResourceMap
                 // We can determine SamsonPHP view files by 100%
                 if($this->isView($file)) {
                     $this->views[] = $file;
+                } else if($this->isGlobal($file)) {
+                    $this->globals[] = $file;
                 } else if($this->isModel($file)) {
                     $this->models[] = $file;
                 } else if($this->isController($file)) {

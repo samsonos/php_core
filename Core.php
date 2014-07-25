@@ -172,8 +172,6 @@ class Core implements iCore
             $ls['views'] = $resourceMap->views;
             $ls['php'] = $resourceMap->php;
 
-            trace($ls['php'], true);
-
             // Save path resources data
             $this->load_path_stack[ $path ] = & $ls;
 
@@ -276,7 +274,7 @@ class Core implements iCore
 	}
 
 	/** @see \samson\core\iCore::load() */
-	public function load($path = NULL, $module_id = NULL)
+	public function load($path = NULL)
 	{	
 		//[PHPCOMPRESSOR(remove,start)]
 		$this->benchmark( __FUNCTION__, func_get_args() );		
@@ -284,44 +282,91 @@ class Core implements iCore
 		
 		//elapsed('Start loading from '.$path);
 
+        // By default module has its own identifier defined
+        $module_id = null;
+        /** @var ResourceMap $resourceMap Pointer to resource map object */
+        $resourceMap = null;
+
+        /** @var string $controllerPath Path to module controller file */
+        $controllerPath = '';
+
+        /** @var string $moduleClass Name of module controller class to load */
+        $moduleClass = '';
+
         // If just file is passed then we count it as old-style only controller module
-        if (is_file($path)) {
+        if (is_file($path) && strpos($path, $this->system_path) !== false) {
             // If no module id is specified - use controller file name as module identifier
-            $module_id = isset($module_id) ? $module_id : basename($path, '.php');
+            $module_id = basename($path, '.php');
 
-            // Get local resources
-            $this->resources($this->system_path, $ls);
+            // Set path to file as controller path
+            $controllerPath = $path;
 
-            // Include module controller file
-            require_once($path);
+            // Use web-application path as module path
+            $path = $this->system_path;
 
-            // Create module object, pass local resources map
-            new CompressableExternalModule($this->system_path, $module_id, $ls);
-
-            //[PHPCOMPRESSOR(remove,start)]
-            //elapsed('Loaded only controller module #'.$module_id.' from: "'.$path.'"');
-            //[PHPCOMPRESSOR(remove,end)]
-
-        } else { // If we have recieved normal entry point for loading
-
-            // Load resource map for this entry point
+            // Load web-application resource map
             $resourceMap = ResourceMap::get($path);
 
-            elapsed($resourceMap->entryPoint);
-            elapsed($resourceMap->module);
+            // Set default module connector class
+            $moduleClass = 'CompressableExternalModule';
+
+        } else { // Regular module loading
+            // Load resource map for this entry point
+            $resourceMap = ResourceMap::get($path);
 
             // Get module controller class name
             $moduleClass = $resourceMap->module[0];
 
-            // Require class into PHP
-            require($resourceMap->module[1]);
-
-            /** @var \samson\core\ExternalModule $connector */
-            $connector = new $moduleClass($path, $module_id, $resourceMap->toLoadStackFormat());
-
-            elapsed('Created module:'.$connector->id);
-
+            // Get module controller path
+            $controllerPath = $resourceMap->module[1];
         }
+
+        // Require class into PHP
+        require($controllerPath);
+
+        /** @var \samson\core\ExternalModule $connector Create module controller instance */
+        $connector = new $moduleClass($path, $module_id, $ls = $resourceMap->toLoadStackFormat());
+
+        // TODO: Code lower to be removed
+        // Get module identifier
+        $module_id = $connector->id();
+
+        // Get module name space
+        $ns = AutoLoader::getOnlyNameSpace($moduleClass);
+
+        // Save module resources
+        $this->load_module_stack[$module_id] = $ls;
+
+        // Check for namespace uniqueness
+        if( !isset($this->load_stack[ $ns ])) $this->load_stack[ $ns ] = & $ls;
+        // Merge another ns location to existing
+        else $this->load_stack[ $ns ] = array_merge_recursive ( $this->load_stack[ $ns ], $ls );
+
+        // If module configuration loaded - set module params
+        if( isset( Config::$data[ $module_id ] ) ) foreach ( Config::$data[ $module_id ] as $k => $v) {
+            // Assign only own class properties no view data set anymore
+            if( property_exists($moduleClass, $k))	$connector->$k = $v;
+            //else e('## - Cannot assign parameter(##), it is not defined as class(##) property', E_SAMSON_CORE_ERROR, array($id, $k, $class_name));
+        }
+
+        // Prepare module mechanism
+        if( $connector->prepare() === false ) e('## - Failed preparing module', E_SAMSON_FATAL_ERROR, $module_id);
+
+        // Trying to find parent class for connecting to it to use View/Controller inheritance
+        $parent_class = get_parent_class( $connector );
+        if ($parent_class !== AutoLoader::className('samson\core\ExternalModule')) {
+            // Переберем загруженные в систему модули
+            foreach ($this->module_stack as & $m){
+                // Если в систему был загружен модуль с родительским классом
+                if( get_class($m) == $parent_class ) {
+                    $connector->parent = & $m;
+                    //elapsed('Parent connection for '.$class_name.'('.$connector->uid.') with '.$parent_class.'('.$m->uid.')');
+                }
+            }
+        }
+
+        elapsed('Loaded module:'.$connector->id);
+
 			//elapsed('   -- Gathered resources from '.$path);
 
 			// Controllers, models and global files must be required immediately
@@ -907,7 +952,7 @@ class Core implements iCore
                 // Operate only with files
                 if(is_file($file)) {
                     // Load local module to core
-                    $this->load($file, basename($file, '.php'));
+                    $this->load($file);
                 }
             }
 
