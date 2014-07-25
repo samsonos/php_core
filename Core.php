@@ -308,7 +308,7 @@ class Core implements iCore
             $resourceMap = ResourceMap::get($path);
 
             // Set default module connector class
-            $moduleClass = 'CompressableExternalModule';
+            $moduleClass = '\samson\core\CompressableExternalModule';
 
         } else { // Regular module loading
             // Load resource map for this entry point
@@ -319,6 +319,11 @@ class Core implements iCore
 
             // Get module controller path
             $controllerPath = $resourceMap->module[1];
+        }
+
+        // Iterate and require all module global files
+        foreach($resourceMap->globals as $global) {
+            require($global);
         }
 
         // Require class into PHP

@@ -86,7 +86,7 @@ define('__SAMSON_VIEW_PATH', __SAMSON_APP_PATH.'/view/');
 define('__SAMSON_DEFAULT_TEMPLATE', __SAMSON_VIEW_PATH.'index.php' );
 
 /** Максимальное время выполнения скрипта */
-define( '__SAMSON_MAX_EXECUTION__', 60 );
+define( '__SAMSON_MAX_EXECUTION__', 120 );
 
 /** Действие контроллера выполнено успешно */
 define( 'A_SUCCESS', TRUE );
