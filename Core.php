@@ -664,7 +664,7 @@ class Core implements iCore
             }
 
             // Iterate all old styled controllers
-            foreach (File::dir($this->system_path.__SAMSON_CONTOROLLER_PATH) as $file) {
+            foreach (File::dir($this->system_path.__SAMSON_CONTROLLER_PATH) as $file) {
                 // Operate only with files
                 if(is_file($file)) {
 
