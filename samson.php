@@ -30,21 +30,3 @@ require( 'shortcuts.php' );
 require( 'Utils2.php' );
 require( 'View.php' );
 require( 'deprecated.php' );
-
-/**
- *
- * @param $classname
- * @deprecated use \samson\core\AutoLoader::className()
- * @return string
- */
-function classnameToComposer($classname)
-{
-    // Get only namespace without classname
-    $namespace = nsname($classname);
-
-    // Transform to composer format
-    $moduleName = str_replace( '\\', '_', str_replace('samson\\', '', $namespace));
-
-    // Add default vendor
-    return \samson\core\ExternalModule::COMPOSER_VENDOR.'/'.$moduleName;
-}

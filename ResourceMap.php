@@ -112,7 +112,7 @@ class ResourceMap
     public $coffee = array();
 
     /** @var array Collection of folders that should be ignored in anyway */
-    public $ignoreFolders = array('.svn', '.git', '.idea', __SAMSON_CACHE_PATH);
+    public $ignoreFolders = array('.svn', '.git', '.idea', __SAMSON_CACHE_PATH, __SAMSON_TEST_PATH, 'vendor');
 
     /**
      * Constructor
@@ -130,6 +130,39 @@ class ResourceMap
 
         // Store current ResourceMap in ResourceMaps collection
         self::$gathered[$this->entryPoint] = & $this;
+    }
+
+    /**
+     * Determines if file is a class
+     *
+     * @param string $path  Path to file for checking
+     * @param string $class Variable to return full class name with name space
+     *
+     * @return bool True if file is a class file
+     */
+    public function isClass($path, & $class = '')
+    {
+        // Class name space, by default - global namespace
+        $namespace = '\\';
+        // Open file handle for reading
+        $file = fopen($path, 'r');
+        // Read lines from file
+        for($i = 0; $i<self::CLASS_FILE_LINES_LIMIT; $i++) {
+            // Read one line from a file
+            $line = fgets($file);
+            // Read one line from a file and try to find namespace definition
+            if ($namespace == '\\' && preg_match('/^\s*namespace\s+(?<namespace>[^;]+)/iu', $line, $matches)) {
+                $namespace .= $matches['namespace'].'\\';
+                // Read one line from a file and try to find extends class pattern
+            } else if (preg_match('/^\s*class\s+(?<class>[a-z0-9]+)\s+extends\s+(?<parent>[a-z0-9\\\]*(ExternalModule|Service))/iu', $line, $matches)) {
+                // Store module class name
+                $class = $namespace.$matches['class'];
+
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /**
@@ -154,32 +187,13 @@ class ResourceMap
     public function isModule($path, & $class = '')
     {
         // If this is a .php file
-        if(strpos($path, '.php') !== false) {
-            // Class name space, by default - global namespace
-            $namespace = '\\';
-            // Open file handle for reading
-            $file = fopen($path, 'r');
-            // Read lines from file
-            for($i = 0; $i<self::CLASS_FILE_LINES_LIMIT; $i++) {
-                // Read one line from a file
-                $line = fgets($file);
-                // Read one line from a file and try to find namespace definition
-                if ($namespace == '\\' && preg_match('/^\s*namespace\s+(?<namespace>[^;]+)/iu', $line, $matches)) {
-                    $namespace .= $matches['namespace'].'\\';
-                // Read one line from a file and try to find extends class pattern
-                } else if (preg_match('/^\s*class\s+(?<class>[a-z0-9]+)\s+extends\s+(?<parent>[a-z0-9\\\]*(ExternalModule|Service))/iu', $line, $matches)) {
-                    // Check if this is not a SamsonPHP core class
-                    if(strpos('CompressableExternalModule, ExternalModule,Service', $matches['class']) === false) {
-                        // Store module class name
-                        $class = $namespace.$matches['class'];
-
-                        return true;
-                    } else {
-                        return false;
-                    }
-                }
+        if(strpos($path, '.php') !== false && $this->isClass($path, $class)) {
+            // Check if this is not a SamsonPHP core class
+            if(strpos('CompressableExternalModule, ExternalModule, Service', str_replace('\samson\core\\', '', $class)) === false) {
+                return true;
+            } else {
+                return false;
             }
-            fclose($file);
         }
     }
 

@@ -17,7 +17,10 @@ namespace samson\core;
  */
 class Core implements iCore
 {
-    /** Collection of paths ignored by resources collector */
+    /**
+     * Collection of paths ignored by resources collector
+     * @deprecated
+     */
     public static $resourceIgnorePath = array(
         '.git',
         '.svn',
@@ -32,14 +35,26 @@ class Core implements iCore
         __SAMSON_TEST_PATH,
     );
 
-	/** Module paths loaded stack */
+    /**
+     * Module paths loaded stack
+     * @deprecated
+     */
 	public $load_path_stack = array();
 
-	/** Modules to be loaded stack */
+    /**
+     * Modules to be loaded stack
+     * @deprecated
+     */
 	public $load_stack = array();
-	
-	/** Modules to be loaded stack */
+
+    /**
+     * Modules to be loaded stack
+     * @deprecated
+     */
 	public $load_module_stack = array();
+
+    /** @var  ResourceMap Current web-application resource map */
+    public $map;
 
     /**
      * Collection of loaded modules
@@ -76,67 +91,6 @@ class Core implements iCore
 	
 	/** View path loading mode */
 	public $render_mode = self::RENDER_STANDART;
-	
-	/**  
-	 * Automatic class loader based on lazy loading from load_stack
-	 * based on class namespace data
-	 */
-	/*private function __autoload($class)
-	{
-		//[PHPCOMPRESSOR(remove,start)]
-		$this->benchmark( __FUNCTION__, func_get_args() );		
-		//[PHPCOMPRESSOR(remove,end)]
-		
-		// Get just class name without ns
-		$class_name = classname( $class );
-		// Get just ns without class name 
-		$ns = nsname( $class );
-		
-		// System module
-		if( $ns == 'samson\core' ) return require ( __SAMSON_PATH__.$class_name.'.php' );
-		// Other modules
-		else 
-		{
-			// If we have loaded path with this namespace
-			if( isset( $this->load_stack[ $ns ] ) )	$ls = & $this->load_stack[ $ns ];
-			// Get last path scanned from load_path_stack for getting php files list,
-			// as we can be sure this condition is met on loading another php file in iCore::load()
-			else
-			{ 
-				end( $this->load_path_stack );
-				$ls = & $this->load_path_stack[ key( $this->load_path_stack ) ];
-			}
-			
-			// If we have php files in this entry to search for needed class
-            foreach (array('php','models') as $key) {
-                // Pointer to module files list
-                $fileSource = & $ls[$key];
-                if( isset($fileSource) && sizeof($fileSource) )
-                {
-                    // Simple method - trying to find class by classname
-                    if( $files = preg_grep( '/\/'.$class_name.'\.php/i', $fileSource))
-                    {
-                        // Проверим на однозначность
-                        if( sizeof($files) > 1 ) return e('Cannot autoload class(##), too many files matched ##', E_SAMSON_CORE_ERROR, array($class,$files) );
-
-                        // Require lastarray element
-                        return require_once( end($files) );
-                    }
-                }
-            }
-
-            // We have not found class in current module, try using PSR-* loader
-            $composerPath = 'vendor/'.classnameToComposer($class).'/'.classname($class).'.php';
-
-            // Try to load path from composer
-            if(file_exists($composerPath)) {
-                return require_once($composerPath);
-            }
-
-            return '';
-		}
-	}*/
-
 
     /**
      * Put benchmark record for performance analyzing
@@ -150,12 +104,15 @@ class Core implements iCore
 				microtime(true)-__SAMSON_T_STARTED__, 	// Time elapsed from start
 				$class.'::'.$function, 		            // Function class::name
 				$args, 									// Function arguments
-				memory_get_usage(true) 					// Memmory
+				memory_get_usage(true) 					// Memory
 		);		
 	}
-	
-	
-	/** @see \samson\core\iCore::resources() */
+
+
+    /**
+     * @see \samson\core\iCore::resources()
+     * @deprecated
+     */
 	public function resources( & $path, & $ls = array(), & $files = null )
 	{
         //[PHPCOMPRESSOR(remove,start)]
@@ -181,160 +138,49 @@ class Core implements iCore
         }
 
         return false;
-		
-		/*$path = normalizepath( $path.'/' );
-		
-		//trace('Collecting resources from '.$path);
-		
-		// Check for module location
-		if( !file_exists( $path ) ) return e( 'loading module from ## - path doesn\'t exists',E_SAMSON_CORE_ERROR,$path, $this );
-				
-		// If this module is not queued for loading
-		if( ! isset( $this->load_path_stack[ $path ] ) ) {
-			// Save this path entry
-			$this->load_path_stack[ $path ] = '';				
-						
-			// Collection for gathering all resources located at module path, grouped by extension
-			$ls['resources'] = array();
-			$ls['controllers'] = array();
-			$ls['models'] = array();
-			$ls['views'] = array();
-			$ls['php'] = array();
-				
-			// Make pointer for pithiness
-			$resources = & $ls['resources'];
-			
-			// Recursively scan module folders for resources if they not passed
-			$files = ! isset( $files ) ? File::dir($path, null, '', $files, NULL, 0, self::$resourceIgnorePath) : $files;
-
-            // Check if we have found web-application in module folders
-            foreach ( preg_grep('/\.htaccess/iu', $files) as $web_app_path )
-            {
-                // If path not to local web application
-                $web_app_path = pathname( $web_app_path ).'/';
-                if( $web_app_path != $this->system_path ) {
-                    // Create copy of files collection
-                    $_files = $files;
-                    $files = array();
-
-                    // Save only local web application files
-                    foreach ($_files as $resource) {
-                        if( strpos( $resource, $web_app_path ) === false ) {
-                            $files[] = $resource;
-                        }
-                    }
-                }
-            }
-		
-			// Iterate module files
-			foreach ($files as $resource) {
-                //elapsed('Analyzing resource: "'.$resource.'"');
-				// No cache folders
-				if( strpos( $resource, '/'.__SAMSON_CACHE_PATH.'/') === false )
-				{
-					// Get extension as resource type
-					$rt = pathinfo( $resource, PATHINFO_EXTENSION );
-						
-					// Check if resource type array cell created
-					if( !isset( $resources[ $rt ] ) ) $resources[ $rt ] = array();
-						
-					// Save resource file path to appropriate collection and fix possible slash issues to *nix format
-					$resources[ $rt ][] = $resource;				
-				}
-			}		
-				
-			// If module contains PHP resources - lets distribute them to specific collections
-			if( isset( $resources[ 'php' ] )) foreach ( $resources[ 'php' ] as $php )
-			{				
-				// Controllers
-				if( strpos( $php, __SAMSON_CONTOROLLER_PATH ) ) $ls['controllers'][] = $php;				
-				// Models
-				else if ( strpos( $php, __SAMSON_MODEL_PATH ) ) $ls['models'][] = $php;
-				// Views and other php files will load only when needed
-				else if ( strpos( $php, __SAMSON_VIEW_PATH )) $ls['views'][] = $php;
-				// Regular php file
-				else $ls['php'][] = $php;
-			}
-			
-			// New way for storing views with extension vphp - enables free module folder structure 
-			if( isset( $resources[ 'vphp' ] )) foreach ( $resources[ 'vphp' ] as $php ) $ls['views'][] = $php;
-			
-			// Save path resources data
-			$this->load_path_stack[ $path ] = & $ls;
-			
-			// New data
-			return true;
-
-		} else { // Return path resources
-            $ls = $this->load_path_stack[ $path ];
-        }
-		
-		// Cached data
-		return false;*/
 	}
 
 	/** @see \samson\core\iCore::load() */
-	public function load($path = NULL)
+	public function load($path = NULL, $module_id = null)
 	{	
 		//[PHPCOMPRESSOR(remove,start)]
 		$this->benchmark( __FUNCTION__, func_get_args() );		
 		//[PHPCOMPRESSOR(remove,end)]
-		
-		//elapsed('Start loading from '.$path);
 
-        // By default module has its own identifier defined
-        $module_id = null;
         /** @var ResourceMap $resourceMap Pointer to resource map object */
-        $resourceMap = null;
+        $resourceMap = ResourceMap::get($path);
 
         /** @var string $controllerPath Path to module controller file */
-        $controllerPath = '';
+        $controllerPath = $resourceMap->module[1];
 
         /** @var string $moduleClass Name of module controller class to load */
-        $moduleClass = '';
-
-        // If just file is passed then we count it as old-style only controller module
-        if (is_file($path) && strpos($path, $this->system_path) !== false) {
-            // If no module id is specified - use controller file name as module identifier
-            $module_id = basename($path, '.php');
-
-            // Set path to file as controller path
-            $controllerPath = $path;
-
-            // Use web-application path as module path
-            $path = $this->system_path;
-
-            // Load web-application resource map
-            $resourceMap = ResourceMap::get($path);
-
-            // Set default module connector class
-            $moduleClass = '\samson\core\CompressableExternalModule';
-
-        } else { // Regular module loading
-            // Load resource map for this entry point
-            $resourceMap = ResourceMap::get($path);
-
-            // Get module controller class name
-            $moduleClass = $resourceMap->module[0];
-
-            // Get module controller path
-            $controllerPath = $resourceMap->module[1];
-        }
+        $moduleClass = $resourceMap->module[0];
 
         // Iterate and require all module global files
         foreach($resourceMap->globals as $global) {
             require($global);
         }
 
-        // Require class into PHP
+        // Require module controller class into PHP
         require($controllerPath);
 
         /** @var \samson\core\ExternalModule $connector Create module controller instance */
+        // TODO: Add  Resource map support to modules, move from old array
         $connector = new $moduleClass($path, $module_id, $ls = $resourceMap->toLoadStackFormat());
 
-        // TODO: Code lower to be removed
         // Get module identifier
         $module_id = $connector->id();
+
+        // If module configuration loaded - set module params
+        if( isset( Config::$data[ $module_id ] ) ) foreach ( Config::$data[ $module_id ] as $k => $v) {
+            // Assign only own class properties no view data set anymore
+            if( property_exists($moduleClass, $k))	$connector->$k = $v;
+            //else e('## - Cannot assign parameter(##), it is not defined as class(##) property', E_SAMSON_CORE_ERROR, array($id, $k, $class_name));
+        }
+
+        // TODO: Code lower to be removed
+        // Prepare module mechanism
+        if( $connector->prepare() === false ) e('## - Failed preparing module', E_SAMSON_FATAL_ERROR, $module_id);
 
         // Get module name space
         $ns = AutoLoader::getOnlyNameSpace($moduleClass);
@@ -347,16 +193,7 @@ class Core implements iCore
         // Merge another ns location to existing
         else $this->load_stack[ $ns ] = array_merge_recursive ( $this->load_stack[ $ns ], $ls );
 
-        // If module configuration loaded - set module params
-        if( isset( Config::$data[ $module_id ] ) ) foreach ( Config::$data[ $module_id ] as $k => $v) {
-            // Assign only own class properties no view data set anymore
-            if( property_exists($moduleClass, $k))	$connector->$k = $v;
-            //else e('## - Cannot assign parameter(##), it is not defined as class(##) property', E_SAMSON_CORE_ERROR, array($id, $k, $class_name));
-        }
-
-        // Prepare module mechanism
-        if( $connector->prepare() === false ) e('## - Failed preparing module', E_SAMSON_FATAL_ERROR, $module_id);
-
+        // TODO: Analyze - do we still need this
         // Trying to find parent class for connecting to it to use View/Controller inheritance
         $parent_class = get_parent_class( $connector );
         if ($parent_class !== AutoLoader::className('samson\core\ExternalModule')) {
@@ -370,128 +207,7 @@ class Core implements iCore
             }
         }
 
-        elapsed('Loaded module:'.$connector->id);
-
-			//elapsed('   -- Gathered resources from '.$path);
-
-			// Controllers, models and global files must be required immediately
-			// because they can consist of just functions, no lazy load available
-			/*if (file_exists($path.__SAMSON_GLOBAL_FILE)) {
-                require_once($path.__SAMSON_GLOBAL_FILE);
-               //elapsed('   -- Included globals from '.$path.__SAMSON_GLOBAL_FILE);
-            }
-
-            // Iterate and include all module controllers
-			foreach ($ls['controllers'] as $php) {
-               //elapsed('   -- Including controllers from '.$path.$php);
-                require_once($php);
-            }
-
-            // Iterate and include all module models
-			foreach ($ls['models'] as $php) {
-               //elapsed('   -- Including models from '.$path.$php);
-                require_once($php);
-            }
-
-            // Let's fix collection of loaded classes
-            $classes = get_declared_classes();
-
-            //[PHPCOMPRESSOR(remove,start)]
-           //elapsed(' -- Starting to search for iModule ancestor in "'.$path.'"');
-            //[PHPCOMPRESSOR(remove,end)]
-
-			// Iterate only php files
-			foreach ($ls['php'] as $php) {
-
-				// We must require regular files and wait to find iModule class ancestor declaration
-				require_once($php);
-
-                //[PHPCOMPRESSOR(remove,start)]
-                //elapsed('   -- Icluded '.$php);
-                //[PHPCOMPRESSOR(remove,end)]
-					
-				// If we have new class declared after requiring
-				$n_classes = get_declared_classes();
-				if (sizeof($new_classes = array_diff($n_classes, $classes))) {
-					// Save new loaded classes list
-					$classes = $n_classes;
-				
-					// Iterate new declared classes
-					foreach ($new_classes as $class_name) {
-
-                        // If core class has been auto loaded when module class has been loaded
-                        if(AutoLoader::getOnlyNameSpace($class_name) == 'samson\core') {
-                            continue; // Ignore core classes at module loading
-                        } else if(in_array(AutoLoader::className('samson\core\ExternalModule'), class_parents($class_name))) {
-							//elapsed('   -- Found iModule ancestor '.$class_name.'('.AutoLoader::getOnlyNameSpace($class_name).') in '.$path);
-
-                            // Create object
-                            /** @var \samson\core\ExternalModule $connector */
-            /*
-                            $connector = new $class_name($path, $module_id, $ls);
-							$id = $connector->id();
-							
-							// Save namespace module data to load stack
-							// If no namespace specified consider classname as namespace
-							$ns = pathname( strtolower($class_name) );							
-						
-							// Save module resources
-							$this->load_module_stack[ $id ] = $ls;
-							
-							// Check for namespace uniqueness 
-							if( !isset($this->load_stack[ $ns ])) $this->load_stack[ $ns ] = & $ls;
-							// Merge another ns location to existing
-							else $this->load_stack[ $ns ] = array_merge_recursive ( $this->load_stack[ $ns ], $ls );
-							
-							//else e('Found duplicate ns(##) for class(##) ', E_SAMSON_CORE_ERROR, array( $ns, $class_name)); 
-											
-							//elapsed('   -- Created instance of '.$class_name.'('.$id.') in '.$path);
-							
-							// Module check
-							if( !isset($id{0})) e('Module from ## does not have identifier', E_SAMSON_CORE_ERROR, $path );
-							if( $ns != strtolower($ns)) e('Module ## has incorrect namespace ## - it must be lowercase', E_SAMSON_CORE_ERROR, array($id,$ns) );
-							if( !isset($ns{0}) ) e('Module ## has no namespace', E_SAMSON_CORE_ERROR,  $id, $ns );
-											
-							// If module configuration loaded - set module params
-							if( isset( Config::$data[ $id ] ) ) foreach ( Config::$data[ $id ] as $k => $v) {
-								// Assisgn only own class properties no view data set anymore
-								if( property_exists( $class_name, $k ))	$connector->$k = $v;
-								//else e('## - Cannot assign parameter(##), it is not defined as class(##) property', E_SAMSON_CORE_ERROR, array($id, $k, $class_name));								
-							}
-							
-							//elapsed('   -- Configured '.$class_name.' in '.$path);
-							
-							// Prepare module mechanism
-							if( $connector->prepare() === false ) e('## - Failed preparing module', E_SAMSON_FATAL_ERROR, $id);
-													
-							//elapsed('   -- Prepared '.$class_name.' in '.$path);
-									
-							// Trying to find parent class for connecting to it to use View/Controller inheritance
-							$parent_class = get_parent_class( $connector );
-							if( $parent_class !== ns_classname('ExternalModule','samson\core') )
-							{
-								// Переберем загруженные в систему модули
-								foreach ( $this->module_stack as & $m )
-								{
-									// Если в систему был загружен модуль с родительским классом
-									if( get_class($m) == $parent_class ) 
-									{										
-										$connector->parent = & $m;
-										//elapsed('Parent connection for '.$class_name.'('.$connector->uid.') with '.$parent_class.'('.$m->uid.')');
-									}
-								}
-							}
-				
-							// End top loop - we have found what we needed
-							break 2;
-						}
-					}
-				}
-			}*/
-			//elapsed('End loading module from '.$path);				
-		/*}
-		// Another try to load same path
-		else e('Path ## has all ready been loaded', E_SAMSON_CORE_ERROR, $path );*/
+        //elapsed('Loaded module:'.$connector->id);
 		
 		// Chaining
 		return $this;
@@ -771,9 +487,9 @@ class Core implements iCore
 
 			// Только внешние модули и их оригиналы
 			if (method_exists($module, 'init') && $module->id() == $id) {
-				////elapsed('Start - Initializing module: '.$id);
+				//elapsed('Start - Initializing module: '.$id);
 				$module->init();
-				////elapsed('End - Initializing module: '.$id);
+				//elapsed('End - Initializing module: '.$id);
 			}
 		}
 	
@@ -847,30 +563,22 @@ class Core implements iCore
 		$db = debug_backtrace();	
 		
 		// Get local web application path for backtrace if available
-		if( isset($db[1]) ) $this->system_path = normalizepath( pathname($db[1]['file']) ).'/';	
-				 		
-		// Установим обработчик автоматической загрузки классов
-		//spl_autoload_register( array( $this, '__autoload'));
-		
-		// Свяжем коллекцию загруженных модулей в систему со статической коллекцией
-		// Созданных экземпляров класса типа "Модуль"
-		$this->module_stack = & Module::$instances;		
-		
-		// TODO: Сделать полноценную загрузку core и local через load
+		if (isset($db[1])) {
+            // Get correct web-application path
+            $this->system_path = normalizepath(pathname($db[1]['file'])).'/';
+
+            // Get web-application resource map
+            $this->map = ResourceMap::get($this->system_path);
+        }
+
+		// Connect static collection with this dynamic field to avoid duplicates
+		$this->module_stack = & Module::$instances;
 
 		// Load samson\core module
 		new System( __SAMSON_PATH__ );
 
-		// Manually include system module to load stack
-		$path = __SAMSON_PATH__;
-		if( $this->resources( $path, $ls ))
-		{
-			$this->load_stack['core'] = & $ls;
-			// Save module resources
-			$this->load_module_stack[ 'core' ] = & $ls;
-		}
-			
-		// Выполним инициализацию конфигурации модулей загруженных в ядро
+        // TODO: Change module configuration logic, probably move it to module loading
+        // we don't need to load configuration for modules that are not loaded?
 		Config::load();
 	}
 	//[PHPCOMPRESSOR(remove,end)]
@@ -897,6 +605,10 @@ class Core implements iCore
                     if(($requirement != 'samsonos/php_core') && (strpos($requirement, 'samsonos/') !== false)) {
 
                        //elapsed('Loading module '.$requirement);
+
+                        // TODO: Make possible to use local modules when developing SamsonCMS - get relative path to main folder
+                        // TODO: Make possible to automatically search for local modules firstly and only then default
+                        // TODO: Make possible to automatically define depth of web-application to build proper paths to local modules
 
                         // Try developer relative path
                         $path = '../../vendor/'.$requirement;
@@ -925,8 +637,6 @@ class Core implements iCore
                 }
             }
 
-            ResourceMap::get($this->system_path);
-
             // Load generic local module with all web-application resources
             if ($this->resources($this->system_path, $ls2)) {
 
@@ -947,8 +657,8 @@ class Core implements iCore
             foreach (File::dir($this->system_path.__SAMSON_MODULE_PATH) as $file) {
                 // If this is folder
                 if(is_dir($file)) {
-                    // Load local module to core
-                    $this->load($file, basename($file));
+                    // Load local module to core, pass folder name as module identifier
+                    $this->load($file, strtolower(basename($file)));
                 }
             }
 
@@ -956,8 +666,12 @@ class Core implements iCore
             foreach (File::dir($this->system_path.__SAMSON_CONTOROLLER_PATH) as $file) {
                 // Operate only with files
                 if(is_file($file)) {
-                    // Load local module to core
-                    $this->load($file);
+
+                    // Require class into PHP
+                    require($file);
+
+                    // Create module connector instance
+                    new CompressableExternalModule($this->system_path, basename($file, '.php'), $this->map->toLoadStackFormat());
                 }
             }
 
