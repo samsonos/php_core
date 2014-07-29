@@ -238,7 +238,7 @@ class ResourceMap
     public function isController($path)
     {
         // Check old-style by location and new-style function type by file name
-        return strpos($path, __SAMSON_CONTOROLLER_PATH) !== false || basename($path, '.php') == 'controller';
+        return strpos($path, __SAMSON_CONTROLLER_PATH) !== false || basename($path, '.php') == 'controller';
     }
 
     /**

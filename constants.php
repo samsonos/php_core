@@ -74,7 +74,7 @@ define('__SAMSON_APP_PATH','app');
 define('__SAMSON_MODULE_PATH','app');
 
 /** Путь к папке где находятся контроллеры системы */
-define('__SAMSON_CONTOROLLER_PATH', __SAMSON_APP_PATH.'/controller/');
+define('__SAMSON_CONTROLLER_PATH', __SAMSON_APP_PATH.'/controller/');
 
 /** Путь к папке где находятся модели системы */
 define('__SAMSON_MODEL_PATH', __SAMSON_APP_PATH.'/model/');
