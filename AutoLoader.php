@@ -198,9 +198,9 @@ class AutoLoader
 }
 
 // If default composer autoloader exists
-if (file_exists('vendor/autoload.php')) {
+if (file_exists(__SAMSON_VENDOR_PATH.'autoload.php')) {
     // Load it automatically before all other loaders - we want to follow PSR-0 standard
-    require 'vendor/autoload.php';
+    require __SAMSON_VENDOR_PATH.'autoload.php';
 }
 
  //[PHPCOMPRESSOR(remove,start)]
