@@ -609,6 +609,7 @@ class Core implements iCore
                         // TODO: Make possible to use local modules when developing SamsonCMS - get relative path to main folder
                         // TODO: Make possible to automatically search for local modules firstly and only then default
                         // TODO: Make possible to automatically define depth of web-application to build proper paths to local modules
+                        // TODO: Force debug message if module cannot be autoloaded by PSR-* standard
 
                         // Try developer relative path
                         $path = '../../vendor/'.$requirement;
