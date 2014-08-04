@@ -171,15 +171,22 @@ class Core implements iCore
         $module_id = $connector->id();
 
         // If module configuration loaded - set module params
-        if( isset( Config::$data[ $module_id ] ) ) foreach ( Config::$data[ $module_id ] as $k => $v) {
-            // Assign only own class properties no view data set anymore
-            if( property_exists($moduleClass, $k))	$connector->$k = $v;
-            //else e('## - Cannot assign parameter(##), it is not defined as class(##) property', E_SAMSON_CORE_ERROR, array($id, $k, $class_name));
+        if (isset(Config::$data[ $module_id ])) {
+            foreach (Config::$data[ $module_id ] as $k => $v) {
+                // Assign only own class properties no view data set anymore
+                if (property_exists($moduleClass, $k)) {
+                    $connector->$k = $v;
+                }/*else {
+                    e('## - Cannot assign parameter(##), it is not defined as class(##) property', E_SAMSON_CORE_ERROR, array($id, $k, $class_name));
+                }*/
+            }
         }
 
         // TODO: Code lower to be removed
         // Prepare module mechanism
-        if( $connector->prepare() === false ) e('## - Failed preparing module', E_SAMSON_FATAL_ERROR, $module_id);
+        if ($connector->prepare() === false) {
+            e('## - Failed preparing module', E_SAMSON_FATAL_ERROR, $module_id);
+        }
 
         // Get module name space
         $ns = AutoLoader::getOnlyNameSpace($moduleClass);

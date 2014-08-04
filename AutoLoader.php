@@ -94,7 +94,7 @@ class AutoLoader
      * @param string $className Class name without namespace
      * @param string $nameSpace Namespace name without class name
      * @param string $file Variable to return path to class file location on success
-     *
+     * @deprecated Should be removed after all modules will be moved to PSR class naming and locating standart
      * @return bool True if class file is found
      */
     protected static function oldModule($className, $nameSpace, & $file = null)
@@ -102,6 +102,8 @@ class AutoLoader
         // Convert to linux path, windows will convert it automatically if necessary
         $ns = str_replace(self::NS_SEPARATOR, '/', $nameSpace);
 
+        /** @var string[] $locations Collection of possible class locations */
+        $locations = null;
         // Iterate all possible file structures
         $path = null;
         foreach (array('php', 'js', 'cms', 'social', 'commerce') as $type) {
@@ -112,12 +114,16 @@ class AutoLoader
                 __SAMSON_DEV_VENDOR_PATH.str_replace('samson/', 'samsonos/'.$type.'_', $ns),
                 __SAMSON_VENDOR_PATH.str_replace('samson/', 'samsonos/', $ns),
                 __SAMSON_VENDOR_PATH.str_replace('samson/', 'samsonos/'.$type.'/', $ns),
+                __SAMSON_VENDOR_PATH.str_replace('samson/', 'samsonos/'.$type.'/', $ns).'/api',
                 __SAMSON_VENDOR_PATH.str_replace('samson/', 'samsonos/'.$type.'_', $ns),
-                __SAMSON_CWD__.__SAMSON_MODEL_PATH
+                strpos($ns, 'cms') !== false ? __SAMSON_VENDOR_PATH.'samsonos/cms_api' : '',
+                strpos($ns, 'cms') !== false ? __SAMSON_VENDOR_PATH.'samsonos/cms/api' : '',
+                __SAMSON_CWD__.__SAMSON_MODEL_PATH,
             );
 
             // Iterate all locations and try to find correct existing path
             foreach($locations as $location) {
+                elapsed($location);
                 if(file_exists($location)) {
                     $path = $location;
                     break 2;
