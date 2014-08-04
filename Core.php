@@ -577,6 +577,15 @@ class Core implements iCore
 		// Load samson\core module
 		new System( __SAMSON_PATH__ );
 
+        // Iterate all files in configuration folder
+        foreach(\samson\core\File::dir('app/config') as $configFile) {
+            // Match only files ending with ...Config.php
+            if(stripos($configFile, 'Config.php') !== false) {
+                // Register configuration class in system
+                require $configFile;
+            }
+        }
+
         // TODO: Change module configuration logic, probably move it to module loading
         // we don't need to load configuration for modules that are not loaded?
 		Config::load();
@@ -631,6 +640,8 @@ class Core implements iCore
                                 return e('Cannot load module(from ##): "##" - Path not found', E_SAMSON_FATAL_ERROR, array($path, $requirement));
                             }
                         }
+
+                        elapsed($path);
 
                         // Load module
                         $this->load($path);
