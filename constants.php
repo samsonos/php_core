@@ -31,10 +31,10 @@ if (!defined('__SAMSON_COPYRIGHT')) {
 }
 
 /** Совместимость с PHP 5 */
-if(!defined('__DIR__')) define( '__DIR__', dirname(__FILE__));
+if(!defined('__DIR__')) define('__DIR__', dirname(__FILE__));
 
 /** Получим путь к фреймфорку SamsonPHP */
-define( '__SAMSON_PATH__', __DIR__.'/' );
+define('__SAMSON_PATH__', __DIR__.'/');
 
 /** Получим текущий каталог веб-приложения */
 define('__SAMSON_CWD__', str_ireplace('\\', '/', getcwd().'/' ) );
@@ -97,7 +97,6 @@ if (!defined('__SAMSON_VIEW_PATH')) {
 if (!defined('__SAMSON_DEFAULT_TEMPLATE')) {
     define('__SAMSON_DEFAULT_TEMPLATE', __SAMSON_VIEW_PATH.'index.php');
 }
-
 
 /** Максимальное время выполнения скрипта */
 define( '__SAMSON_MAX_EXECUTION__', 120 );
