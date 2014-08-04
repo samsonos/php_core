@@ -581,7 +581,7 @@ class Core implements iCore
 		$this->module_stack = & Module::$instances;
 
 		// Load samson\core module
-		new System(__SAMSON_PATH__, 'system', ResourceMap::get(__SAMSON_PATH__)->toLoadStackFormat());
+        $this->load(__SAMSON_PATH__);
 
         // Iterate all files in configuration folder
         foreach(\samson\core\File::dir('app/config') as $configFile) {
