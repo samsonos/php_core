@@ -30,7 +30,6 @@ class Core implements iCore
         'upload',
 		'out',
         'i18n',
-        __SAMSON_MODULE_PATH,
         __SAMSON_CACHE_PATH,
         __SAMSON_TEST_PATH,
     );
@@ -575,7 +574,7 @@ class Core implements iCore
 		$this->module_stack = & Module::$instances;
 
 		// Load samson\core module
-		new System( __SAMSON_PATH__ );
+		new System(__SAMSON_PATH__);
 
         // Iterate all files in configuration folder
         foreach(\samson\core\File::dir('app/config') as $configFile) {
@@ -666,7 +665,7 @@ class Core implements iCore
             }
 
             // Iterate all files in local modules folder to find local modules
-            foreach (File::dir($this->system_path.__SAMSON_MODULE_PATH) as $file) {
+            foreach (File::dir($this->system_path.__SAMSON_APP_PATH) as $file) {
                 // If this is folder
                 if(is_dir($file)) {
                     // Load local module to core, pass folder name as module identifier
