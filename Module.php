@@ -406,23 +406,23 @@ class Module implements iModule, \ArrayAccess, iModuleViewable
 		$this->id = $id;
 		
 		// Set path to module
-		$this->path( $path );
+		$this->path($path);
 
 		// Generate unique module identifier
 		$this->uid = rand(0, 9999999).'_'.microtime(true);
 		
 		// Add to module identifier to view data stack
-		$this->data['id'] = $this->id;			
+		$this->data['id'] = $this->id;
 						
 		// Save views list
-		isset( $resources ) ? $this->views = & $resources['views'] : '';
+        (isset($resources ) && isset($resources['views'])) ? $this->views = & $resources['views'] : '';
 		
 		// Generate unique module cache path in local web-application
 		$this->cache_path = __SAMSON_CWD__.__SAMSON_CACHE_PATH.'/'.$this->id.'/';
 		
 		// Save ONLY ONE copy of this instance in static instances collection,
 		// avoiding rewriting by cloned modules
-		!isset( self::$instances[ $this->id ] ) ? self::$instances[ $this->id ] = & $this : '';		
+		!isset( self::$instances[ $this->id ] ) ? self::$instances[ $this->id ] = & $this : '';
 			
 		// Find all controller actions
 		$functions = get_defined_functions();
@@ -446,7 +446,7 @@ class Module implements iModule, \ArrayAccess, iModuleViewable
 					$this->controllers[ $matches['controller'] ] = $method;
 				}
 			}			
-		}		
+		}
 		
 		// Iterate class methods
 		foreach (get_class_methods($this) as $method) {

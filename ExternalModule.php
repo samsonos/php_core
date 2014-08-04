@@ -32,7 +32,7 @@ class ExternalModule extends Module implements iExternalModule
 	 * @param array 	$resources	Module resources list 
 	 */
 	public function  __construct($path, $vid = null, $resources = NULL )
-	{			
+	{
 		// Module identifier not specified - set it to NameSpace\Classname
 		if (!isset($this->id{0}) && !isset($vid)) {
             // Generate identifier from module class

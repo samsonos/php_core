@@ -116,8 +116,8 @@ class AutoLoader
                 __SAMSON_VENDOR_PATH.str_replace('samson/', 'samsonos/'.$type.'/', $ns),
                 __SAMSON_VENDOR_PATH.str_replace('samson/', 'samsonos/'.$type.'/', $ns).'/api',
                 __SAMSON_VENDOR_PATH.str_replace('samson/', 'samsonos/'.$type.'_', $ns),
-                strpos($ns, 'cms') !== false ? __SAMSON_VENDOR_PATH.'samsonos/cms_api' : '', // use cms api if class name has "cms"
-                strpos($ns, 'cms') !== false ? __SAMSON_VENDOR_PATH.'samsonos/cms/api' : '', // use cms api if class name has "cms"
+                strpos($ns, 'cms') !== false ? __SAMSON_VENDOR_PATH.'samsonos/cms_api' : '_', // use cms api if class name has "cms"
+                strpos($ns, 'cms') !== false ? __SAMSON_VENDOR_PATH.'samsonos/cms/api' : '_', // use cms api if class name has "cms"
                 __SAMSON_CWD__.__SAMSON_MODEL_PATH, // use local model path as the last variant of class location
             );
 
