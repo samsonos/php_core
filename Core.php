@@ -647,8 +647,6 @@ class Core implements iCore
                             }
                         }
 
-                        elapsed($path);
-
                         // Load module
                         $this->load($path);
                     }

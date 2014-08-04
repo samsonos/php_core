@@ -60,12 +60,12 @@ define('__SAMSON_PROTOCOL', (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 
 
 /** Default path to web-application cache folder */
 if (!defined('__SAMSON_CACHE_PATH')) {
-    define('__SAMSON_CACHE_PATH', 'cache/');
+    define('__SAMSON_CACHE_PATH', 'cache');
 }
 
 /** Default path to web-application tests folder */
 if (!defined('__SAMSON_TEST_PATH')) {
-    define('__SAMSON_TEST_PATH', 'tests/');
+    define('__SAMSON_TEST_PATH', 'tests');
 }
 
 /** Default path to web-application code root */

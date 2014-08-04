@@ -116,14 +116,13 @@ class AutoLoader
                 __SAMSON_VENDOR_PATH.str_replace('samson/', 'samsonos/'.$type.'/', $ns),
                 __SAMSON_VENDOR_PATH.str_replace('samson/', 'samsonos/'.$type.'/', $ns).'/api',
                 __SAMSON_VENDOR_PATH.str_replace('samson/', 'samsonos/'.$type.'_', $ns),
-                strpos($ns, 'cms') !== false ? __SAMSON_VENDOR_PATH.'samsonos/cms_api' : '',
-                strpos($ns, 'cms') !== false ? __SAMSON_VENDOR_PATH.'samsonos/cms/api' : '',
-                __SAMSON_CWD__.__SAMSON_MODEL_PATH,
+                strpos($ns, 'cms') !== false ? __SAMSON_VENDOR_PATH.'samsonos/cms_api' : '', // use cms api if class name has "cms"
+                strpos($ns, 'cms') !== false ? __SAMSON_VENDOR_PATH.'samsonos/cms/api' : '', // use cms api if class name has "cms"
+                __SAMSON_CWD__.__SAMSON_MODEL_PATH, // use local model path as the last variant of class location
             );
 
             // Iterate all locations and try to find correct existing path
             foreach($locations as $location) {
-                elapsed($location);
                 if(file_exists($location)) {
                     $path = $location;
                     break 2;
@@ -148,7 +147,6 @@ class AutoLoader
 
             // If we have found several files matching this class
             if (sizeof($files) > 1) {
-                elapsed($files);
                 return e('Cannot autoload class(##), too many files matched ##', E_SAMSON_CORE_ERROR, array($className,$files) );
             }
 
