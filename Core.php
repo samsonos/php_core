@@ -626,17 +626,8 @@ class Core implements iCore
                         // TODO: Make possible to automatically define depth of web-application to build proper paths to local modules
                         // TODO: Force debug message if module cannot be autoloaded by PSR-* standard
 
-                        // Try developer relative path
-                        $path = '../../vendor/'.$requirement;
-                        // If path with underscores does not exists
-                        if (!file_exists($path)) {
-                            // Try path without underscore
-                            $path = str_replace('_', '/', $path);
-                            if (!file_exists($path)) {
-                                // Build path to module
-                                $path = __SAMSON_VENDOR_PATH.$requirement;
-                            }
-                        }
+                        // Use default path
+                        $path = __SAMSON_VENDOR_PATH.$requirement;
 
                         // If path with underscores does not exists
                         if (!file_exists($path)) {

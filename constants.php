@@ -13,7 +13,7 @@ define('__SAMSON_PHP_OLD', version_compare(PHP_VERSION, '5.3.0', '<'));
 
 /** If no specific vendor path is defined */
 if (!defined('__SAMSON_VENDOR_PATH')) {
-    define('__SAMSON_VENDOR_PATH', 'vendor/');
+    define('__SAMSON_VENDOR_PATH', '../vendor/');
 }
 
 /** If not specified development vendor path */
