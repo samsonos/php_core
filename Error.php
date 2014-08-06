@@ -116,7 +116,7 @@ class Error
 			s()->benchmark( __FUNCTION__, func_get_args() );
 
             $template_html = '<!-- Total time elapsed:'.round( microtime(TRUE) - __SAMSON_T_STARTED__, 3 ).'s -->';
-            //if( function_exists('db')) $template_html .= '<!-- '.db()->profiler().' -->';
+            if( function_exists('db')) $template_html .= '<!-- '.db()->profiler().' -->';
             $template_html .= '<!-- Memory used: '.round(memory_get_peak_usage(true)/1000000,1).' МБ -->';
             $template_html .= '<!-- Benchmark table: -->';
 

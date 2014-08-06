@@ -107,7 +107,6 @@ class Core implements iCore
 		);		
 	}
 
-
     /**
      * @see \samson\core\iCore::resources()
      * @deprecated
@@ -473,7 +472,7 @@ class Core implements iCore
 	
 	/**	@see iCore::start() */
 	public function start( $default )
-	{	
+	{
 		// Parse URL
 		url();
 
@@ -660,14 +659,14 @@ class Core implements iCore
                 }
             }
 
-            // Iterate all files in local modules folder to find local modules
+           /* // Iterate all files in local modules folder to find local modules
             foreach (File::dir($this->system_path.__SAMSON_APP_PATH) as $file) {
                 // If this is folder
                 if(is_dir($file)) {
                     // Load local module to core, pass folder name as module identifier
                     $this->load($file, strtolower(basename($file)));
                 }
-            }
+            }*/
 
             // Iterate all old styled controllers
             foreach (File::dir($this->system_path.__SAMSON_CONTROLLER_PATH) as $file) {
