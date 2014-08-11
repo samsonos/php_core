@@ -156,7 +156,7 @@ class Core implements iCore
 
         // Iterate and require all module global files
         foreach($resourceMap->globals as $global) {
-            require($global);
+            require_once($global);
         }
 
         // Require module controller class into PHP
