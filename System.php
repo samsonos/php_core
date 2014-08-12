@@ -8,7 +8,4 @@ namespace samson\core;
 class System extends CompressableExternalModule
 {		
 	protected $id = 'core';
-	protected $author = 'Vitaly Iegorov';
-	protected $version = '1.1.1';
-	protected $requirements = array();
 }

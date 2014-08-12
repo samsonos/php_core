@@ -154,6 +154,8 @@ class Core implements iCore
         /** @var string $moduleClass Name of module controller class to load */
         $moduleClass = $resourceMap->module[0];
 
+        //trace($resourceMap, true);
+
         // Iterate and require all module global files
         foreach($resourceMap->globals as $global) {
             require_once($global);

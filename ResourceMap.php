@@ -79,7 +79,7 @@ class ResourceMap
     public $controllers = array();
 
     /** @var string Path to \samson\core\Module ancestor */
-    public $module;
+    public $module = array();
 
     /** @var  array Collection of old-fashion global namespace module files by entry point */
     public $globals = array();
@@ -189,7 +189,7 @@ class ResourceMap
         // If this is a .php file
         if(strpos($path, '.php') !== false && $this->isClass($path, $class)) {
             // Check if this is not a SamsonPHP core class
-            if(strpos('CompressableExternalModule, ExternalModule, Service', str_replace('\samson\core\\', '', $class)) === false) {
+            if(strpos('CompressableExternalModule, ExternalModule, Service, CompressableService', str_replace('\samson\core\\', '', $class)) === false) {
                 return true;
             } else {
                 return false;
@@ -250,7 +250,7 @@ class ResourceMap
     {
         return array(
             'resources' => $this->resources,
-            'controllers' => $this->controllers,
+            'controllers' => array_merge($this->controllers, $this->module),
             'models' => $this->models,
             'views' => $this->views,
             'php' => $this->php
@@ -291,6 +291,7 @@ class ResourceMap
                 } else if($this->isController($file)) {
                     $this->controllers[] = $file;
                 } else if($this->isModule($file, $class)) {
+                    elapsed('MODULE FILE:'.$file.'-'.$class);
                     $this->module = array($class, $file);
                 } else if($this->isPHP($file)) {
                     $this->php[] = $file;
