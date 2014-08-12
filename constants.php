@@ -8,12 +8,21 @@ namespace samson\core;
 /**  Отметка времени начала работы фреймворка */
 define('__SAMSON_T_STARTED__', microtime(TRUE));
 
-/** Установим версию фреймворка */
-define('__SAMSON_VERSION__', '6.0.0');
+/** Constant for storing flag that current PHP version is really old */
+define('__SAMSON_PHP_OLD', version_compare(PHP_VERSION, '5.3.0', '<'));
 
 /** If no specific vendor path is defined */
 if (!defined('__SAMSON_VENDOR_PATH')) {
-    define('__SAMSON_VENDOR_PATH', 'vendor/');
+    define('__SAMSON_VENDOR_PATH', '../vendor/');
+}
+
+/** If not specified development vendor path */
+if (!defined('__SAMSON_DEV_VENDOR_PATH')) {
+    /**
+     * Use standard relative path to add ability of using local module version
+     * for their quick development
+     */
+    define('__SAMSON_DEV_VENDOR_PATH', '../../vendor/');
 }
 
 /** SamsonPHP copyright */
@@ -22,10 +31,10 @@ if (!defined('__SAMSON_COPYRIGHT')) {
 }
 
 /** Совместимость с PHP 5 */
-if(!defined('__DIR__')) define( '__DIR__', dirname(__FILE__));
+if(!defined('__DIR__')) define('__DIR__', dirname(__FILE__));
 
 /** Получим путь к фреймфорку SamsonPHP */
-define( '__SAMSON_PATH__', __DIR__.'/' );
+define('__SAMSON_PATH__', __DIR__.'/');
 
 /** Получим текущий каталог веб-приложения */
 define('__SAMSON_CWD__', str_ireplace('\\', '/', getcwd().'/' ) );
@@ -44,40 +53,59 @@ if(!defined('__SAMSON_BASE__')) {
 }
 
 /** Flag that this script runs from remote app */
-define( '__SAMSON_REMOTE_APP', __SAMSON_BASE__ !== '/' );
+define('__SAMSON_REMOTE_APP', __SAMSON_BASE__ !== '/');
 
 /** Get HTTP protocol **/
 define('__SAMSON_PROTOCOL', (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' || $_SERVER['SERVER_PORT'] == 443) ? "https://" : "http://" );
 
-/** Default path to cache folder */
-define('__SAMSON_CACHE_PATH','cache');
+/** Default path to web-application cache folder */
+if (!defined('__SAMSON_CACHE_PATH')) {
+    define('__SAMSON_CACHE_PATH', 'cache');
+}
+
+/** Default path to web-application tests folder */
+if (!defined('__SAMSON_TEST_PATH')) {
+    define('__SAMSON_TEST_PATH', 'tests');
+}
+
+/** Default path to web-application code root */
+if (!defined('__SAMSON_APP_PATH')) {
+    define('__SAMSON_APP_PATH', 'app');
+}
 
 /** Default path to tests folder */
-define('__SAMSON_TEST_PATH','tests');
+if (!defined('__SAMSON_CONFIG_PATH')) {
+    define('__SAMSON_CONFIG_PATH', __SAMSON_APP_PATH.'/config/');
+}
 
-/** Путь к файлу с глобальными данными модуля */
-define( '__SAMSON_GLOBAL_FILE', 'global.php' );
+/** Default path to web-application functional module controllers root */
+if (!defined('__SAMSON_CONTROLLER_PATH')) {
+    define('__SAMSON_CONTROLLER_PATH', __SAMSON_APP_PATH.'/controller/');
+}
 
-/** Путь к папке где находятся файлы системы */
-define('__SAMSON_APP_PATH','app');
+/** Default path to web-application module models root */
+if (!defined('__SAMSON_MODEL_PATH')) {
+    define('__SAMSON_MODEL_PATH', __SAMSON_APP_PATH.'/model/');
+}
 
-/** Путь к папке где находятся контроллеры системы */
-define('__SAMSON_CONTOROLLER_PATH', __SAMSON_APP_PATH.'/controller/');
+/** Default path to web-application module views root */
+if (!defined('__SAMSON_VIEW_PATH')) {
+    define('__SAMSON_VIEW_PATH', __SAMSON_APP_PATH.'/view/');
+}
 
-/** Путь к папке где находятся модели системы */
-define('__SAMSON_MODEL_PATH', __SAMSON_APP_PATH.'/model/');
-
-/**  Путь к папке где находятся представления системы */
-define('__SAMSON_VIEW_PATH', __SAMSON_APP_PATH.'/view/');
-
-/** Путь к файлу с главным шаблоном системы */
-define('__SAMSON_DEFAULT_TEMPLATE', __SAMSON_VIEW_PATH.'index.php' );
+/** Default path to web-application default template view */
+if (!defined('__SAMSON_DEFAULT_TEMPLATE')) {
+    define('__SAMSON_DEFAULT_TEMPLATE', __SAMSON_VIEW_PATH.'index.php');
+}
 
 /** Максимальное время выполнения скрипта */
-define( '__SAMSON_MAX_EXECUTION__', 60 );
+define( '__SAMSON_MAX_EXECUTION__', 120 );
 
 /** Действие контроллера выполнено успешно */
 define( 'A_SUCCESS', TRUE );
 
 /** Действие контроллера НЕ выполнено */
 define( 'A_FAILED', FALSE );
+
+/** Путь к файлу с глобальными данными модуля */
+define( '__SAMSON_GLOBAL_FILE', 'global.php' );

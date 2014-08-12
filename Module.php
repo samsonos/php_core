@@ -377,6 +377,8 @@ class Module implements iModule, \ArrayAccess, iModuleViewable
 			// If method is specified - add it to universal controller parameters list
 			if(isset(url()->method{0})) array_unshift( $parameters, url()->method );		
 		}
+
+        //elapsed('Performing #'.$this->id.' controller action -'.$controller);
 		
 		// Perform controller action
 		$action_result = isset( $controller ) ? call_user_func_array( $controller, $parameters ) : A_FAILED;		
@@ -392,9 +394,9 @@ class Module implements iModule, \ArrayAccess, iModuleViewable
 	 * @param string 	$path 		Module location
 	 * @param array 	$resources	Module resources list 
 	 */
-	public function __construct( $id, $path = NULL, $resources = NULL )
-	{	
-		// Set defautl view context name
+	public function __construct($id, $path = NULL, $resources = NULL)
+	{
+		// Set default view context name
 		$this->view_context = self::VD_POINTER_DEF;
 		
 		// Set up default view data pointer
@@ -404,23 +406,23 @@ class Module implements iModule, \ArrayAccess, iModuleViewable
 		$this->id = $id;
 		
 		// Set path to module
-		$this->path( $path );	
+		$this->path($path);
 
 		// Generate unique module identifier
 		$this->uid = rand(0, 9999999).'_'.microtime(true);
 		
 		// Add to module identifier to view data stack
-		$this->data['id'] = $this->id;			
+		$this->data['id'] = $this->id;
 						
 		// Save views list
-		isset( $resources ) ? $this->views = & $resources['views'] : '';
+        (isset($resources ) && isset($resources['views'])) ? $this->views = & $resources['views'] : '';
 		
 		// Generate unique module cache path in local web-application
 		$this->cache_path = __SAMSON_CWD__.__SAMSON_CACHE_PATH.'/'.$this->id.'/';
 		
 		// Save ONLY ONE copy of this instance in static instances collection,
 		// avoiding rewriting by cloned modules
-		!isset( self::$instances[ $this->id ] ) ? self::$instances[ $this->id ] = & $this : '';		
+		!isset( self::$instances[ $this->id ] ) ? self::$instances[ $this->id ] = & $this : '';
 			
 		// Find all controller actions
 		$functions = get_defined_functions();
@@ -444,7 +446,7 @@ class Module implements iModule, \ArrayAccess, iModuleViewable
 					$this->controllers[ $matches['controller'] ] = $method;
 				}
 			}			
-		}		
+		}
 		
 		// Iterate class methods
 		foreach (get_class_methods($this) as $method) {

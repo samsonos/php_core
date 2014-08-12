@@ -106,7 +106,7 @@ class Error
 	 * Обработчик завершения работы скрипта
 	 */
 	public function shutdown()
-	{		
+	{
 		//[PHPCOMPRESSOR(remove,start)]
 		// TODO: Create core shutdown routines
 		if( !s()->async() )
@@ -324,3 +324,4 @@ class Error
 		);
 	}
 }
+

@@ -239,7 +239,7 @@ class Generator
 		
 		if( $format == 'php' ) $code ='<?php '.$code;
 			 
-		file_put_contents( $name, $code );
+		file_put_contents( $name, $code, 0775 );
 	}
 
     /**

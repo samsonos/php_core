@@ -1,1 +1,13 @@
-{"name":"samsonos/php_core","author":"Vitaly Iegorov","version":"1.1.1","require":{},"license":"Open Software License (OSL) v 3.0","homepage":"http://samsonos.com/"}
+{
+    "name":"samsonos/php_core",
+    "description": "SamsonPHP framework core module",
+    "keywords": [ "php", "framework", "samsonos", "samsonphp"],
+    "authors":[
+        {
+            "name":"Vitaly Iegorov",
+            "email":"egorov@samsonos.com"
+        }
+    ],
+    "license":"Open Software License (OSL) v 3.0",
+    "homepage":"http://samsonphp.com/"
+}
