@@ -820,9 +820,17 @@ class Core implements iCore
                 foreach ($composerObject['require'] as $requirement => $version) {
                     // Ignore core module and work only with samsonos/* modules before they are not PSR- optimized
                     if(($requirement != 'samsonos/php_core') && (strpos($requirement, 'samsonos/') !== false)) {
-
-                        // Try developer relative path
-                        $path = '../../vendor/'.$requirement;
+							
+						$path = '../../../vendor/'.$requirement;
+						if (!file_exists($path)) {
+							// Try path without underscore
+                            $path = str_replace('_', '/', $path);
+                            if (!file_exists($path)) {
+								// Try developer relative path
+								$path = '../../vendor/'.$requirement;
+							}
+						}					
+                        
                         // If path with underscores does not exists
                         if (!file_exists($path)) {
                             // Try path without underscore
