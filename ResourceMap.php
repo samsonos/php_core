@@ -114,18 +114,28 @@ class ResourceMap
     /** @var array Collection of folders that should be ignored in anyway */
     public $ignoreFolders = array('.svn', '.git', '.idea', __SAMSON_CACHE_PATH, __SAMSON_TEST_PATH, 'vendor');
 
+    /** @var array Collection of files that must be ignored by ResourceMap */
+    public $ignoreFiles = array('phpunit.php');
+
     /**
      * Constructor
-     * @param string    $entryPoint     ResourceMap entry point
-     * @param array     $ignoreFolders  Collection of folders to be ignored in ResourceMap
+     *
+     * @param string $entryPoint    ResourceMap entry point
+     * @param array  $ignoreFolders Collection of folders to be ignored in ResourceMap
+     * @param array  $ignoreFiles   Collection of files to be ignored in ResourceMap
      */
-    public function __construct($entryPoint, $ignoreFolders = null)
+    public function __construct($entryPoint, array $ignoreFolders = null, array $ignoreFiles = null)
     {
         $this->entryPoint = $entryPoint;
 
         if (isset($ignoreFolders)) {
             // Combine passed folders to ignore with the default ones
             $this->ignoreFolders = array_merge($this->ignoreFolders, $ignoreFolders);
+        }
+
+        if (isset($ignoreFiles)) {
+            // Combine passed files to ignore with the default ones
+            $this->ignoreFiles = array_merge($this->ignoreFiles, $ignoreFiles);
         }
 
         // Store current ResourceMap in ResourceMaps collection
@@ -253,7 +263,7 @@ class ResourceMap
             'controllers' => array_merge($this->controllers, $this->module),
             'models' => $this->models,
             'views' => $this->views,
-            'php' => $this->php
+            'php' => array_merge($this->php, $this->globals)
         );
     }
 
@@ -280,32 +290,35 @@ class ResourceMap
             $files = array();
             //TODO: Ignore cms folder - ignore another web-applications or not parse current root web-application path
             foreach (File::dir($this->entryPoint, null, '', $files, NULL, 0, $this->ignoreFolders) as $file) {
-                $class = '';
-                // We can determine SamsonPHP view files by 100%
-                if($this->isView($file)) {
-                    $this->views[] = $file;
-                } else if($this->isGlobal($file)) {
-                    $this->globals[] = $file;
-                } else if($this->isModel($file)) {
-                    $this->models[] = $file;
-                } else if($this->isController($file)) {
-                    $this->controllers[] = $file;
-                } else if($this->isModule($file, $class)) {
-                    elapsed('MODULE FILE:'.$file.'-'.$class);
-                    $this->module = array($class, $file);
-                } else if($this->isPHP($file)) {
-                    $this->php[] = $file;
-                } else { // Save resource by file extension
-                    // Get extension as resource type
-                    $rt = pathinfo($file, PATHINFO_EXTENSION );
 
-                    // Check if resource type array cell created
-                    if (!isset($this->resources[$rt])) {
-                        $this->resources[$rt] = array();
+                // Check if this file does not has to be ignored
+                if (!in_array(basename($file), $this->ignoreFiles)) {
+                    $class = '';
+                    // We can determine SamsonPHP view files by 100%
+                    if($this->isView($file)) {
+                        $this->views[] = $file;
+                    } else if($this->isGlobal($file)) {
+                        $this->globals[] = $file;
+                    } else if($this->isModel($file)) {
+                        $this->models[] = $file;
+                    } else if($this->isController($file)) {
+                        $this->controllers[] = $file;
+                    } else if($this->isModule($file, $class)) {
+                        $this->module = array($class, $file);
+                    } else if($this->isPHP($file)) {
+                        $this->php[] = $file;
+                    } else { // Save resource by file extension
+                        // Get extension as resource type
+                        $rt = pathinfo($file, PATHINFO_EXTENSION );
+
+                        // Check if resource type array cell created
+                        if (!isset($this->resources[$rt])) {
+                            $this->resources[$rt] = array();
+                        }
+
+                        // Add resource to collection
+                        $this->resources[$rt][] = $file;
                     }
-
-                    // Add resource to collection
-                    $this->resources[$rt][] = $file;
                 }
             }
 

@@ -679,7 +679,7 @@ class Core implements iCore
                     require($file);
 
                     // Create module connector instance
-                    new CompressableExternalModule($this->system_path, basename($file, '.php'), $this->map->toLoadStackFormat());
+                    new CompressableLocalModule(basename($file, '.php'), $this->system_path, $this->map->toLoadStackFormat());
                 }
             }
 
