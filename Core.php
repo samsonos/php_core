@@ -605,7 +605,13 @@ class Core implements iCore
      */
     public function composer()
     {
-        $path = $this->path().'composer.json';
+        // Try new project structure
+        $path = $this->path().'../composer.json';
+
+        // If this is an old project structure
+        if (!file_exists($path)) {
+            $path = $this->path().'composer.json';
+        }
 
         // If we have composer configuration file
         if (file_exists($path)) {
