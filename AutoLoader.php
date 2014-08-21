@@ -109,6 +109,7 @@ class AutoLoader
         foreach (array('php', 'js', 'cms', 'social', 'commerce') as $type) {
             // Build all possible module location for backward compatibility
             $locations = array(
+                __SAMSON_VENDOR_PATH.str_replace('samson/', 'samsonos/', $ns).'/'.strtolower($className),
                 __SAMSON_VENDOR_PATH.str_replace('samson/', 'samsonos/', $ns),
                 __SAMSON_VENDOR_PATH.str_replace('samson/', 'samsonos/'.$type.'/', $ns),
                 __SAMSON_VENDOR_PATH.str_replace('samson/', 'samsonos/'.$type.'/', $ns).'/api',
