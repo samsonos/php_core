@@ -19,10 +19,10 @@ class ResourceMap
 
     /** @var array Collection of classes that are Module ancestors */
     public static $moduleAncestors = array(
-        'CompressableExternalModule',
-        'ExternalModule',
-        'Service',
-        'CompressableService'
+        '\samson\core\CompressableExternalModule' => 'CompressableExternalModule',
+        '\samson\core\ExternalModule' => 'ExternalModule',
+        '\samson\core\Service' => 'Service',
+        '\samson\core\CompressableService' => 'CompressableService'
     );
 
     /** @var ResourceMap[] Collection of ResourceMaps gathered by entry points */
