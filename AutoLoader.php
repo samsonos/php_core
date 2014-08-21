@@ -3,7 +3,7 @@
  * Created by Vitaly Iegorov <egorov@samsonos.com>
  * on 24.04.14 at 18:09
  */
- namespace samson\core;
+namespace samson\core;
 
 /**
  * Generic SamsonPHP class auto loader
@@ -11,10 +11,13 @@
  * @copyright 2014 SamsonOS
  * @version 1.0.0
  */
-class AutoLoader 
+class AutoLoader
 {
     /** Namespace separator character marker */
     const NS_SEPARATOR = '\\';
+
+    /** @var array Static collection module locations */
+    public static $moduleMap = array();
 
     /** Module files cache for optimizing */
     protected static $fileCache = array();
@@ -94,42 +97,52 @@ class AutoLoader
      * @param string $className Class name without namespace
      * @param string $nameSpace Namespace name without class name
      * @param string $file Variable to return path to class file location on success
-     * @deprecated Should be removed after all modules will be moved to PSR class naming and locating standart
+     * @deprecated Should be removed after all modules will be moved to PSR class naming and locating standard
      * @return bool True if class file is found
      */
     protected static function oldModule($className, $nameSpace, & $file = null)
     {
+        //elapsed('++ Autoloading '.$className.' from '.$nameSpace);
+
         // Convert to linux path, windows will convert it automatically if necessary
         $ns = str_replace(self::NS_SEPARATOR, '/', $nameSpace);
 
-        /** @var string[] $locations Collection of possible class locations */
-        $locations = null;
-        // Iterate all possible file structures
-        $path = null;
-        foreach (array('php', 'js', 'cms', 'social', 'commerce') as $type) {
-            // Build all possible module location for backward compatibility
-            $locations = array(
-                __SAMSON_VENDOR_PATH.str_replace('samson/', 'samsonos/', $ns).'/'.strtolower($className),
-                __SAMSON_VENDOR_PATH.str_replace('samson/', 'samsonos/', $ns),
-                __SAMSON_VENDOR_PATH.str_replace('samson/', 'samsonos/'.$type.'/', $ns),
-                __SAMSON_VENDOR_PATH.str_replace('samson/', 'samsonos/'.$type.'/', $ns).'/api',
-                __SAMSON_VENDOR_PATH.str_replace('samson/', 'samsonos/'.$type.'_', $ns),
-                strpos($ns, 'cms') !== false ? __SAMSON_VENDOR_PATH.'samsonos/cms_api' : '_', // use cms api if class name has "cms"
-                strpos($ns, 'cms') !== false ? __SAMSON_VENDOR_PATH.'samsonos/cms/api' : '_', // use cms api if class name has "cms"
-                __SAMSON_CWD__.__SAMSON_MODEL_PATH, // use local model path as the last variant of class location
-            );
+        // Check if we have predefined namespace path definition
+        if (isset(self::$moduleMap[$nameSpace])) {
+            // take path from module location map
+            $path = self::$moduleMap[$nameSpace];
+        } else { // Try automatic searcher
 
-            // Iterate all locations and try to find correct existing path
-            foreach($locations as $location) {
-                if(file_exists($location)) {
-                    $path = $location;
-                    break 2;
+            /** @var string[] $locations Collection of possible class locations */
+            $locations = null;
+            // Iterate all possible file structures
+            $path = null;
+            foreach (array('php', 'js', 'cms', 'social', 'commerce') as $type) {
+
+                // Build all possible module location for backward compatibility
+                $locations = array(
+                    __SAMSON_VENDOR_PATH.str_replace('samson/', 'samsonos/', $ns).'/'.strtolower($className),
+                    __SAMSON_VENDOR_PATH.str_replace('samson/', 'samsonos/', $ns),
+                    __SAMSON_VENDOR_PATH.str_replace('samson/', 'samsonos/'.$type.'/', $ns),
+                    __SAMSON_VENDOR_PATH.str_replace('samson/', 'samsonos/'.$type.'/', $ns).'/api',
+                    __SAMSON_VENDOR_PATH.str_replace('samson/', 'samsonos/'.$type.'_', $ns),
+                    strpos($ns, 'cms') !== false ? __SAMSON_VENDOR_PATH.'samsonos/cms_api' : '_', // use cms api if class name has "cms"
+                    strpos($ns, 'cms') !== false ? __SAMSON_VENDOR_PATH.'samsonos/cms/api' : '_', // use cms api if class name has "cms"
+                    __SAMSON_CWD__.__SAMSON_MODEL_PATH, // use local model path as the last variant of class location
+                );
+
+                // Iterate all locations and try to find correct existing path
+                foreach ($locations as $location) {
+                    if (file_exists($location)) {
+                        $path = $location;
+                        break 2;
+                    }
                 }
             }
         }
 
         // If class not found
-        if(!isset($path)) {
+        if (!isset($path)) {
             return e('Class location ## not found by namespace ##', E_SAMSON_CORE_ERROR, array($className, $ns));
         }
 
@@ -141,22 +154,24 @@ class AutoLoader
         }
 
         // Trying to find class by class name in folder files collection
-        if (sizeof($files = preg_grep( '/\/'.$className.'\.php/i', self::$fileCache[$nameSpace]))) {
-
+        if (sizeof($files = preg_grep('/\/'.$className.'\.php/i', self::$fileCache[$nameSpace]))) {
             // If we have found several files matching this class
             if (sizeof($files) > 1) {
-                return e('Cannot autoload class(##), too many files matched ##', E_SAMSON_CORE_ERROR, array($className,$files) );
+                return e('Cannot autoload class(##), too many files matched ##', E_SAMSON_CORE_ERROR, array($className,$files));
             }
 
             // Return last array element as file path
             $file = end($files);
 
+            //elapsed('  Loaded class['.$key.'] from "'.$file.'"');
+
             // Everything is OK
             return true;
 
-        } else { // Signal error
-            return e('Cannot autoload class(##), class file not found in ##', E_SAMSON_CORE_ERROR, array($className,$path));
         }
+
+        // If we are here - signal error
+        return e('Cannot autoload class(##), class file not found in ##', E_SAMSON_CORE_ERROR, array($className,$path));
     }
 
     /**
@@ -182,7 +197,7 @@ class AutoLoader
             if (file_exists($path)) {
                 //elapsed('Autoloading class '.$class.' at '.$path);
                 require_once($path);
-            // old school compatibility will be removed when old modules will be updated
+                // old school compatibility will be removed when old modules will be updated
             } else if(self::oldModule($className, $nameSpace, $path)) {
                 //elapsed('Autoloading(old style) class '.$class.' at '.$path);
                 require_once($path);
@@ -205,7 +220,7 @@ if (file_exists(__SAMSON_VENDOR_PATH.'autoload.php')) {
     require __SAMSON_VENDOR_PATH.'autoload.php';
 }
 
- //[PHPCOMPRESSOR(remove,start)]
+//[PHPCOMPRESSOR(remove,start)]
 // Add SamsonPHP default autoloader
 spl_autoload_register(array('\samson\core\AutoLoader','load'));
 //[PHPCOMPRESSOR(remove,end)]
