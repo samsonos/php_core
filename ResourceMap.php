@@ -3,7 +3,7 @@
  * Created by Vitaly Iegorov <egorov@samsonos.com>
  * on 24.07.14 at 17:06
  */
- namespace samson\core;
+namespace samson\core;
 
 /**
  * Generic class to manage all web-application resources
@@ -11,10 +11,19 @@
  * @copyright 2014 SamsonOS
  * @version 1.0.0
  */
-class ResourceMap 
+class ResourceMap
 {
+
     /** Number of lines to read in file to determine its PHP class */
     const CLASS_FILE_LINES_LIMIT = 50;
+
+    /** @var array Collection of classes that are Module ancestors */
+    public static $moduleAncestors = array(
+        'CompressableExternalModule',
+        'ExternalModule',
+        'Service',
+        'CompressableService'
+    );
 
     /** @var ResourceMap[] Collection of ResourceMaps gathered by entry points */
     public static $gathered = array();
@@ -30,12 +39,12 @@ class ResourceMap
     public static function find($entryPoint, & $pointer = null)
     {
         // Pointer to find ResourceMap for this entry point
-        $_pointer = & self::$gathered[$entryPoint];
+        $tempPointer = & self::$gathered[$entryPoint];
 
         // If we have already build resource map for this entry point
-        if (isset($_pointer)) {
+        if (isset($tempPointer)) {
             // Return pointer value
-            $pointer = $_pointer;
+            $pointer = $tempPointer;
 
             return true;
         }
@@ -62,7 +71,7 @@ class ResourceMap
             // Build ResourceMap for this entry point
             $resourceMap->build($entryPoint);
 
-        } else if($force){ // If we have found ResourceMap for this entry point but we forced to rebuild it
+        } elseif ($force) { // If we have found ResourceMap for this entry point but we forced to rebuild it
             $resourceMap->build($entryPoint);
         }
 
@@ -157,18 +166,32 @@ class ResourceMap
         // Open file handle for reading
         $file = fopen($path, 'r');
         // Read lines from file
-        for($i = 0; $i<self::CLASS_FILE_LINES_LIMIT; $i++) {
+        for ($i = 0; $i<self::CLASS_FILE_LINES_LIMIT; $i++) {
             // Read one line from a file
             $line = fgets($file);
+            $matches = array();
+
             // Read one line from a file and try to find namespace definition
             if ($namespace == '\\' && preg_match('/^\s*namespace\s+(?<namespace>[^;]+)/iu', $line, $matches)) {
                 $namespace .= $matches['namespace'].'\\';
-                // Read one line from a file and try to find extends class pattern
-            } else if (preg_match('/^\s*class\s+(?<class>[a-z0-9]+)\s+extends\s+(?<parent>[a-z0-9\\\]*(ExternalModule|Service))/iu', $line, $matches)) {
+                // Read one line from a file and try to find class pattern
+            } elseif (preg_match('/^\s*class\s+(?<class>[a-z0-9]+)\s+extends\s+(?<parent>[a-z0-9\\\]+)/iu', $line, $matches)) {
+
                 // Store module class name
                 $class = $namespace.$matches['class'];
 
-                return true;
+                // Define if this class is Module ancestor
+                if (isset(self::$moduleAncestors[$matches['parent']]) || in_array($matches['parent'], self::$moduleAncestors)) {
+                    // Save class as module ancestor
+                    self::$moduleAncestors[$namespace.$matches['class']] = $matches['class'];
+                    // Completed my sir!
+                    return true;
+                }
+
+                // Add class to classes array
+                $this->classes[] = $class;
+
+                return false;
             }
         }
 
@@ -197,14 +220,16 @@ class ResourceMap
     public function isModule($path, & $class = '')
     {
         // If this is a .php file
-        if(strpos($path, '.php') !== false && $this->isClass($path, $class)) {
+        if (strpos($path, '.php') !== false && $this->isClass($path, $class)) {
             // Check if this is not a SamsonPHP core class
-            if(strpos('CompressableExternalModule, ExternalModule, Service, CompressableService', str_replace('\samson\core\\', '', $class)) === false) {
+            if (strpos('CompressableExternalModule, ExternalModule, Service, CompressableService', str_replace('\samson\core\\', '', $class)) === false) {
                 return true;
             } else {
                 return false;
             }
         }
+
+        return false;
     }
 
     /**
@@ -289,27 +314,27 @@ class ResourceMap
             // Collect all resources from entry point
             $files = array();
             //TODO: Ignore cms folder - ignore another web-applications or not parse current root web-application path
-            foreach (File::dir($this->entryPoint, null, '', $files, NULL, 0, $this->ignoreFolders) as $file) {
+            foreach (File::dir($this->entryPoint, null, '', $files, null, 0, $this->ignoreFolders) as $file) {
 
                 // Check if this file does not has to be ignored
                 if (!in_array(basename($file), $this->ignoreFiles)) {
                     $class = '';
                     // We can determine SamsonPHP view files by 100%
-                    if($this->isView($file)) {
+                    if ($this->isView($file)) {
                         $this->views[] = $file;
-                    } else if($this->isGlobal($file)) {
+                    } elseif ($this->isGlobal($file)) {
                         $this->globals[] = $file;
-                    } else if($this->isModel($file)) {
+                    } elseif ($this->isModel($file)) {
                         $this->models[] = $file;
-                    } else if($this->isController($file)) {
+                    } elseif ($this->isController($file)) {
                         $this->controllers[] = $file;
-                    } else if($this->isModule($file, $class)) {
+                    } elseif ($this->isModule($file, $class)) {
                         $this->module = array($class, $file);
-                    } else if($this->isPHP($file)) {
+                    } elseif ($this->isPHP($file)) {
                         $this->php[] = $file;
                     } else { // Save resource by file extension
                         // Get extension as resource type
-                        $rt = pathinfo($file, PATHINFO_EXTENSION );
+                        $rt = pathinfo($file, PATHINFO_EXTENSION);
 
                         // Check if resource type array cell created
                         if (!isset($this->resources[$rt])) {
@@ -325,7 +350,7 @@ class ResourceMap
             // Iterate all defined object variables
             foreach (get_object_vars($this) as $var => $value) {
                 // If we have matched resources with that type
-                if(isset($this->resources[$var])) {
+                if (isset($this->resources[$var])) {
                     // Bind object variable to resources collection
                     $this->$var = & $this->resources[$var];
                 }
@@ -336,4 +361,3 @@ class ResourceMap
         }
     }
 }
- 
