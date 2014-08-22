@@ -161,8 +161,19 @@ class Core implements iCore
             require_once($global);
         }
 
+        // Define default module identifier if it is not passed
+        $module_id = isset($module_id) ? $module_id : strtolower(substr($moduleClass, 1));
+
         // Require module controller class into PHP
-        require($controllerPath);
+        if (file_exists($controllerPath)) {
+            //elapsed('+ ['.$module_id.'] Including module controller '.$controllerPath);
+            require($controllerPath);
+        }
+
+        // Iterate all function-style controllers and require them
+        foreach ($resourceMap->controllers as $controller) {
+            require($controller);
+        }
 
         /** @var \samson\core\ExternalModule $connector Create module controller instance */
         // TODO: Add  Resource map support to modules, move from old array
