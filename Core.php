@@ -182,6 +182,8 @@ class Core implements iCore
         // Get module identifier
         $module_id = $connector->id();
 
+        // TODO: Add ability to get configuration from parent classes
+
         // If module configuration loaded - set module params
         if (isset(Config::$data[ $module_id ])) {
             foreach (Config::$data[ $module_id ] as $k => $v) {
@@ -194,11 +196,12 @@ class Core implements iCore
             }
         }
 
-        // TODO: Code lower to be removed
         // Prepare module mechanism
         if ($connector->prepare() === false) {
             e('## - Failed preparing module', E_SAMSON_FATAL_ERROR, $module_id);
         }
+
+        // TODO: Code lower to be removed
 
         // Get module name space
         $ns = AutoLoader::getOnlyNameSpace($moduleClass);
