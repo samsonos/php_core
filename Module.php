@@ -159,8 +159,8 @@ class Module implements iModule, \ArrayAccess, iModuleViewable
 	{		
 		// Если передан параметр - установим его
 		if( func_num_args() )
-		{ 
-			$this->path = normalizepath($value);	
+		{
+            $this->path = rtrim(normalizepath($value), DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR;
 			
 			return $this; 
 		}		
