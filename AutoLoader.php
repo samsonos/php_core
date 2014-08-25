@@ -38,7 +38,7 @@ class AutoLoader
         }
 
         // Convert NS_SEPARATOR to namespace
-        $className = strtolower(str_replace(self::NS_SEPARATOR, '_', $className));
+        return strtolower(str_replace(self::NS_SEPARATOR, '_', $className));
     }
 
     /**
