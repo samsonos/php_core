@@ -42,11 +42,7 @@ class ExternalModule extends Module implements iExternalModule
             $this->id = $vid;
         }
 
-        // TODO: never using virtual identifiers anymore? do we still need them?
-		// Save this module under virtual identifier
-		if(isset($vid) ) self::$instances[ ($this->vid = $vid) ] = & $this;
-		// Otherwise equal it to real identifier
-		else $this->vid = $this->id;
+        $this->vid = $this->id;
 		
 		// Call parent constructor
 		parent::__construct($this->id, $path, $resources );

@@ -162,7 +162,7 @@ class Core implements iCore
         }
 
         // Define default module identifier if it is not passed
-        $module_id = isset($module_id) ? $module_id : strtolower(substr($moduleClass, 1));
+        $module_id = isset($module_id) ? $module_id : AutoLoader::oldClassName($moduleClass);
 
         // Require module controller class into PHP
         if (file_exists($controllerPath)) {
