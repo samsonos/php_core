@@ -469,7 +469,7 @@ function ns_classname( $class_name, $ns = 'samson\activerecord' )
  */
 function uni_classname( $class_name )
 {
-    return \samson\core\AutoLoader::className($class_name);
+    return \samson\core\AutoLoader::oldClassName($class_name);
 }
 
 /**
