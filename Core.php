@@ -265,7 +265,7 @@ class Core implements iCore
 			
 		if (locale() != SamsonLocale::DEF)
 		{
-			// Modify standart view path with another template
+			// Modify standard view path with another template
 			$__template_view = str_replace( __SAMSON_VIEW_PATH, __SAMSON_VIEW_PATH.locale().'/', $__template_view );
 		}
 		
