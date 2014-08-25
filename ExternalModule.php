@@ -36,7 +36,7 @@ class ExternalModule extends Module implements iExternalModule
 		// Module identifier not specified - set it to NameSpace\Classname
 		if (!isset($this->id{0}) && !isset($vid)) {
             // Generate identifier from module class
-            $this->id = AutoLoader::className(get_class($this));
+            $this->id = AutoLoader::oldClassName(get_class($this));
         } else if (!isset($this->id{0}) && isset($vid)) { // If identifier is passed and no id is set
             // Set passed vid as module identifier
             $this->id = $vid;
