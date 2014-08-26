@@ -599,7 +599,7 @@ class Core implements iCore
         $this->load(__SAMSON_PATH__);
 
         // Iterate all files in configuration folder
-        foreach(\samson\core\File::dir(__SAMSON_CONFIG_PATH) as $configFile) {
+        foreach(\samson\core\File::dir($this->system_path.__SAMSON_CONFIG_PATH) as $configFile) {
             // Match only files ending with ...Config.php
             if(stripos($configFile, 'Config.php') !== false) {
                 // Register configuration class in system
