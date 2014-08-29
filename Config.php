@@ -57,19 +57,27 @@ class Config
 		{				
 			//trace('Создаем конфигурацию:'.$class);		
 			
-			// Создадим экземпляр объекта конфигурации модуля	
-			$o = new $class();	
-		
-			// Сохраним в статическую коллекцию загруженную конфигурацию модулей системы
-			// в нужном нам режиме работы
-			if( $o->__type === self::$type || $o->__type === ConfigType::ALL ) 
-			{					
-				self::$data[ $o->__module ] = array_merge(
-						isset(self::$data[ $o->__module ])? self::$data[ $o->__module ] : array(),	// Предыдущий конфиг если он существовал	 
-						array( '__path' => $o->__path ),	// Путь к модулю
-						get_object_vars($o)					// Переменные конфигурации модуля
-				);		
-			}
+			/** @var Config $o Module configuration object */
+			$o = new $class();
+
+            // Pointer to module configuration
+            $config = & self::$data[$o->__module];
+
+            // If this module configuration matches current configuration type
+            if ($o->__type === self::$type) {
+                // Set only this module configuration object
+                $config = array_merge(
+                    get_object_vars($o),            // Get all configuration parameters
+                    array( '__path' => $o->__path ) // Add path parameter from configuration
+                );
+            } else if($o->__type === ConfigType::ALL) {
+                // If this is generic module configuration
+                $config = array_merge(
+                    get_object_vars($o),                    // Get all configuration parameters
+                    isset($config) ? $config : array(),     // Merge with previous configuration
+                    array( '__path' => $o->__path )         // Add path parameter from configuration
+                );
+            }
 		}
 	}
 	
