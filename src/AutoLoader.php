@@ -215,12 +215,6 @@ class AutoLoader
 }
 
 //[PHPCOMPRESSOR(remove,start)]
-// If default composer autoloader exists
-if (file_exists(__SAMSON_VENDOR_PATH.'autoload.php')) {
-    // Load it automatically before all other loaders - we want to follow PSR-0 standard
-    require __SAMSON_VENDOR_PATH.'autoload.php';
-}
-
 // Add SamsonPHP default autoloader
 spl_autoload_register(array('\samson\core\AutoLoader','load'));
 //[PHPCOMPRESSOR(remove,end)]
