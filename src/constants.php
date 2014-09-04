@@ -27,7 +27,7 @@ if (!defined('__SAMSON_DEV_VENDOR_PATH')) {
 
 /** SamsonPHP copyright */
 if (!defined('__SAMSON_COPYRIGHT')) {
-    define('__SAMSON_COPYRIGHT', '<!-- This site is working under SamsonPHP framework http:://samsonphp.com  -->');
+    define('__SAMSON_COPYRIGHT', '<!-- This site is working under SamsonPHP framework http://samsonphp.com  -->');
 }
 
 /** Совместимость с PHP 5 */
