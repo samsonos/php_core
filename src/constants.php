@@ -34,7 +34,7 @@ if (!defined('__SAMSON_COPYRIGHT')) {
 if(!defined('__DIR__')) define('__DIR__', dirname(__FILE__));
 
 /** Получим путь к фреймфорку SamsonPHP */
-define('__SAMSON_PATH__', __DIR__.'/');
+define('__SAMSON_PATH__', __DIR__.'/../');
 
 /** Получим текущий каталог веб-приложения */
 define('__SAMSON_CWD__', str_ireplace('\\', '/', getcwd().'/' ) );
