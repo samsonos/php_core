@@ -9,5 +9,10 @@
         }
     ],
     "license":"Open Software License (OSL) v 3.0",
-    "homepage":"http://samsonphp.com/"
+    "homepage":"http://samsonphp.com/",
+    "classmap": ["src/"],
+    "psr-0": {
+        "samsonos\\core\\": "src/"
+    },
+    "files": ["src/samson.php"]
 }
