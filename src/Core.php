@@ -361,8 +361,7 @@ class Core implements iCore
 	public function path( $path = NULL )
 	{ 			
 		// Если передан аргумент
-		if( func_num_args() )  
-		{	
+		if (func_num_args()) {
 			// Сформируем новый относительный путь к главному шаблону системы
 			$this->template_path = $path.$this->template_path;  
 	
@@ -475,10 +474,6 @@ class Core implements iCore
         // Set main template path
         $this->template($this->template_path);
 
-		//[PHPCOMPRESSOR(remove,start)]
-		$this->benchmark(__FUNCTION__, func_get_args());
-		//[PHPCOMPRESSOR(remove,end)]
-
         /** @var mixed $result External route controller action result */
         $result = A_FAILED;
 
@@ -500,11 +495,14 @@ class Core implements iCore
             $output = $this->render($this->template_path, $this->active->toView());
 
             // Fire after render event
-            Event::fire('core.after_render', array(&$output));
+            Event::fire('core.rendered', array(&$output));
 		}
 		
 		// Output results to client
 		echo $output;
+
+        // Fire ended event
+        Event::fire('core.ended', array(&$output));
     }
 
 	//[PHPCOMPRESSOR(remove,start)]
@@ -532,17 +530,8 @@ class Core implements iCore
 		// Load samson\core module
         $this->load(__SAMSON_PATH__);
 
-        // Iterate all files in configuration folder
-        foreach(\samson\core\File::dir($this->system_path.__SAMSON_CONFIG_PATH) as $configFile) {
-            // Match only files ending with ...Config.php
-            if(stripos($configFile, 'Config.php') !== false) {
-                // Register configuration class in system
-                require $configFile;
-            }
-        }
-
         // Temporary add template worker
-        Event::subscribe('core.after_render', array($this, 'generate_template'));
+        Event::subscribe('core.rendered', array($this, 'generate_template'));
 
         // Fire core creation event
         Event::fire('core.created', array(&$this));
@@ -656,6 +645,6 @@ class Core implements iCore
 	/** Магический метод для сериализации объекта */
 	public function __sleep()
     {
-        return array( 'module_stack', 'e404', 'render_mode', 'view_path' );
+        return array( 'module_stack', 'render_mode', 'view_path' );
     }
 }

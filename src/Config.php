@@ -39,16 +39,25 @@ class Config
 	 * Коллекция параметров конфигурации модулей системы
 	 * @var array
 	 */
-	public static $data = array(); 
-	
-	/**
-	 * Выполнить загрузку и инициализацию конфигурации модулей
-	 * загруженных в ядро системы
-	 * @param ConfigType $type Рабочая конфигурация
-	 * @param iCore Указатель на ядро системы для взаимодействия
-	 */
-	public static function load( $type = NULL )
-	{	
+	public static $data = array();
+
+    /**
+     * Load configuration classes and store their data
+     *
+     * @param Core       $core
+     * @param ConfigType $type Рабочая конфигурация
+     */
+	public static function load(\samson\core\Core & $core, $type = NULL)
+	{
+        // Iterate all files in configuration folder
+        foreach(\samson\core\File::dir($core->path().__SAMSON_CONFIG_PATH) as $configFile) {
+            // Match only files ending with ...Config.php
+            if(stripos($configFile, 'Config.php') !== false) {
+                // Register configuration class in system
+                require_once($configFile);
+            }
+        }
+
 		// Установим режим конфигурации модулей
 		if( isset( $type ) ) self::$type = $type;
 		

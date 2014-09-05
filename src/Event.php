@@ -16,6 +16,15 @@ class Event
     protected static $listeners = array();
 
     /**
+     * Return copy of event listeners
+     * @return array Collection of all event listeners
+     */
+    public static function listeners()
+    {
+        return self::$listeners;
+    }
+
+    /**
      * Fire an event
      *
      * @param string $key    Event unique identifier
@@ -45,8 +54,15 @@ class Event
             if ($signal === false) {
                 // Iterate all handlers
                 foreach ($pointer as $handler) {
+                    // Combine arguments
+                    $args = array_merge($params, $handler[1]);
+
+                    //[PHPCOMPRESSOR(remove,start)]
+                    Benchmark::instance()->store($key, $args);
+                    //[PHPCOMPRESSOR(remove,end)]
+
                     // Call external event handlers
-                    call_user_func_array($handler[0], array_merge($params, $handler[1]));
+                    call_user_func_array($handler[0], $args);
                 }
             } else { // Call only first event subscriber as signal and return its result
                 return call_user_func_array($pointer[0][0], array_merge($params, $pointer[0][1]));

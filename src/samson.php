@@ -30,3 +30,7 @@ require('shortcuts.php');
 require('Utils2.php');
 require('View.php');
 require('deprecated.php');
+
+//[PHPCOMPRESSOR(remove,start)]
+require('Benchmark.php');
+//[PHPCOMPRESSOR(remove,end)]
