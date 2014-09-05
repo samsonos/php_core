@@ -34,9 +34,12 @@ class Benchmark
 
     /**
      * Output to current system output stream benchmark data and total results
-     * @param string $output Current system output stream
+     *
+     * @param string  $output   Current system output stream
+     * @param array   $vars     Associative collection of view data
+     * @param iModule $module   Pointer to current module
      */
-    public function show(&$output, $data = array(), iModule $module = null)
+    public function show(&$output, $vars = null, iModule $module = null)
     {
         // TODO: this is not correct!!!
         if (!in_array($module->id(), array('compressor', 'deploy'))) {
@@ -47,8 +50,7 @@ class Benchmark
 
             $l = 0;
             $m = 0;
-            foreach ($this->data as $func => $data )
-            {
+            foreach ($this->data as $data) {
                 // Generate params string
                 $params = array();
                 if (is_array( $data[2] )) {
