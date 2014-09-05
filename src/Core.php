@@ -509,10 +509,7 @@ class Core implements iCore
 	/** Конструктор */
 	public function __construct()
 	{
-		//elapsed('Constructor');		
-		$this->benchmark( __FUNCTION__, func_get_args() );			
-		
-		// Get backtrace to define witch scipt initiated core creation
+		// Get backtrace to define witch script initiated core creation
 		$db = debug_backtrace();	
 		
 		// Get local web application path for backtrace if available
@@ -605,15 +602,6 @@ class Core implements iCore
                     require_once($model);
                 }
             }
-
-           /* // Iterate all files in local modules folder to find local modules
-            foreach (File::dir($this->system_path.__SAMSON_APP_PATH) as $file) {
-                // If this is folder
-                if(is_dir($file)) {
-                    // Load local module to core, pass folder name as module identifier
-                    $this->load($file, strtolower(basename($file)));
-                }
-            }*/
 
             // Iterate all old styled controllers
             foreach (File::dir($this->system_path.__SAMSON_CONTROLLER_PATH) as $file) {
