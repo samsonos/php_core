@@ -42,7 +42,11 @@ class ExternalModule extends Module implements iExternalModule
             $this->id = $vid;
         }
 
+        // TODO: Do we steel need virtual id?
         $this->vid = $this->id;
+
+        // Subscribe to an config ready core event
+        Event::subscribe('core.config_ready', array($this, 'init'));
 		
 		// Call parent constructor
 		parent::__construct($this->id, $path, $resources );

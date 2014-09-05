@@ -121,7 +121,7 @@ class ResourceMap
     public $coffee = array();
 
     /** @var array Collection of folders that should be ignored in anyway */
-    public $ignoreFolders = array('.svn', '.git', '.idea', __SAMSON_CACHE_PATH, __SAMSON_TEST_PATH, 'vendor', __SAMSON_CONFIG_PATH, 'cms');
+    public $ignoreFolders = array('.svn', '.git', '.idea', __SAMSON_CACHE_PATH, __SAMSON_TEST_PATH, 'vendor', __SAMSON_CONFIG_PATH, 'cms', 'contrib');
 
     /** @var array Collection of files that must be ignored by ResourceMap */
     public $ignoreFiles = array('phpunit.php');

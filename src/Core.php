@@ -489,6 +489,9 @@ class Core implements iCore
 	/**	@see iCore::start() */
 	public function start( $default )
 	{
+        // Fire an core started event
+        Event::fire('core.start');
+
 		// Parse URL
 		url();
 
@@ -502,20 +505,21 @@ class Core implements iCore
 		Config::init( $this );					
 		//[PHPCOMPRESSOR(remove,end)]
 
+        // Fire an core config ready event
+        Event::fire('core.config_ready');
+
+
 		// Проинициализируем НЕ ЛОКАЛЬНЫЕ модули
-		foreach ($this->module_stack as $id => $module ) {
+		/*foreach ($this->module_stack as $id => $module ) {
             /** @var $module Module */
 
 			// Только внешние модули и их оригиналы
-			if (method_exists($module, 'init') && $module->id() == $id) {
+			/*if (method_exists($module, 'init') && $module->id() == $id) {
 				//elapsed('Start - Initializing module: '.$id);
 				$module->init();
 				//elapsed('End - Initializing module: '.$id);
 			}
-		}
-	
-		// Send success status
-		header("HTTP/1.0 200 Ok");
+		}*/
 		
 		// Результат выполнения действия модуля
 		$module_loaded = A_FAILED;
@@ -544,6 +548,9 @@ class Core implements iCore
              */
             $module_loaded = $this->active->action(url()->method);
 
+            // Send success status
+            header("HTTP/1.0 200 Ok");
+
 		} else { // No controller has been executed
             // Call e404 routine
             $module_loaded = $this->e404();
@@ -559,8 +566,14 @@ class Core implements iCore
 
             //elapsed('Rendering main template: '.$this->template_path);
 
+            // Fire before render
+            Event::fire('core.before_render', $html);
+
 			// Render main template
             $html = $this->render($this->template_path, $this->active->toView());
+
+            // Fire after render event
+            Event::fire('core.after_render', $html);
 
 			//[PHPCOMPRESSOR(remove,start)]
             // TODO: Replace this block with renderer logic
@@ -568,6 +581,9 @@ class Core implements iCore
             $html = $this->generate_template($html, '','');
 			//[PHPCOMPRESSOR(remove,end)]
 		}
+
+        // Fire before render
+        Event::fire('core.before_output', $html);
 		
 		// Output results to client
 		echo $html;
