@@ -541,10 +541,6 @@ class Core implements iCore
             }
         }
 
-        // TODO: Change module configuration logic, probably move it to module loading
-        // we don't need to load configuration for modules that are not loaded?
-		Config::load();
-
         // Temporary add template worker
         Event::subscribe('core.after_render', array($this, 'generate_template'));
 
