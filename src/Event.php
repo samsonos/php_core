@@ -23,7 +23,7 @@ class Event
      *
      * @return bool True if everything were fine
      */
-    public static function fire($key, & $params = array())
+    public static function fire($key, $params = array())
     {
         // Convert to lowercase
         $key = strtolower($key);
@@ -57,7 +57,7 @@ class Event
      * @param callback  $handler    Callback
      * @param array     $params     Additional callback parameters
      */
-    public static function subscribe($key, $handler, array & $params = array())
+    public static function subscribe($key, $handler, $params = array())
     {
         // Convert to lowercase
         $key = strtolower($key);
@@ -68,6 +68,12 @@ class Event
         // Create event handlers array
         if (!isset($pointer)) {
             $pointer = array();
+        }
+
+        // If any params is passed
+        if (isset($params)) {
+            // Convert it to an array
+            $params = is_array($params) ? $params : array(&$params);
         }
 
         // Add event handler

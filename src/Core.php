@@ -431,7 +431,7 @@ class Core implements iCore
 		}		
 	}		
 	
-	public function generate_template( $template_html )
+	public function generate_template( & $template_html )
 	{
 		// Добавим путь к ресурсам для браузера
 		$head_html = "\n".'<base href="'.url()->base().'">';
@@ -544,34 +544,23 @@ class Core implements iCore
             $module_loaded = $this->e404();
         }
 
-        //elapsed('Controller action result: '.$module_loaded);
-
 		// Сюда соберем весь вывод системы
 		$html = '';
 	
 		// If this is not asynchronous response and controller has been executed
 		if (!$this->async && ($module_loaded !== A_FAILED)) {
-
-            //elapsed('Rendering main template: '.$this->template_path);
-
             // Fire before render
-            Event::fire('core.before_render', $html);
+            Event::fire('core.before_render', array(& $this));
 
 			// Render main template
             $html = $this->render($this->template_path, $this->active->toView());
 
             // Fire after render event
-            Event::fire('core.after_render', $html);
-
-			//[PHPCOMPRESSOR(remove,start)]
-            // TODO: Replace this block with renderer logic
-			// Add special sugar to template HTML
-            $html = $this->generate_template($html, '','');
-			//[PHPCOMPRESSOR(remove,end)]
+            Event::fire('core.after_render', array(&$html));
 		}
 
         // Fire before render
-        Event::fire('core.before_output', $html);
+        Event::fire('core.before_output', array(&$html));
 		
 		// Output results to client
 		echo $html;
@@ -614,6 +603,9 @@ class Core implements iCore
         // TODO: Change module configuration logic, probably move it to module loading
         // we don't need to load configuration for modules that are not loaded?
 		Config::load();
+
+        // Temporary add template worker
+        Event::subscribe('core.after_render', array($this, 'generate_template'));
 	}
 	//[PHPCOMPRESSOR(remove,end)]
 
@@ -716,8 +708,14 @@ class Core implements iCore
 
 	
 	/** Магический метод для десериализации объекта */
-	public function __wakeup(){	$this->active = & $this->module_stack['local']; }
+	public function __wakeup()
+    {
+        $this->active = & $this->module_stack['local'];
+    }
 	
 	/** Магический метод для сериализации объекта */
-	public function __sleep(){  return array( 'module_stack', 'e404', 'render_mode', 'view_path' ); }
+	public function __sleep()
+    {
+        return array( 'module_stack', 'e404', 'render_mode', 'view_path' );
+    }
 }
