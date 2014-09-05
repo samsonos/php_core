@@ -370,9 +370,15 @@ class Core implements iCore
 			// Очистим коллекцию загруженых модулей
 			unset( $this->module_stack[ $_id ] );			
 		}		
-	}		
-	
-	public function generate_template( & $template_html )
+	}
+
+    /**
+     * Insert generic html template tags and data
+     * @param $template_html
+     * @deprecated Must be moved to a new HTML output object
+     * @return mixed Changed HTML template
+     */
+    public function generate_template( & $template_html )
 	{
 		// Добавим путь к ресурсам для браузера
 		$head_html = "\n".'<base href="'.url()->base().'">';
