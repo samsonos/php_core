@@ -63,7 +63,7 @@ class Core implements iCore
 	/** @var string Path to current web-application */
 	protected $system_path = __SAMSON_CWD__;
 	
-	/** @var string View path modifier for templating */
+	/** @var string View path modifier for templates */
 	protected $view_path = '';
 
 	/** @var string View path loading mode */
@@ -302,7 +302,7 @@ class Core implements iCore
 		else if( is_callable( $render_handler ) )
 		{
             // Backward compatibility
-            Event::subscribe('core.render', $render_handler);
+            $this->subscribe('core.render', $render_handler);
 
             //TODO: Add position to insert renderer
 			// Insert new renderer at the end of the stack
@@ -435,7 +435,7 @@ class Core implements iCore
 		// Если передан аргумент функции то установим новый обработчик e404 
 		if (func_num_args()) {
             // Subscribe external handler for e404 event
-            Event::subscribe('core.e404', $callable);
+            $this->subscribe('core.e404', $callable);
 			
 			// Chaining
 			return $this;
@@ -505,7 +505,7 @@ class Core implements iCore
         $this->load(__SAMSON_PATH__);
 
         // Temporary add template worker
-        Event::subscribe('core.rendered', array($this, 'generate_template'));
+        $this->subscribe('core.rendered', array($this, 'generate_template'));
 
         // Fire core creation event
         Event::fire('core.created', array(&$this));
