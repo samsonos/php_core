@@ -32,15 +32,7 @@ interface iCore
 	 * @return string Обработанное прорисованное представление
 	 */
 	public function render( $view_path, $view_data = array() );
-	
-	/**
-	 * Add template render function to render stack 
-	 * @param mixed $render_handler Pointer to render function
-	 * @param number $position Position in render stack to place render function
-	 * @return array If nothing passed returns current render handler stack
-	 */
-	public function renderer( $render_handler = null, $position = null );
-	
+
 	/**
 	 * Установить/Получить флаг ассинхронности вывода ответа системы
 	 * 
