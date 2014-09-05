@@ -10,6 +10,9 @@ To use SamsonPHP framework in your project you must add its dependency in your `
         "samsonos/php_core": "*"
     },
 ```
+After doing ```composer install``` or ```composer update``` you must include composer autoloader
+in you init script: ```require [PATH_TO_VENDOR_DIR]/autoload.php```. Following this line, all
+SamsonPHP classes and functions would be available.
 
 > We should use ```"minimum-stability":"dev"``` composer directive as we still cannot get
 > final release version of core module and other commonly used modules, but we promise to
