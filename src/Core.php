@@ -122,6 +122,7 @@ class Core implements iCore
             require($controllerPath);
         }
 
+        // TODO: this should be done via composer autoload file field
         // Iterate all function-style controllers and require them
         foreach ($resourceMap->controllers as $controller) {
             require($controller);
@@ -191,6 +192,8 @@ class Core implements iCore
 	public function render( $__view, $__data = array() )
 	{
 		////elapsed('Start rendering '.$__view);
+
+        // TODO: Make rendering as external system
 		
 		// Объявить ассоциативный массив переменных в данном контексте
 		if( is_array( $__data ))extract( $__data );	
@@ -201,15 +204,6 @@ class Core implements iCore
 		// Path to another template view, by default we are using default template folder path,
 		// for meeting first condition
 		$__template_view = $__view;
-		
-		//trace('$$__template_view'.$__template_view);
-		
-		// If another template folder defined 
-	/*	if( isset($this->view_path{0}) )
-		{
-			// Modify standart view path with another template 
-			$template_view = str_replace( __SAMSON_VIEW_PATH.'/', __SAMSON_VIEW_PATH.'/'.$this->view_path.'/', $__template_view );
-		}	*/
 			
 		if (locale() != SamsonLocale::DEF)
 		{
@@ -446,6 +440,7 @@ class Core implements iCore
         // Fire core started event
         Event::fire('core.started');
 
+        // TODO: Does not see why it should be here
         // Set main template path
         $this->template($this->template_path);
 
