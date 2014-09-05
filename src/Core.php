@@ -17,10 +17,7 @@ namespace samson\core;
  */
 class Core implements iCore
 {
-    /**
-     * Collection of paths ignored by resources collector
-     * @deprecated
-     */
+    /** @deprecated Collection of paths ignored by resources collector */
     public static $resourceIgnorePath = array(
         '.git',
         '.svn',
@@ -34,55 +31,42 @@ class Core implements iCore
         __SAMSON_TEST_PATH,
     );
 
-    /**
-     * Module paths loaded stack
-     * @deprecated
-     */
+    /** @deprecated Module paths loaded stack */
 	public $load_path_stack = array();
 
-    /**
-     * Modules to be loaded stack
-     * @deprecated
-     */
+    /** @deprecated Modules to be loaded stack */
 	public $load_stack = array();
 
-    /**
-     * Modules to be loaded stack
-     * @deprecated
-     */
+    /** @deprecated Modules to be loaded stack */
 	public $load_module_stack = array();
 
     /** @var  ResourceMap Current web-application resource map */
     public $map;
 
-    /**
-     * Collection of loaded modules
-     * @var Module[]
-     */
+    /** @var Module[] Collection of loaded modules */
 	public $module_stack = array();
-	
-	/** Render handlers stack */
+
+    /** Render handlers stack
+     * @deprecated With new event system we don't need any kind of stack anymore
+     */
 	public $render_stack = array();
 	
-	/**
-	 * Pointer to current active module
-	 * @var Module
-	 */
+	/** @var Module Pointer to current active module */
     protected $active = null;
 	
-	/** Flag for outputting layout template, used for asynchronous requests */
+	/** @var bool Flag for outputting layout template, used for asynchronous requests */
 	protected $async = FALSE;	
 	
-	/** Path to main system template */
+	/** @var string Path to main system template */
 	protected $template_path = __SAMSON_DEFAULT_TEMPLATE;
 	
-	/** Path to current web-application */
+	/** @var string Path to current web-application */
 	protected $system_path = __SAMSON_CWD__;
 	
-	/** View path modifier for templating */
+	/** @var string View path modifier for templating */
 	protected $view_path = '';
 
-	/** View path loading mode */
+	/** @var string View path loading mode */
 	public $render_mode = self::RENDER_STANDART;
 
     /**
@@ -279,6 +263,9 @@ class Core implements iCore
 		// Очистим буффер
 		ob_end_clean();
 
+        // Fire core render event
+        Event::fire('core.render', array(&$html, &$__data, &$this->active));
+
 		// Iterating throw render stack, with one way template processing
 		foreach ( $this->render_stack as & $renderer )
 		{
@@ -289,8 +276,24 @@ class Core implements iCore
 		////elapsed('End rendering '.$__view);		
 		return $html ;
 	}
-	
-	/** @see \samson\core\iCore::renderer() */
+
+    /**
+     * Generic wrap for Event system subscription
+     * @see \samson\core\Event::subscribe()
+     * @param string    $key        Event identifier
+     * @param callable  $handler    Event handler
+     * @param array     $params     Event parameters
+     */
+    public function subscribe($key, $handler, $params = array())
+    {
+        Event::subscribe($key, $handler, $params);
+    }
+
+
+    /**
+     * @see \samson\core\iCore::renderer()
+     * @deprecated Use Core::subscribe('core.render', ...)
+     */
 	public function renderer( $render_handler = null, $position = null )
 	{
 		// If nothing passed just return current render stack
@@ -298,6 +301,9 @@ class Core implements iCore
 		// If we have an argument, check if its a function
 		else if( is_callable( $render_handler ) )
 		{
+            // Backward compatibility
+            Event::subscribe('core.render', $render_handler);
+
             //TODO: Add position to insert renderer
 			// Insert new renderer at the end of the stack
 			return array_push( $this->render_stack, $render_handler );
@@ -421,7 +427,9 @@ class Core implements iCore
 		return $template_html;
 	}
 
-	/** @see \samson\core\iCore::e404() */
+    /** @see \samson\core\iCore::e404()
+     * @deprecated Use Core:subscribe('core.e404', ...)
+     */
 	public function e404($callable = null)
 	{
 		// Если передан аргумент функции то установим новый обработчик e404 
