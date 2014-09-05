@@ -68,7 +68,7 @@ class Core implements iCore
 	 * Pointer to current active module
 	 * @var Module
 	 */
-    public $active = null;
+    protected $active = null;
 	
 	/** Flag for outputting layout template, used for asynchronous requests */
 	protected $async = FALSE;	
