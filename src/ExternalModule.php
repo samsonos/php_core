@@ -77,6 +77,15 @@ class ExternalModule extends Module implements iExternalModule
 		// Remove all unnessesary fields from serialization
 		return array_diff( array_keys( get_object_vars( $this )), array( 'view_path', 'view_html', 'view_data' ));
 	}
+
+    /** Deserialization logic */
+    public function __wakeup()
+    {
+        parent::__wakeup();
+
+        // Subscribe to an config ready core event
+        Event::subscribe('core.config_ready', array($this, 'init'));
+    }
 	
 	/** @see Module::duplicate() */
 	public function & duplicate( $id, $class_name = null )
