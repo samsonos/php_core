@@ -40,16 +40,14 @@ class Core implements iCore
     /** @deprecated Modules to be loaded stack */
 	public $load_module_stack = array();
 
+    /** @deprecated Render handlers stack, With new event system we don't need any kind of stack anymore */
+    public $render_stack = array();
+
     /** @var  ResourceMap Current web-application resource map */
     public $map;
 
     /** @var Module[] Collection of loaded modules */
 	public $module_stack = array();
-
-    /** Render handlers stack
-     * @deprecated With new event system we don't need any kind of stack anymore
-     */
-	public $render_stack = array();
 	
 	/** @var Module Pointer to current active module */
     protected $active = null;
@@ -468,11 +466,15 @@ class Core implements iCore
 	
 		// If this is not asynchronous response and controller has been executed
 		if (!$this->async && ($result !== A_FAILED)) {
+
+            // Store module data
+            $data = $this->active->toView();
+
 			// Render main template
-            $output = $this->render($this->template_path, $this->active->toView());
+            $output = $this->render($this->template_path, $data);
 
             // Fire after render event
-            Event::fire('core.rendered', array(&$output));
+            Event::fire('core.rendered', array(&$output, &$data, &$this->active));
 		}
 		
 		// Output results to client
