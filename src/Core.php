@@ -477,9 +477,6 @@ class Core implements iCore
 
 		//[PHPCOMPRESSOR(remove,start)]
 		$this->benchmark(__FUNCTION__, func_get_args());
-
-		// Проинициализируем оставшиеся конфигурации и подключим внешние модули по ним
-		Config::init($this);
 		//[PHPCOMPRESSOR(remove,end)]
 
         /** @var mixed $result External route controller action result */

@@ -127,3 +127,7 @@ class Config
 	 */
 	protected $__path;	
 }
+//[PHPCOMPRESSOR(remove,start)]
+// Subscribe to core started event to load all possible module configurations
+\samson\core\Event::subscribe('core.started', array('\samson\core\Config', 'init'));
+//[PHPCOMPRESSOR(remove,end)]
