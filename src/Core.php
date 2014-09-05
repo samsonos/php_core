@@ -193,7 +193,7 @@ class Core implements iCore
 	{
 		////elapsed('Start rendering '.$__view);
 
-        // TODO: Make rendering as external system
+        // TODO: Make rendering as external system, to split up these 3 rendering options
 		
 		// Объявить ассоциативный массив переменных в данном контексте
 		if( is_array( $__data ))extract( $__data );	
@@ -280,30 +280,6 @@ class Core implements iCore
     {
         Event::subscribe($key, $handler, $params);
     }
-
-
-    /**
-     * @see \samson\core\iCore::renderer()
-     * @deprecated Use Core::subscribe('core.render', ...)
-     */
-	public function renderer( $render_handler = null, $position = null )
-	{
-		// If nothing passed just return current render stack
-		if( !func_num_args() ) return $this->render_stack;
-		// If we have an argument, check if its a function
-		else if( is_callable( $render_handler ) )
-		{
-            // Backward compatibility
-            $this->subscribe('core.render', $render_handler);
-
-            //TODO: Add position to insert renderer
-			// Insert new renderer at the end of the stack
-			return array_push( $this->render_stack, $render_handler );
-		}
-
-		// Error
-		return e('Argument(##) passed for render function not callable', E_SAMSON_CORE_ERROR, $render_handler );
-	}
 	 
 	/**	@see iCore::async() */
 	public function async( $async = NULL )
