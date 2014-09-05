@@ -73,13 +73,14 @@ class URL implements iURL
 
         // Если модуль был успешно загружен и находится в стеке модулей ядра
         if (isset($core->module_stack[$module])) {
-            //elapsed('Preforming '.$module_name.'::'.url()->method.' controller action');
-
             /** @var $active Module Set found module as current */
-            $core->active = & $core->module_stack[$module];
+            $active = & $core->module_stack[$module];
+
+            // Set current active module
+            $core->active($active);
 
             // Perform module controller action and return result
-            $result = $core->active->action(url()->method);
+            $result = $active->action(url()->method);
         }
     }
 	

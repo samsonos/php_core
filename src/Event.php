@@ -20,8 +20,12 @@ class Event
      *
      * @param string $key    Event unique identifier
      * @param mixed  $params Event additional data
+     * @param bool   $signal True if this event must be signaled only once
+     *
+     * @return mixed If signal is true then the event handler result will be returned,
+     *               otherwise null
      */
-    public static function fire($key, $params = array())
+    public static function fire($key, $params = array(), $signal = false)
     {
         // Convert to lowercase
         $key = strtolower($key);
@@ -37,10 +41,15 @@ class Event
                 $params = is_array($params) ? $params : array(&$params);
             }
 
-            // Iterate all handlers
-            foreach ($pointer as $handler) {
-                // Call external event handlers
-                call_user_func_array($handler[0], array_merge($params, $handler[1]));
+            // If this is regular event firing
+            if ($signal === false) {
+                // Iterate all handlers
+                foreach ($pointer as $handler) {
+                    // Call external event handlers
+                    call_user_func_array($handler[0], array_merge($params, $handler[1]));
+                }
+            } else { // Call only first event subscriber as signal and return its result
+                return call_user_func_array($pointer[0][0], array_merge($params, $pointer[0][1]));
             }
         }
     }

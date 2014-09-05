@@ -64,9 +64,6 @@ class Core implements iCore
 	/** Render handlers stack */
 	public $render_stack = array();
 	
-	/** Pointer to external E404 error handler */
-	protected $e404 = null;
-	
 	/**
 	 * Pointer to current active module
 	 * @var Module
@@ -381,13 +378,15 @@ class Core implements iCore
 	}	
 	
 	/**	@see iModule::active() */
-	public function & active( iModule & $module = NULL )
+	public function & active(iModule & $module = null)
 	{
 		// Сохраним старый текущий модуль		
 		$old = & $this->active;
 		
 		// Если передано значение модуля для установки как текущий - проверим и установим его
-		if( isset( $module ) ) $this->active = & $module;
+		if (isset($module)) {
+            $this->active = & $module;
+        }
 
 		// Вернем значение текущего модуля  
 		return $old;
@@ -453,38 +452,30 @@ class Core implements iCore
 		
 		return $template_html;
 	}
+
+    /**
+     * Generic e404 output controller action
+     */
+    public function e404handler()
+    {
+        // Set header
+        header('HTTP/1.0 404 Not Found');
+
+        // Output generic page
+        echo '<h1>E404 - Page not found</h1>';
+    }
 	
 	/** @see \samson\core\iCore::e404() */
-	public function e404( $callable = null )
+	public function e404($callable = null)
 	{
 		// Если передан аргумент функции то установим новый обработчик e404 
-		if( func_num_args() ) 
-		{
-			// Set e404 handler		
-			$this->e404 = $callable;
+		if (func_num_args()) {
+            // Subscribe external handler for e404 event
+            Event::subscribe('core.e404', $callable);
 			
-			// Продолжим цепирование
+			// Chaining
 			return $this;
 		}
-		// Проверим если задан обработчик e404
-		else if( is_callable( $this->e404 ) )
-		{
-			// Вызовем обработчик
-			$result = call_user_func( $this->e404, url()->module, url()->method );
-			
-			// Если метод ничего не вернул - считаем что все ок!
-			return isset( $result ) ? $result : A_SUCCESS;		
-		} else { // Стандартное поведение
-			//elapsed('e404');
-			// Установим HTTP заголовок что такой страницы нет
-			header('HTTP/1.0 404 Not Found');
-			
-			// Установим представление
-			echo'<h1>Запрашиваемая страница не найдена</h1>';
-
-			// Вернем успешный статус выполнения функции
-			return A_FAILED;
-		}	
 	}
 	
 	/**	@see iCore::start() */
@@ -497,25 +488,22 @@ class Core implements iCore
         $this->template($this->template_path);
 
 		//[PHPCOMPRESSOR(remove,start)]
-		$this->benchmark( __FUNCTION__, func_get_args() );		
+		$this->benchmark(__FUNCTION__, func_get_args());
 
 		// Проинициализируем оставшиеся конфигурации и подключим внешние модули по ним
-		Config::init( $this );					
+		Config::init($this);
 		//[PHPCOMPRESSOR(remove,end)]
 
         /** @var mixed $result External route controller action result */
         $result = A_FAILED;
 
-        // Fire an core routing event
+        // Fire core routing event
         Event::fire('core.routing', array(&$this, &$result, $default));
 
         // If no one has passed back routing callback
         if (!isset($result) || $result == A_FAILED) {
-            // Fire core e404 - controller not found event
-            Event::fire('core.e404');
-
-            // Call e404 routine
-            $result = $this->e404();
+            // Fire core e404 - routing failed event
+            $result = Event::fire('core.e404', array(url()->module, url()->method), true);
         }
 
 		// Response
@@ -523,18 +511,12 @@ class Core implements iCore
 	
 		// If this is not asynchronous response and controller has been executed
 		if (!$this->async && ($result !== A_FAILED)) {
-            // Fire before render
-            Event::fire('core.before_render', array(&$this));
-
 			// Render main template
             $output = $this->render($this->template_path, $this->active->toView());
 
             // Fire after render event
             Event::fire('core.after_render', array(&$output));
 		}
-
-        // Fire before render
-        Event::fire('core.before_output', array(&$output));
 		
 		// Output results to client
 		echo $output;
