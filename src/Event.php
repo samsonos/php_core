@@ -20,8 +20,6 @@ class Event
      *
      * @param string $key    Event unique identifier
      * @param mixed  $params Event additional data
-     *
-     * @return bool True if everything were fine
      */
     public static function fire($key, $params = array())
     {
@@ -44,11 +42,7 @@ class Event
                 // Call external event handlers
                 call_user_func_array($handler[0], array_merge($params, $handler[1]));
             }
-
-            return true;
         }
-
-        return false;
     }
 
     /**
