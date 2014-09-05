@@ -491,13 +491,13 @@ class Core implements iCore
      */
     public function composer()
     {
-        // Try new project structure
-        $path = $this->path().'../composer.json';
-
-        // If this is an old project structure
-        if (!file_exists($path)) {
-            $path = $this->path().'composer.json';
-        }
+        /**
+         * Composer.json is always one level up to vendors dir, as
+         * without __SAMSON_VENDOR_PATH constant nothing will work,
+         * we can guarantee that it is correct and can use to find
+         * composer.json
+         */
+        $path = __SAMSON_VENDOR_PATH.'../'.'composer.json';
 
         // If we have composer configuration file
         if (file_exists($path)) {
