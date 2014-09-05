@@ -453,18 +453,6 @@ class Core implements iCore
 		return $template_html;
 	}
 
-    /**
-     * Generic e404 output controller action
-     */
-    public function e404handler()
-    {
-        // Set header
-        header('HTTP/1.0 404 Not Found');
-
-        // Output generic page
-        echo '<h1>E404 - Page not found</h1>';
-    }
-	
 	/** @see \samson\core\iCore::e404() */
 	public function e404($callable = null)
 	{
