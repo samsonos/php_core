@@ -36,38 +36,41 @@ class Benchmark
      * Output to current system output stream benchmark data and total results
      * @param string $output Current system output stream
      */
-    public function show(&$output)
+    public function show(&$output, $data = array(), iModule $module = null)
     {
-        $output .= '<!-- Total time elapsed:'.round( microtime(TRUE) - __SAMSON_T_STARTED__, 3 ).'s -->';
-        if( function_exists('db')) $output .= '<!-- '.db()->profiler().' -->';
-        $output .= '<!-- Memory used: '.round(memory_get_peak_usage(true)/1000000,1).' МБ -->';
-        $output .= '<!-- Benchmark table: -->';
+        // TODO: this is not correct!!!
+        if (!in_array($module->id(), array('compressor', 'deploy'))) {
+            $output .= '<!-- Total time elapsed:'.round( microtime(TRUE) - __SAMSON_T_STARTED__, 3 ).'s -->';
+            if( function_exists('db')) $output .= '<!-- '.db()->profiler().' -->';
+            $output .= '<!-- Memory used: '.round(memory_get_peak_usage(true)/1000000,1).' МБ -->';
+            $output .= '<!-- Benchmark table: -->';
 
-        $l = 0;
-        $m = 0;
-        foreach ($this->data as $func => $data )
-        {
-            // Generate params string
-            $params = array();
-            if (is_array( $data[2] )) {
-                foreach ($data[2] as $value) {
-                    if (is_string($value)) {
-                        $params[] = '"'.(strlen($value) > 10 ? substr($value, 0, 10).'..':$value).'"';
+            $l = 0;
+            $m = 0;
+            foreach ($this->data as $func => $data )
+            {
+                // Generate params string
+                $params = array();
+                if (is_array( $data[2] )) {
+                    foreach ($data[2] as $value) {
+                        if (is_string($value)) {
+                            $params[] = '"'.(strlen($value) > 10 ? substr($value, 0, 10).'..':$value).'"';
+                        }
                     }
                 }
+                $params = implode( ',', $params );
+
+                $started 		= sprintf( '%5ss', number_format( round($data[0],4), 4 ));
+                $elapsed 		= sprintf( ' | %5ss', number_format( round($data[0] - $l,4), 4 ));
+                $mem 			= sprintf( ' | %7s МБ',number_format($data[3]/1000000,4));
+                $mem_elapsed 	= sprintf( ' | %7s МБ',number_format(($data[3]-$m)/1000000,4));
+
+                $output .= '<!-- '.$started.''.$elapsed.$mem.$mem_elapsed.' | '.$data[1].'('.$params.') -->';
+
+                // Save previous TS
+                $l = $data[0];
+                $m = $data[3];
             }
-            $params = implode( ',', $params );
-
-            $started 		= sprintf( '%5ss', number_format( round($data[0],4), 4 ));
-            $elapsed 		= sprintf( ' | %5ss', number_format( round($data[0] - $l,4), 4 ));
-            $mem 			= sprintf( ' | %7s МБ',number_format($data[3]/1000000,4));
-            $mem_elapsed 	= sprintf( ' | %7s МБ',number_format(($data[3]-$m)/1000000,4));
-
-            $output .= '<!-- '.$started.''.$elapsed.$mem.$mem_elapsed.' | '.$data[1].'('.$params.') -->';
-
-            // Save previous TS
-            $l = $data[0];
-            $m = $data[3];
         }
     }
 
