@@ -46,7 +46,7 @@ class ExternalModule extends Module implements iExternalModule
         $this->vid = $this->id;
 
         // Subscribe to an config ready core event
-        Event::subscribe('core.config_ready', array($this, 'init'));
+        Event::subscribe('core.started', array($this, 'init'));
 		
 		// Call parent constructor
 		parent::__construct($this->id, $path, $resources );
@@ -84,7 +84,7 @@ class ExternalModule extends Module implements iExternalModule
         parent::__wakeup();
 
         // Subscribe to an config ready core event
-        Event::subscribe('core.config_ready', array($this, 'init'));
+        Event::subscribe('core.started', array($this, 'init'));
     }
 	
 	/** @see Module::duplicate() */

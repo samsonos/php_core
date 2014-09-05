@@ -51,7 +51,37 @@ class URL implements iURL
 	/**
 	 * Конструктор класса
 	 */
-	public function __construct(){ $this->parse();}
+	public function __construct()
+    {
+        $this->parse();
+
+        // Subscribe for core routing
+        \samson\core\Event::subscribe('core.routing', array($this, 'router'));
+    }
+
+    /**
+     * Generic old-styled URL module based router for SamsonPHP
+     *
+     * @param \samson\core\Core $core       Pointer to core object
+     * @param mixed             $result     Return value as routing result
+     * @param string            $default    Default route path
+     */
+    public function router(\samson\core\Core & $core, & $result, $default = 'main')
+    {
+        // Make module URL part case insensitive, if nothing passed use default path
+        $module = isset($this->module{0}) ? mb_strtolower( $this->module, 'UTF-8') : $default;
+
+        // Если модуль был успешно загружен и находится в стеке модулей ядра
+        if (isset($core->module_stack[$module])) {
+            //elapsed('Preforming '.$module_name.'::'.url()->method.' controller action');
+
+            /** @var $active Module Set found module as current */
+            $core->active = & $core->module_stack[$module];
+
+            // Perform module controller action and return result
+            $result = $core->active->action(url()->method);
+        }
+    }
 	
 	/**	 
 	 * @see iURL::module()

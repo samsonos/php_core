@@ -71,7 +71,7 @@ class Core implements iCore
 	 * Pointer to current active module
 	 * @var Module
 	 */
-	protected $active = null;
+    public $active = null;
 	
 	/** Flag for outputting layout template, used for asynchronous requests */
 	protected $async = FALSE;	
@@ -488,7 +488,7 @@ class Core implements iCore
 	}
 	
 	/**	@see iCore::start() */
-	public function start( $default )
+	public function start($default)
 	{
         // Fire core started event
         Event::fire('core.started');
@@ -503,64 +503,41 @@ class Core implements iCore
 		Config::init( $this );					
 		//[PHPCOMPRESSOR(remove,end)]
 
-        // Fire an core config ready event
-        Event::fire('core.config_ready');
-		
-		// Результат выполнения действия модуля
-		$module_loaded = A_FAILED;
+        /** @var mixed $result External route controller action result */
+        $result = A_FAILED;
 
-		// Получим идентификатор модуля из URL и сделаем идентификатор модуля регистро-независимым 
-		$module_name = mb_strtolower( url()->module, 'UTF-8');
-				
-		// Если не задано имя модуля, установим модуль по умолчанию
-		if( ! isset( $module_name{0} ) ) $module_name = $default;	
-		
-		//elapsed('Trying to get '.$module_name.' controller');
-		
-		// Если модуль был успешно загружен и находится в стеке модулей ядра
-		if (isset($this->module_stack[ $module_name ])) {
-			//elapsed('Preforming '.$module_name.'::'.url()->method.' controller action');
+        // Fire an core routing event
+        Event::fire('core.routing', array(&$this, &$result, $default));
 
-            /**
-             * Set found module as current
-             * @var $active Module
-             */
-			$this->active = & $this->module_stack[$module_name];
+        // If no one has passed back routing callback
+        if (!isset($result) || $result == A_FAILED) {
+            // Fire core e404 - controller not found event
+            Event::fire('core.e404');
 
-            /**
-             * Try to perform controller action
-             * @var $module_loaded integer
-             */
-            $module_loaded = $this->active->action(url()->method);
-
-            // Send success status
-            header("HTTP/1.0 200 Ok");
-
-		} else { // No controller has been executed
             // Call e404 routine
-            $module_loaded = $this->e404();
+            $result = $this->e404();
         }
 
-		// Сюда соберем весь вывод системы
-		$html = '';
+		// Response
+		$output = '';
 	
 		// If this is not asynchronous response and controller has been executed
-		if (!$this->async && ($module_loaded !== A_FAILED)) {
+		if (!$this->async && ($result !== A_FAILED)) {
             // Fire before render
-            Event::fire('core.before_render', array(& $this));
+            Event::fire('core.before_render', array(&$this));
 
 			// Render main template
-            $html = $this->render($this->template_path, $this->active->toView());
+            $output = $this->render($this->template_path, $this->active->toView());
 
             // Fire after render event
-            Event::fire('core.after_render', array(&$html));
+            Event::fire('core.after_render', array(&$output));
 		}
 
         // Fire before render
-        Event::fire('core.before_output', array(&$html));
+        Event::fire('core.before_output', array(&$output));
 		
 		// Output results to client
-		echo $html;
+		echo $output;
     }
 
 	//[PHPCOMPRESSOR(remove,start)]
