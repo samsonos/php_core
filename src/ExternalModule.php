@@ -173,10 +173,6 @@ class ExternalModule extends Module implements iExternalModule
 	/**	@see iExternalModule::init() */
 	public function init( array $params = array() )
 	{
-		//[PHPCOMPRESSOR(remove,start)]
-		s()->benchmark( __FUNCTION__, func_get_args(), get_class($this) );
-		//[PHPCOMPRESSOR(remove,end)]
-		
 		// Установим переданные параметры
 		$this->set( $params );
 	

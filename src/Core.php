@@ -81,28 +81,9 @@ class Core implements iCore
 	
 	/** View path modifier for templating */
 	protected $view_path = '';
-	
-	/** Collection of performance benchmarks for analyzing */
-	public $benchmarks = array();
-	
+
 	/** View path loading mode */
 	public $render_mode = self::RENDER_STANDART;
-
-    /**
-     * Put benchmark record for performance analyzing
-     * @param string $function  Function name
-     * @param array $args       Function arguments
-     * @param string $class     Classname who called benchmark
-     */
-	public function benchmark( $function = __FUNCTION__, $args = array(), $class = __CLASS__ )
-	{		
-		$this->benchmarks[] = array( 
-				microtime(true)-__SAMSON_T_STARTED__, 	// Time elapsed from start
-				$class.'::'.$function, 		            // Function class::name
-				$args, 									// Function arguments
-				memory_get_usage(true) 					// Memory
-		);		
-	}
 
     /**
      * @see \samson\core\iCore::resources()
@@ -110,10 +91,6 @@ class Core implements iCore
      */
 	public function resources( & $path, & $ls = array(), & $files = null )
 	{
-        //[PHPCOMPRESSOR(remove,start)]
-        $this->benchmark( __FUNCTION__, func_get_args() );
-        //[PHPCOMPRESSOR(remove,end)]
-
         if (!isset( $this->load_path_stack[$path])) {
             // Get the resource map for this entry point
             $resourceMap = ResourceMap::get($path);
@@ -137,11 +114,7 @@ class Core implements iCore
 
 	/** @see \samson\core\iCore::load() */
 	public function load($path = NULL, $module_id = null)
-	{	
-		//[PHPCOMPRESSOR(remove,start)]
-		$this->benchmark( __FUNCTION__, func_get_args() );		
-		//[PHPCOMPRESSOR(remove,end)]
-
+	{
         /** @var ResourceMap $resourceMap Pointer to resource map object */
         $resourceMap = ResourceMap::get($path);
 
@@ -234,11 +207,7 @@ class Core implements iCore
 	
 	/** @see \samson\core\iCore::render() */
 	public function render( $__view, $__data = array() )
-	{		
-		//[PHPCOMPRESSOR(remove,start)]
-		$this->benchmark( __FUNCTION__, func_get_args() );
-		//[PHPCOMPRESSOR(remove,end)]
-		
+	{
 		////elapsed('Start rendering '.$__view);
 		
 		// Объявить ассоциативный массив переменных в данном контексте

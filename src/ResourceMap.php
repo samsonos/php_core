@@ -299,10 +299,6 @@ class ResourceMap
      */
     public function build($path = null)
     {
-        //[PHPCOMPRESSOR(remove,start)]
-        //s()->benchmark( __FUNCTION__, func_get_args(), __CLASS__);
-        //[PHPCOMPRESSOR(remove,end)]
-
         // If no other path is passed use current entry point and convert it to *nix path format
         $path = normalizepath(isset($path) ? $path : $this->entryPoint);
 

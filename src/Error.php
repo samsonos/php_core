@@ -107,47 +107,6 @@ class Error
 	 */
 	public function shutdown()
 	{
-		//[PHPCOMPRESSOR(remove,start)]
-		// TODO: Create core shutdown routines
-		if( !s()->async() )
-		{
-			// Fix performance
-			
-			s()->benchmark( __FUNCTION__, func_get_args() );
-
-            $template_html = '<!-- Total time elapsed:'.round( microtime(TRUE) - __SAMSON_T_STARTED__, 3 ).'s -->';
-            if( function_exists('db')) $template_html .= '<!-- '.db()->profiler().' -->';
-            $template_html .= '<!-- Memory used: '.round(memory_get_peak_usage(true)/1000000,1).' МБ -->';
-            $template_html .= '<!-- Benchmark table: -->';
-
-			$l = 0;
-			$m = 0;
-			foreach (s()->benchmarks as $func => $data )
-			{
-				// Generate params string
-				$params = array();
-				if(is_array( $data[2] )) foreach ( $data[2] as $value )
-				{
-					if( is_string($value) ) $params[] = '"'.$value.'"';
-				}
-				$params = implode( ',', $params );
-					
-				$started 		= sprintf( '%5ss', number_format( round($data[0],4), 4 ));
-				$elapsed 		= sprintf( ' | %5ss', number_format( round($data[0] - $l,4), 4 ));
-				$mem 			= sprintf( ' | %7s МБ',number_format($data[3]/1000000,4));
-				$mem_elapsed 	= sprintf( ' | %7s МБ',number_format(($data[3]-$m)/1000000,4));		
-					
-				$template_html .= '<!-- '.$started.''.$elapsed.$mem.$mem_elapsed.' | '.$data[1].'('.$params.') -->';
-					
-				// Save previous TS
-				$l = $data[0];
-				$m = $data[3];
-			}
-			
-			echo $template_html;						
-		}
-		//[PHPCOMPRESSOR(remove,end)]
-		
 		// Если установлен обработчик завершения выполнения скрипта - вызовем его
 		if( isset( self::$shutdown_handler ) && ( call_user_func( self::$shutdown_handler ) === false )) return null;		
 				
