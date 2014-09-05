@@ -491,10 +491,7 @@ class Core implements iCore
 	public function start( $default )
 	{
         // Fire core started event
-        Event::fire('core.start');
-
-		// Parse URL
-		url();
+        Event::fire('core.started');
 
         // Set main template path
         $this->template($this->template_path);
@@ -606,6 +603,9 @@ class Core implements iCore
 
         // Temporary add template worker
         Event::subscribe('core.after_render', array($this, 'generate_template'));
+
+        // Fire core creation event
+        Event::fire('core.created', array(&$this));
 	}
 	//[PHPCOMPRESSOR(remove,end)]
 
