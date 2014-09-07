@@ -88,9 +88,11 @@ function isvalue( $m, $name, $value = null )
             // If this is boolean and it matches $value
             case 'boolean': return (isset($value) ? $var == $value : $var);
             // If this is number and it matches $value
-            case 'integer': return (isset($value) ? $var === intval($value): false);
+            case 'integer': return (isset($value) ? $var === intval($value): $var);
             // If this is double and it matches $value
-            case 'double':  return (isset($value) ? $var === doubleval($value): false);
+            case 'double':  return (isset($value) ? $var === doubleval($value): $var);
+            // If this is double and it matches $value
+            case 'float':  return (isset($value) ? $var === floatval($value): $var);
             // If this is not empty array
             case 'array':   return sizeof($var);
             // If this is a string and it matches $value or if no $value is set string is not empty
