@@ -272,13 +272,18 @@ class Core implements iCore
     /**
      * Generic wrap for Event system subscription
      * @see \samson\core\Event::subscribe()
-     * @param string    $key        Event identifier
-     * @param callable  $handler    Event handler
-     * @param array     $params     Event parameters
+     *
+     * @param string   $key     Event identifier
+     * @param callable $handler Event handler
+     * @param array    $params  Event parameters
+     *
+     * @return $this Chaining
      */
     public function subscribe($key, $handler, $params = array())
     {
         Event::subscribe($key, $handler, $params);
+
+        return $this;
     }
 	 
 	/**	@see iCore::async() */
