@@ -181,7 +181,8 @@ class Core implements iCore
             }
         }
 
-        //elapsed('Loaded module:'.$connector->id);
+        // Fire core module load event
+        Event::fire('core.module_loaded', array(&$connector));
 		
 		// Chaining
 		return $this;
