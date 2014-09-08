@@ -515,38 +515,42 @@ class Core implements iCore
             // Read file into object
             $composerObject = json_decode(file_get_contents($path), true);
 
-           //elapsed('Loading from composer.json');
-            // If composer has requirements configured
-            if (isset($composerObject['require'])) {
-                // Iterate requirements
-                foreach ($composerObject['require'] as $requirement => $version) {
-                    // Ignore core module and work only with samsonos/* modules before they are not PSR- optimized
-                    if(($requirement != 'samsonos/php_core') && (strpos($requirement, 'samsonos/') !== false)) {
+            // Gather all possible requires
+            $require = array_merge(
+                array(),
+                isset($composerObject['require']) ? array_merge($require, $composerObject['require']) : array(),
+                isset($composerObject['require']) ? array_merge($require, $composerObject['require-dev']) : array()
+            );
 
-                       //elapsed('Loading module '.$requirement);
+            // Iterate requirements
+            foreach ($require as $requirement => $version) {
+                // Ignore core module and work only with samsonos/* modules before they are not PSR- optimized
+                if(($requirement != 'samsonos/php_core') && (strpos($requirement, 'samsonos/') !== false)) {
 
-                        // TODO: Make possible to use local modules when developing SamsonCMS - get relative path to main folder
-                        // TODO: Make possible to automatically search for local modules firstly and only then default
-                        // TODO: Make possible to automatically define depth of web-application to build proper paths to local modules
-                        // TODO: Force debug message if module cannot be autoloaded by PSR-* standard
+                   //elapsed('Loading module '.$requirement);
 
-                        // Use default path
-                        $path = __SAMSON_VENDOR_PATH.$requirement;
+                    // TODO: Make possible to use local modules when developing SamsonCMS - get relative path to main folder
+                    // TODO: Make possible to automatically search for local modules firstly and only then default
+                    // TODO: Make possible to automatically define depth of web-application to build proper paths to local modules
+                    // TODO: Force debug message if module cannot be autoloaded by PSR-* standard
 
-                        // If path with underscores does not exists
+                    // Use default path
+                    $path = __SAMSON_VENDOR_PATH.$requirement;
+
+                    // If path with underscores does not exists
+                    if (!file_exists($path)) {
+                        // Try path without underscore
+                        $path = str_replace('_', '/', $path);
                         if (!file_exists($path)) {
-                            // Try path without underscore
-                            $path = str_replace('_', '/', $path);
-                            if (!file_exists($path)) {
-                                return e('Cannot load module(from ##): "##" - Path not found', E_SAMSON_FATAL_ERROR, array($path, $requirement));
-                            }
+                            return e('Cannot load module(from ##): "##" - Path not found', E_SAMSON_FATAL_ERROR, array($path, $requirement));
                         }
-
-                        // Load module
-                        $this->load($path);
                     }
+
+                    // Load module
+                    $this->load($path);
                 }
             }
+
 
             // Load generic local module with all web-application resources
             if ($this->resources($this->system_path, $ls2)) {
