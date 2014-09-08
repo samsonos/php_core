@@ -519,8 +519,8 @@ class Core implements iCore
             // Gather all possible requires
             $require = array_merge(
                 array(),
-                isset($composerObject['require']) ? array_merge($require, $composerObject['require']) : array(),
-                isset($composerObject['require']) ? array_merge($require, $composerObject['require-dev']) : array()
+                isset($composerObject['require']) ? $composerObject['require'] : array(),
+                isset($composerObject['require-dev']) ? $composerObject['require-dev'] : array()
             );
 
             // Iterate requirements
