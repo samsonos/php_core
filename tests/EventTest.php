@@ -16,13 +16,31 @@ class EventTest extends \PHPUnit_Framework_TestCase
         return $result == 2;
     }
 
+    public function eventReferenceCallback(&$result)
+    {
+        $result = array('reference' => 'yes!');
+    }
+
+    public function testPassingParametersByReference()
+    {
+        // Subscribe to event
+        \samson\core\Event::subscribe('test.susbcribe_reference', array($this, 'eventReferenceCallback'));
+
+        // Fire event
+        $result = null;
+        \samson\core\Event::fire('test.susbcribe_reference', array(&$result));
+
+        // Perform test
+        $this->assertArrayHasKey('reference', $result);
+    }
+
     public function testSubscribeStatic()
     {
         // Subscribe to event
         \samson\core\Event::subscribe('test.susbcribe_static', array('\tests\EventTest', 'eventStaticCallback'));
 
         // Fire event
-        $result = null;
+        $result = 0;
         \samson\core\Event::fire('test.susbcribe_static', array(&$result));
 
         // Perform test
