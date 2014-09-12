@@ -6,21 +6,25 @@ namespace tests;
  */
 class EventTest extends \PHPUnit_Framework_TestCase
 {
+    /** Static event callback handler */
     public static function eventStaticCallback(&$result)
     {
         return $result = 3;
     }
 
+    /** Dynamic event callback handler */
     public function eventDynamicCallback(&$result)
     {
         return $result = 2;
     }
 
+    /** Reference event callback handler */
     public function eventReferenceCallback(&$result)
     {
         $result = array('reference' => 'yes!');
     }
 
+    /** Test if we can pass parameters by reference to change them in event callback handler */
     public function testPassingParametersByReference()
     {
         // Subscribe to event
@@ -34,6 +38,7 @@ class EventTest extends \PHPUnit_Framework_TestCase
         $this->assertArrayHasKey('reference', $result);
     }
 
+    /** Test static event callback handler */
     public function testSubscribeStatic()
     {
         // Subscribe to event
@@ -47,6 +52,7 @@ class EventTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals(3, $result);
     }
 
+    /** Test global event callback handler */
     public function testSubscribeGlobal()
     {
         // Subscribe to event
@@ -60,6 +66,7 @@ class EventTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals(1, $result);
     }
 
+    /** Test dynamic event callback handler */
     public function testSubscribeDynamic()
     {
         // Subscribe to event
@@ -74,6 +81,7 @@ class EventTest extends \PHPUnit_Framework_TestCase
     }
 }
 
+/** Global event callback handler */
 function globalEventCallback(&$result)
 {
     return $result = 1;
