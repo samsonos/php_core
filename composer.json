@@ -16,5 +16,10 @@
             "samsonos\\core\\": "src/"
         },
         "files": ["src/samson.php"]
+    },
+    "require-dev": {
+        "satooshi/php-coveralls": "dev-master",
+        "squizlabs/php_codesniffer": "2.0.*@dev",
+        "phpunit/phpunit": "4.2.*"
     }
 }
