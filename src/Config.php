@@ -1,24 +1,14 @@
 <?php
 namespace samson\core;
 
-/**
- * Виды режимов конфигурация работы фреймворка
- *
- * @package SamsonPHP
- * @author Vitaly Iegorov <vitalyiegorov@gmail.com>
- * @version 0.1
- */
-class ConfigType 
-{
-	/** Конфигурация по умолчанию*/
-	const ALL 			= 0;
-	/** Конфигурация для разработки	*/
-	const DEVELOPMENT 	= 1;
-	/** Конфигурация для тестирования */
-	const TEST 			= 2;
-	/** Конфигурация для продакшина */
-	const PRODUCTION 	= 3;	
-}
+/** Constant to define generic stage at web-application production status */
+define('CONFIG_ALL', 0);
+/** Constant to define development stage at web-application production status */
+define('CONFIG_DEV', 1);
+/** Constant to define test stage at web-application production status */
+define('CONFIG_TEST', 2);
+/** Constant to define final stage at web-application production status */
+define('CONFIG_PRODUCTION', 3);
 
 /**
  * Класс для конфигурации работы фреймворка
