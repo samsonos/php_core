@@ -25,6 +25,8 @@ $old_umask = umask(0);
 // Include SamsonPHP auto loader
 require('AutoLoader.php');
 
+require('Config.php');
+
 // Load files with functions
 require('shortcuts.php');
 require('Utils2.php');

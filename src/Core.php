@@ -135,25 +135,10 @@ class Core implements iCore
         // Get module identifier
         $module_id = $connector->id();
 
+        // Fire core module load event
+        Event::fire('core.module_loaded', array($module_id, &$connector));
+
         // TODO: Add ability to get configuration from parent classes
-
-        // If module configuration loaded - set module params
-        if (isset(Config::$data[ $module_id ])) {
-            foreach (Config::$data[ $module_id ] as $k => $v) {
-                // Assign only own class properties no view data set anymore
-                if (property_exists($moduleClass, $k)) {
-                    $connector->$k = $v;
-                }/*else {
-                    e('## - Cannot assign parameter(##), it is not defined as class(##) property', E_SAMSON_CORE_ERROR, array($id, $k, $class_name));
-                }*/
-            }
-        }
-
-       /* // Prepare module mechanism
-        if ($connector->prepare() === false) {
-            e('## - Failed preparing module', E_SAMSON_FATAL_ERROR, $module_id);
-        }*/
-
         // TODO: Code lower to be removed
 
         // Get module name space
@@ -180,9 +165,6 @@ class Core implements iCore
                 }
             }
         }
-
-        // Fire core module load event
-        Event::fire('core.module_loaded', array(&$connector));
 		
 		// Chaining
 		return $this;
