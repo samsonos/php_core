@@ -325,6 +325,3 @@ class URL implements iURL
 		}
 	}
 }
-
-// Subscribe to core started event
-\samson\core\Event::subscribe('core.started', 'url');
