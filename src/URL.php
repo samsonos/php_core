@@ -54,9 +54,6 @@ class URL implements iURL
 	public function __construct()
     {
         $this->parse();
-
-        // Subscribe for core routing
-        \samson\core\Event::subscribe('core.routing', array($this, 'router'));
     }
 
     /**
