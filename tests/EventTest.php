@@ -19,9 +19,12 @@ class EventTest extends \PHPUnit_Framework_TestCase
     }
 
     /** Reference event callback handler */
-    public function eventReferenceCallback(&$result)
+    public function eventReferenceCallback(&$result, &$subscribeParameter = null)
     {
         $result = array('reference' => 'yes!');
+        if (isset($subscribeParameter)) {
+            $subscribeParameter .= '_recieved';
+        }
     }
 
     /** Test if we can pass parameters by reference to change them in event callback handler */
@@ -36,6 +39,24 @@ class EventTest extends \PHPUnit_Framework_TestCase
 
         // Perform test
         $this->assertArrayHasKey('reference', $result);
+    }
+
+    /** Test if we can pass parameters by reference to change them in event callback handler */
+    public function testPassingParametersOnSubscribe()
+    {
+        $testParameter = 'subscribe_param';
+        // Subscribe to event
+        \samson\core\Event::subscribe('test.subscribe_parameter', array($this, 'eventReferenceCallback'), array(&$testParameter));
+
+        // Fire event
+        $result = null;
+        \samson\core\Event::fire('test.subscribe_parameter', array(&$result));
+
+        // Perform test
+        $this->assertArrayHasKey('reference', $result);
+
+        // Perform test
+        $this->assertEquals('subscribe_param_recieved', $testParameter);
     }
 
     /** Test static event callback handler */
