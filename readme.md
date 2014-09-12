@@ -18,4 +18,6 @@ Following this line, all SamsonPHP classes and functions would be available.
 > final release version of core module and other commonly used modules, but we promise to
 > do it near future
 
+For further information read [Official SamsonPHP Wiki](https://github.com/samsonos/php_core/wiki)
+
 Developed by [SamsonOS](http://samsonos.com/)
