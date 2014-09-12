@@ -132,7 +132,7 @@ class Core implements iCore
         Event::fire('core.module_loaded', array($module_id, &$connector));
 
         // TODO: Add ability to get configuration from parent classes
-        // TODO: Code lower to be removed
+        // TODO: Code lower to be removed, or do we still need this
 
         // Get module name space
         $ns = AutoLoader::getOnlyNameSpace($moduleClass);
@@ -145,14 +145,13 @@ class Core implements iCore
         // Merge another ns location to existing
         else $this->load_stack[ $ns ] = array_merge_recursive ( $this->load_stack[ $ns ], $ls );
 
-        // TODO: Analyze - do we still need this
         // Trying to find parent class for connecting to it to use View/Controller inheritance
         $parent_class = get_parent_class( $connector );
         if ($parent_class !== AutoLoader::className('samson\core\ExternalModule')) {
             // Переберем загруженные в систему модули
             foreach ($this->module_stack as & $m){
                 // Если в систему был загружен модуль с родительским классом
-                if( get_class($m) == $parent_class ) {
+                if (get_class($m) == $parent_class) {
                     $connector->parent = & $m;
                     //elapsed('Parent connection for '.$class_name.'('.$connector->uid.') with '.$parent_class.'('.$m->uid.')');
                 }
