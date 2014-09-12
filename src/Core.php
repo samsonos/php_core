@@ -149,10 +149,10 @@ class Core implements iCore
             }
         }
 
-        // Prepare module mechanism
+       /* // Prepare module mechanism
         if ($connector->prepare() === false) {
             e('## - Failed preparing module', E_SAMSON_FATAL_ERROR, $module_id);
-        }
+        }*/
 
         // TODO: Code lower to be removed
 

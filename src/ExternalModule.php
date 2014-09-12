@@ -47,6 +47,9 @@ class ExternalModule extends Module implements iExternalModule
 
         // Subscribe to an config ready core event
         Event::subscribe('core.started', array($this, 'init'));
+
+        // Subscribe to an module loaded core event
+        Event::subscribe('core.module_loaded', array($this, 'prepare'));
 		
 		// Call parent constructor
 		parent::__construct($this->id, $path, $resources );
