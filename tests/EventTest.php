@@ -100,6 +100,15 @@ class EventTest extends \PHPUnit_Framework_TestCase
         // Perform test
         $this->assertEquals(2, $result);
     }
+    
+    /** Test if listeners getter not empty after all tests */
+    public function testListenersList()
+    {
+        $listeners = \samson\core\Event::listeners();
+        
+        // Perform test
+        $this->assertGreaterThan(0, $listeners);
+    }
 }
 
 /** Global event callback handler */
