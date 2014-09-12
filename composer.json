@@ -13,7 +13,8 @@
     "autoload" : {
         "classmap": ["src/"],
         "psr-0": {
-            "samsonos\\core\\": "src/"
+            "samsonos\\core\\": "src/",
+            "samson\\core\\": "src/"
         },
         "files": ["src/samson.php"]
     },
