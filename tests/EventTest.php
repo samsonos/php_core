@@ -8,12 +8,12 @@ class EventTest extends \PHPUnit_Framework_TestCase
 {
     public static function eventStaticCallback(&$result)
     {
-        return $result == 3;
+        return $result = 3;
     }
 
     public function eventDynamicCallback(&$result)
     {
-        return $result == 2;
+        return $result = 2;
     }
 
     public function eventReferenceCallback(&$result)
@@ -76,5 +76,5 @@ class EventTest extends \PHPUnit_Framework_TestCase
 
 function globalEventCallback(&$result)
 {
-    return $result == 1;
+    return $result = 1;
 }
