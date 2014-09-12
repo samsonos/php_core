@@ -18,7 +18,6 @@ Following this line, all SamsonPHP classes and functions would be available.
 > final release version of core module and other commonly used modules, but we promise to
 > do it near future
 
-##Loading modules into SamsonPHP framework
-All modules are loaded via composer.json file section ```require:...``` and follows all PSR-0 rules.
+For further information read [Official SamsonPHP Wiki](https://github.com/samsonos/php_core/wiki)
 
 Developed by [SamsonOS](http://samsonos.com/)
