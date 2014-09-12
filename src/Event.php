@@ -100,30 +100,5 @@ class Event
         // Add event handler
         $pointer[] = array($handler, & $params);
     }
-
-    /**
-     * Output events structure and handlers
-     */
-    public static function debug()
-    {
-        $listeners = &self::$listeners;
-        foreach ($listeners as $key => $handlers) {
-            if (sizeof($handlers)) {
-                trace($key);
-                foreach ($handlers as $handler) {
-                    if (is_array($handler[0])) {
-                        if (is_object($handler[0][0])) {
-                            $isModule = ($handler[0][0] instanceof \samson\core\Module) ? '[module]' : '[dynamic]';
-                            trace('   -- '.$isModule.' '.get_class($handler[0][0]).'->'.$handler[0][1].'()');
-                        } else {
-                            trace('   -- [static] '.$handler[0][0].'::'.$handler[0][1].'()');
-                        }
-                    } else {
-                        trace('   -- [global] '.$handler[0].'()');
-                    }
-                }
-            }
-        }
-    }
 }
  
