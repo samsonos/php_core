@@ -275,7 +275,7 @@ function debug_parse_markers( $pattern, array & $args = NULL )
  */
 function trace( $text = '', $totextarea = false )
 {
-	if( !$totextarea ) echo '' .print_a($text,TRUE).'<br>'."\n"; 
+	if( !$totextarea ) echo '' .print_a($text,TRUE).'<br>'."\n";
 	else echo '<textarea style="z-index:1000; position:relative;">'.print_r( $text,true).'</textarea>';
 	
 	return FALSE; 
