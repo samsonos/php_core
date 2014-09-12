@@ -56,7 +56,7 @@ class EventTest extends \PHPUnit_Framework_TestCase
     public function testSubscribeGlobal()
     {
         // Subscribe to event
-        \samson\core\Event::subscribe('test.subscribe_global', '\globalEventCallback');
+        \samson\core\Event::subscribe('test.subscribe_global', 'globalEventCallback');
 
         // Fire event
         $result = null;
