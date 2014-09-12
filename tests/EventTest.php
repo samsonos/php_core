@@ -28,11 +28,11 @@ class EventTest extends \PHPUnit_Framework_TestCase
     public function testPassingParametersByReference()
     {
         // Subscribe to event
-        \samson\core\Event::subscribe('test.susbcribe_reference', array($this, 'eventReferenceCallback'));
+        \samson\core\Event::subscribe('test.subscribe_reference', array($this, 'eventReferenceCallback'));
 
         // Fire event
         $result = null;
-        \samson\core\Event::fire('test.susbcribe_reference', array(&$result));
+        \samson\core\Event::fire('test.subscribe_reference', array(&$result));
 
         // Perform test
         $this->assertArrayHasKey('reference', $result);
@@ -42,11 +42,11 @@ class EventTest extends \PHPUnit_Framework_TestCase
     public function testSubscribeStatic()
     {
         // Subscribe to event
-        \samson\core\Event::subscribe('test.susbcribe_static', array('\tests\EventTest', 'eventStaticCallback'));
+        \samson\core\Event::subscribe('test.subscribe_static', array('\tests\EventTest', 'eventStaticCallback'));
 
         // Fire event
         $result = 0;
-        \samson\core\Event::fire('test.susbcribe_static', array(&$result));
+        \samson\core\Event::fire('test.subscribe_static', array(&$result));
 
         // Perform test
         $this->assertEquals(3, $result);
@@ -56,11 +56,11 @@ class EventTest extends \PHPUnit_Framework_TestCase
     public function testSubscribeGlobal()
     {
         // Subscribe to event
-        \samson\core\Event::subscribe('test.susbcribe_global', 'globalEventCallback');
+        \samson\core\Event::subscribe('test.subscribe_global', 'globalEventCallback');
 
         // Fire event
         $result = null;
-        \samson\core\Event::fire('test.susbcribe_global', array(&$result));
+        \samson\core\Event::fire('test.subscribe_global', array(&$result));
 
         // Perform test
         $this->assertEquals(1, $result);
@@ -70,11 +70,11 @@ class EventTest extends \PHPUnit_Framework_TestCase
     public function testSubscribeDynamic()
     {
         // Subscribe to event
-        \samson\core\Event::subscribe('test.susbcribe_dynamic', array($this, 'eventDynamicCallback'));
+        \samson\core\Event::subscribe('test.subscribe_dynamic', array($this, 'eventDynamicCallback'));
 
         // Fire event
         $result = null;
-        \samson\core\Event::fire('test.susbcribe_dynamic', array(&$result));
+        \samson\core\Event::fire('test.subscribe_dynamic', array(&$result));
 
         // Perform test
         $this->assertEquals(2, $result);
