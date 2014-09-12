@@ -56,7 +56,7 @@ if(!defined('__SAMSON_BASE__')) {
 define('__SAMSON_REMOTE_APP', __SAMSON_BASE__ !== '/');
 
 /** Get HTTP protocol **/
-define('__SAMSON_PROTOCOL', (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' || $_SERVER['SERVER_PORT'] == 443) ? "https://" : "http://" );
+define('__SAMSON_PROTOCOL', (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' || (isset($_SERVER['SERVER_PORT']) && $_SERVER['SERVER_PORT']== 443)) ? "https://" : "http://" );
 
 /** Default path to web-application cache folder */
 if (!defined('__SAMSON_CACHE_PATH')) {
