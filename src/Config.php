@@ -8,21 +8,21 @@ define('CONFIG_DEV', 1);
 /** Constant to define test stage at web-application production status */
 define('CONFIG_TEST', 2);
 /** Constant to define final stage at web-application production status */
-define('CONFIG_PRODUCTION', 3);
+define('CONFIG_PROD', 3);
 
 /**
- * Класс для конфигурации работы фреймворка
+ * Module configuration
+ * SamsonPHP configuration is based on classes, to configure a module
+ * in your web application you must create class that exends this class
+ * and all of it public field would be parsed and passed to module
+ * at core module load stage.
  *
  * @package SamsonPHP
- * @author Vitaly Iegorov <vitalyiegorov@gmail.com>
- * @version 0.1
+ * @author Vitaly Iegorov <egorov@samsonos.com>
  */
 class Config
 {	
-	/**
-	 * Текущий режим конфишурации работы фреймворка 
-	 * @var ConfigType
-	 */
+	/** @var integer Current web-application development stage*/
 	public static $type = ConfigType::ALL;
 	
 	/**
@@ -57,8 +57,8 @@ class Config
     /**
      * Load configuration classes and store their data
      *
-     * @param \samson\core\Core|\samson\core\iCore $core
-     * @param ConfigType                           $type Рабочая конфигурация
+     * @param \samson\core\Core|\samson\core\iCore $core Pointer to core instance
+     * @param integer                              $type Web-application development stage identifier
      */
 	public static function load(\samson\core\iCore & $core, $type = NULL)
 	{
@@ -92,7 +92,7 @@ class Config
                         get_object_vars($o),            // Get all configuration parameters
                         array( '__path' => $o->__path ) // Add path parameter from configuration
                     );
-                } else if($o->__type === ConfigType::ALL) {
+                } else if($o->__type === CONFIG_ALL) {
                     // If this is generic module configuration
                     $config = array_merge(
                         get_object_vars($o),                    // Get all configuration parameters
@@ -136,23 +136,13 @@ class Config
 		}
 	}
 	
-	/**
-	 * Тип конфигурации, по умолчанию DEV
-	 * @var ConfigType
-	 */
-	protected $__type = ConfigType::ALL;	
+	/** @var integer Configuration web-application development stage identifier */
+	protected $__type = CONFIG_ALL;
 	
-	/**
-	 * Имя модуля для которого предназначена конфигурация
-	 * @var string
-	 */
+	/** @var string	Special field to specify module identifier to what this configuration is */
 	protected $__module;
 	
-	/**
-	 * Путь к модулю, если указан то будет выполнена попытка загрузить модуль
-	 * если он еще не загружен в ядро
-	 * @var string
-	 */
+	/** @var string	Path to module location if it was not loaded already */
 	protected $__path;	
 }
 
