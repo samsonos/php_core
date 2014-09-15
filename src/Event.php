@@ -70,6 +70,8 @@ class Event
                 return call_user_func_array($pointer[0][0], array_merge($params, $pointer[0][1]));
             }
         }
+
+        return null;
     }
 
     /**
