@@ -1,4 +1,5 @@
 <?php
+namespace samson\core;
 /**
  * Created by Vitaly Iegorov <egorov@samsonos.com>
  * on 12.09.14 at 22:20
@@ -10,6 +11,7 @@
  * @package SamsonPHP
  * @author Vitaly Iegorov <vitalyiegorov@gmail.com>
  * @version 0.1
+ * @deprecated
  */
 class ConfigType
 {
