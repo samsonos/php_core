@@ -23,7 +23,7 @@ define('CONFIG_PROD', 3);
 class Config
 {	
 	/** @var integer Current web-application development stage*/
-	public static $type = ConfigType::ALL;
+	public static $type = CONFIG_ALL;
 	
 	/**
 	 * Коллекция параметров конфигурации модулей системы
