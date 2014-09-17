@@ -131,6 +131,12 @@ class Core implements iCore
         // Fire core module load event
         Event::fire('core.module_loaded', array($module_id, &$connector));
 
+        // TODO: Think how to decouple this
+        // Call module preparation handler
+        if (!$connector->prepare()) {
+            // Handle module failed preparing
+        }
+
         // TODO: Add ability to get configuration from parent classes
         // TODO: Code lower to be removed, or do we still need this
 
