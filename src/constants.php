@@ -11,6 +11,7 @@ define('__SAMSON_T_STARTED__', microtime(TRUE));
 /** Constant for storing flag that current PHP version is really old */
 define('__SAMSON_PHP_OLD', version_compare(PHP_VERSION, '5.3.0', '<'));
 
+//[PHPCOMPRESSOR(remove,start)]
 /** If no specific vendor path is defined */
 if (!defined('__SAMSON_VENDOR_PATH')) {
     define('__SAMSON_VENDOR_PATH', '../vendor/');
@@ -29,6 +30,7 @@ if (!defined('__SAMSON_DEV_VENDOR_PATH')) {
 if (!defined('__SAMSON_COPYRIGHT')) {
     define('__SAMSON_COPYRIGHT', '<!-- This site is working under SamsonPHP framework http://samsonphp.com  -->');
 }
+//[PHPCOMPRESSOR(remove,end)]
 
 /** Совместимость с PHP 5 */
 if(!defined('__DIR__')) define('__DIR__', dirname(__FILE__));
