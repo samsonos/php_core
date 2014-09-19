@@ -191,8 +191,8 @@ class URL implements iURL
 		header('Location: '.$full_url );
 			
 		// Добавим клиентскон перенаправление в случаи не срабатывания серверного
-		echo '<script type="text/javascript">window.location.href="' . $full_url . '";</script>';
-        die;
+		/*echo '<script type="text/javascript">window.location.href="' . $full_url . '";</script>';
+        die;*/
 	}	
 	
 	/**	 
