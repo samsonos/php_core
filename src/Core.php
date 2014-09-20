@@ -250,6 +250,7 @@ class Core implements iCore
 		return $html ;
 	}
 
+    //[PHPCOMPRESSOR(remove,start)]
     /**
      * Generic wrap for Event system subscription
      * @see \samson\core\Event::subscribe()
@@ -266,6 +267,7 @@ class Core implements iCore
 
         return $this;
     }
+    //[PHPCOMPRESSOR(remove,end)]
 	 
 	/**	@see iCore::async() */
 	public function async( $async = NULL )
@@ -358,6 +360,7 @@ class Core implements iCore
 		}		
 	}
 
+    //[PHPCOMPRESSOR(remove,start)]
     /**
      * Insert generic html template tags and data
      * @param $template_html
@@ -401,6 +404,7 @@ class Core implements iCore
 			return $this;
 		}
 	}
+    //[PHPCOMPRESSOR(remove,end)]
 	
 	/**	@see iCore::start() */
 	public function start($default)
@@ -475,7 +479,6 @@ class Core implements iCore
         // Fire core creation event
         Event::fire('core.created', array(&$this));
 	}
-	//[PHPCOMPRESSOR(remove,end)]
 
     /**
      * Load system from composer.json
@@ -568,6 +571,7 @@ class Core implements iCore
 
         return $this;
     }
+    //[PHPCOMPRESSOR(remove,end)]
 
 	
 	/** Магический метод для десериализации объекта */
