@@ -89,16 +89,7 @@ interface iCore
 	 * @param string $id Module identifier
 	 */
 	public function unload( $id );
-	
-	/**
-	 * Обработчик ошибки e404 
-	 * Если в метод не переданы аргументы то выполняется текущий обработчик
-	 * иначе устанвливается указатель на внешний
-	 * 
-	 * @param string $callable Указатель на внешний обработчик ошибки
-	 */
-	public function e404( $callable = null );
-	
+
 	/**
 	 * Запустить ядро системы
 	 * 
