@@ -45,8 +45,10 @@ class ExternalModule extends Module implements iExternalModule
         // TODO: Do we steel need virtual id?
         $this->vid = $this->id;
 
+        //[PHPCOMPRESSOR(remove,start)]
         // Subscribe to an config ready core event
         Event::subscribe('core.started', array($this, 'init'));
+        //[PHPCOMPRESSOR(remove,end)]
 
       /*  // Subscribe to an module loaded core event
         Event::subscribe('core.module_loaded', array($this, 'prepare'));*/
