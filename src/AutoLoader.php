@@ -30,10 +30,13 @@ class AutoLoader
      * @param string $className Class name to convert
      * @return string Class name in old format where "\" replaced with "_"
      */
-    public static function oldClassName($className)
+    public static function oldClassName($className, $namespace = null)
     {
-        // If class name has first symbol as NS_SEPARATOR - remove it to avoid ugly classes _samson_core_...
-        if ($className{0} == self::NS_SEPARATOR) {
+        // If class name has no namespace separator
+        if (strpos($className, '\\') === false) {
+            $className = $namespace.'\\'.$className;
+        } else if ($className{0} == self::NS_SEPARATOR) {
+            // If class name has first symbol as NS_SEPARATOR - remove it to avoid ugly classes _samson_core_...
             $className = substr($className, 1);
         }
 
