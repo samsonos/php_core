@@ -452,7 +452,7 @@ function ajax_handler( $action_handler, $action_params = NULL, $success_handler 
  * @deprecated use \samson\core\AutoLoader::className() and pass full class name to it without splitting into class name and namespace
  * @return string Исправленное имя класса
  */
-function ns_classname( $class_name, $ns = 'samson\activerecord' )
+function ns_classname($class_name, $ns = null)
 {
     return \samson\core\AutoLoader::className($class_name, $ns);
 }

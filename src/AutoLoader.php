@@ -27,16 +27,14 @@ class AutoLoader
 
     /**
      * Convert class name to old PHP format not supporting name spaces
+     *
      * @param string $className Class name to convert
      * @return string Class name in old format where "\" replaced with "_"
      */
-    public static function oldClassName($className, $namespace = null)
+    public static function oldClassName($className)
     {
-        // If class name has no namespace separator
-        if (strpos($className, '\\') === false) {
-            $className = $namespace.'\\'.$className;
-        } else if ($className{0} == self::NS_SEPARATOR) {
-            // If class name has first symbol as NS_SEPARATOR - remove it to avoid ugly classes _samson_core_...
+        // If class name has first symbol as NS_SEPARATOR - remove it to avoid ugly classes _samson_core_...
+        if ($className{0} == self::NS_SEPARATOR) {
             $className = substr($className, 1);
         }
 
@@ -49,12 +47,22 @@ class AutoLoader
      * if PHP version is lower 5.3.0 it does not supports namespaces and function
      * will convert class name with namespace to class name
      *
-     * @param string $className Full class name with namespace
+     * @param string $className Class name
+     * @param string $namespace Namespace to add to class name if it does not have one
      *
      * @return string Supported class name
      */
-    public static function className($className)
+    public static function className($className, $namespace = null)
     {
+        if (__SAMSON_PHP_OLD) {
+            if (strpos($className, str_replace(self::NS_SEPARATOR, '_', $namespace)) === false) {
+                $className = $namespace.'\\'.$className;
+            }
+        } else if (strpos($className, '\\') === false) { // If class name has no namespace separator
+            // Add namespace to it
+            $className = $namespace.'\\'.$className;
+        }
+
         // If this is an old PHP version - remove namespaces
         return __SAMSON_PHP_OLD ? self::oldClassName($className) : $className;
     }
@@ -66,11 +74,11 @@ class AutoLoader
      *
      * @return string Class name without namespace
      */
-    public static function getOnlyClass( $className )
+    public static function getOnlyClass($className)
     {
         // Try to find namespace separator
-        if (($p = strrpos( $className, self::NS_SEPARATOR )) !== false ) {
-            $className = substr( $className, $p + 1 );
+        if (($p = strrpos( $className, self::NS_SEPARATOR )) !== false) {
+            $className = substr($className, $p + 1);
         }
 
         return $className;
@@ -83,7 +91,7 @@ class AutoLoader
      *
      * @return string Namespace without class
      */
-    public static function getOnlyNameSpace( $className )
+    public static function getOnlyNameSpace($className)
     {
         // Try to find namespace separator
         if (($p = strrpos( $className, self::NS_SEPARATOR )) !== false ) {
