@@ -454,11 +454,7 @@ function ajax_handler( $action_handler, $action_params = NULL, $success_handler 
  */
 function ns_classname( $class_name, $ns = 'samson\activerecord' )
 {
-    if (strpos($class_name, '\\') === false) {
-        $class_name = $ns.'\\'.$class_name;
-    }
-
-    return \samson\core\AutoLoader::className($class_name);
+    return \samson\core\AutoLoader::className($class_name, $ns);
 }
 
 /**
