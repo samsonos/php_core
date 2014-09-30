@@ -54,10 +54,9 @@ class AutoLoader
      */
     public static function className($className, $namespace = null)
     {
-        if (__SAMSON_PHP_OLD) {
-            if (strpos($className, str_replace(self::NS_SEPARATOR, '_', $namespace)) === false) {
-                $className = $namespace.'\\'.$className;
-            }
+        // If passed class exists - just return it(without autoloading)
+        if (class_exists($className, false)) {
+            return $className;
         } else if (strpos($className, '\\') === false) { // If class name has no namespace separator
             // Add namespace to it
             $className = $namespace.'\\'.$className;

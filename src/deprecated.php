@@ -455,6 +455,33 @@ function ajax_handler( $action_handler, $action_params = NULL, $success_handler 
 function ns_classname($class_name, $ns = null)
 {
     return \samson\core\AutoLoader::className($class_name, $ns);
+    /*
+    // If core rendering model is NOT array loading
+    if( s()->render_mode != samson\core\iCore::RENDER_ARRAY )
+    {
+        return ( strpos($class_name, __NS_SEPARATOR__) !== false ) ? $class_name : $ns.__NS_SEPARATOR__.$class_name;
+    }
+    // Array loading render model
+    else
+    {
+        // If first char is namespace - remove it
+        if($class_name{0} == '\\') $class_name = substr( $class_name, 1 );
+
+        // If class exists - return it
+        if( class_exists( $class_name, false )) return $class_name;
+        // If classname with namespaces passed - transform it
+        else if( strpos($class_name, __NS_SEPARATOR__) !== false )
+        {
+            // Get only namespace from classname
+            $ns = trim(nsname($class_name));
+
+            // Transform namespace and class name
+            return str_replace('\\', '_', $ns).'_'.classname( $class_name );
+        }
+        // Add namespace to class name and transform it
+        else return str_replace('\\', '_', $ns).'_'.$class_name;
+    }
+    */
 }
 
 /**
