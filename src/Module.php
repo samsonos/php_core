@@ -104,8 +104,8 @@ class Module implements iModule, \ArrayAccess, iModuleViewable
 	public function findView( $view_path )
 	{				
 		// Remove file extension for correct array searching
-		$view_path = str_replace( array('.php','.vphp'), '', $view_path );		
-		
+		$view_path = str_replace( array('.php','.vphp'), '', $view_path );
+
 		// Try to find passed view_path in  resources views collection
 		if( sizeof($view = preg_grep('/'.addcslashes($view_path,'/\\').'(\.php|\.vphp)/ui', $this->views )) )
 		{		
@@ -183,10 +183,10 @@ class Module implements iModule, \ArrayAccess, iModuleViewable
 	
 	/** @see iModule::view() */
 	public function view( $view_path )
-	{	
+	{
 		// Find full path to view file
 		$view_path = $this->findView( $view_path );
-		
+
 		//elapsed($this->id.' - Changing current view to '.$view_path);
 			
 		// Switch view context to founded module view
@@ -201,7 +201,7 @@ class Module implements iModule, \ArrayAccess, iModuleViewable
 	
 	/**	@see iModule::output() */
 	public function output( $view_path = null )
-	{	
+	{
 		// If view path not specified - use current correct view path
 		if( !isset( $view_path ) ) $view_path = $this->view_path;
 		// Direct rendering of specific view, not default view data entry
