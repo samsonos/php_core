@@ -145,7 +145,7 @@ class ExternalModule extends Module implements iExternalModule
 		//elapsed($this->id.'('.$this->uid.')-'.$this->view_path);
 		// Если этот класс не прямой наследник класса "Подключаемого Модуля"
 		if( isset( $this->parent ) )
-		{		
+		{
 			// Find full path to view file
 			$_view_path = $this->findView( $view_path );			
 			
