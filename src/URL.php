@@ -325,13 +325,3 @@ class URL implements iURL
 		}
 	}
 }
-
-/*
- * Temporary solution to support compressed version, because other way localization does not work,
- * as chain is broken, first time URL object is created and URL is parsed only after start, so
- * CMS::afterCompress does not knows what is current locale and does not inject it to all material
- * queries.
- */
-
-
-url();
