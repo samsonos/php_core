@@ -409,8 +409,9 @@ class Core implements iCore
 	/**	@see iCore::start() */
 	public function start($default)
 	{
+		// TODO: Change ExternalModule::init() signature
         // Fire core started event
-        Event::fire('core.started', array(&$this));
+        Event::fire('core.started', array(array(&$this)));
 
         // TODO: Does not see why it should be here
         // Set main template path
