@@ -410,7 +410,7 @@ class Core implements iCore
 	public function start($default)
 	{
         // Fire core started event
-        Event::fire('core.started');
+        Event::fire('core.started', array(&$this));
 
         // TODO: Does not see why it should be here
         // Set main template path
