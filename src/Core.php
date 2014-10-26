@@ -100,66 +100,69 @@ class Core implements iCore
         /** @var ResourceMap $resourceMap Pointer to resource map object */
         $resourceMap = ResourceMap::get($path);
 
-        /** @var string $controllerPath Path to module controller file */
-        $controllerPath = $resourceMap->module[1];
+        // Check if we have found SamsonPHP external module class
+        if (isset($resourceMap->module[0])) {
+            /** @var string $controllerPath Path to module controller file */
+            $controllerPath = $resourceMap->module[1];
 
-        /** @var string $moduleClass Name of module controller class to load */
-        $moduleClass = $resourceMap->module[0];
+            /** @var string $moduleClass Name of module controller class to load */
+            $moduleClass = $resourceMap->module[0];
 
-        // Define default module identifier if it is not passed
-        $module_id = isset($module_id) ? $module_id : AutoLoader::oldClassName($moduleClass);
+            // Define default module identifier if it is not passed
+            $module_id = isset($module_id) ? $module_id : AutoLoader::oldClassName($moduleClass);
 
-        // Require module controller class into PHP
-        if (file_exists($controllerPath)) {
-            //elapsed('+ ['.$module_id.'] Including module controller '.$controllerPath);
-            require($controllerPath);
-        }
+            // Require module controller class into PHP
+            if (file_exists($controllerPath)) {
+                //elapsed('+ ['.$module_id.'] Including module controller '.$controllerPath);
+                require($controllerPath);
+            }
 
-        // TODO: this should be done via composer autoload file field
-        // Iterate all function-style controllers and require them
-        foreach ($resourceMap->controllers as $controller) {
-            require($controller);
-        }
+            // TODO: this should be done via composer autoload file field
+            // Iterate all function-style controllers and require them
+            foreach ($resourceMap->controllers as $controller) {
+                require($controller);
+            }
 
-        /** @var \samson\core\ExternalModule $connector Create module controller instance */
-        // TODO: Add  Resource map support to modules, move from old array
-        $connector = new $moduleClass($path, $module_id, $ls = $resourceMap->toLoadStackFormat());
+            /** @var \samson\core\ExternalModule $connector Create module controller instance */
+            // TODO: Add  Resource map support to modules, move from old array
+            $connector = new $moduleClass($path, $module_id, $ls = $resourceMap->toLoadStackFormat());
 
-        // Get module identifier
-        $module_id = $connector->id();
+            // Get module identifier
+            $module_id = $connector->id();
 
-        // Fire core module load event
-        Event::fire('core.module_loaded', array($module_id, &$connector));
+            // Fire core module load event
+            Event::fire('core.module_loaded', array($module_id, &$connector));
 
-        // TODO: Think how to decouple this
-        // Call module preparation handler
-        if (!$connector->prepare()) {
-            // Handle module failed preparing
-        }
+            // TODO: Think how to decouple this
+            // Call module preparation handler
+            if (!$connector->prepare()) {
+                // Handle module failed preparing
+            }
 
-        // TODO: Add ability to get configuration from parent classes
-        // TODO: Code lower to be removed, or do we still need this
+            // TODO: Add ability to get configuration from parent classes
+            // TODO: Code lower to be removed, or do we still need this
 
-        // Get module name space
-        $ns = AutoLoader::getOnlyNameSpace($moduleClass);
+            // Get module name space
+            $ns = AutoLoader::getOnlyNameSpace($moduleClass);
 
-        // Save module resources
-        $this->load_module_stack[$module_id] = $ls;
+            // Save module resources
+            $this->load_module_stack[$module_id] = $ls;
 
-        // Check for namespace uniqueness
-        if( !isset($this->load_stack[ $ns ])) $this->load_stack[ $ns ] = & $ls;
-        // Merge another ns location to existing
-        else $this->load_stack[ $ns ] = array_merge_recursive ( $this->load_stack[ $ns ], $ls );
+            // Check for namespace uniqueness
+            if( !isset($this->load_stack[ $ns ])) $this->load_stack[ $ns ] = & $ls;
+            // Merge another ns location to existing
+            else $this->load_stack[ $ns ] = array_merge_recursive ( $this->load_stack[ $ns ], $ls );
 
-        // Trying to find parent class for connecting to it to use View/Controller inheritance
-        $parent_class = get_parent_class( $connector );
-        if ($parent_class !== AutoLoader::className('samson\core\ExternalModule')) {
-            // Переберем загруженные в систему модули
-            foreach ($this->module_stack as & $m){
-                // Если в систему был загружен модуль с родительским классом
-                if (get_class($m) == $parent_class) {
-                    $connector->parent = & $m;
-                    //elapsed('Parent connection for '.$class_name.'('.$connector->uid.') with '.$parent_class.'('.$m->uid.')');
+            // Trying to find parent class for connecting to it to use View/Controller inheritance
+            $parent_class = get_parent_class( $connector );
+            if ($parent_class !== AutoLoader::className('samson\core\ExternalModule')) {
+                // Переберем загруженные в систему модули
+                foreach ($this->module_stack as & $m){
+                    // Если в систему был загружен модуль с родительским классом
+                    if (get_class($m) == $parent_class) {
+                        $connector->parent = & $m;
+                        //elapsed('Parent connection for '.$class_name.'('.$connector->uid.') with '.$parent_class.'('.$m->uid.')');
+                    }
                 }
             }
         }
