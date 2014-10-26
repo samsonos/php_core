@@ -165,6 +165,8 @@ class Core implements iCore
                     }
                 }
             }
+        } else {// Signal error
+            e('Cannot load module from: "##"', D_SAMSON_DEBUG, $path);
         }
 		
 		// Chaining
