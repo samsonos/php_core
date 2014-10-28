@@ -311,7 +311,6 @@ class ResourceMap
             $files = array();
             //TODO: Ignore cms folder - ignore another web-applications or not parse current root web-application path
             foreach (File::dir($this->entryPoint, null, '', $files, null, 0, $this->ignoreFolders) as $file) {
-
                 // Check if this file does not has to be ignored
                 if (!in_array(basename($file), $this->ignoreFiles)) {
                     $class = '';

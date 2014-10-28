@@ -470,7 +470,7 @@ class Core implements iCore
             $this->system_path = normalizepath(pathname($db[1]['file'])).'/';
 
             // Get web-application resource map
-            $this->map = ResourceMap::get($this->system_path);
+            $this->map = ResourceMap::get($this->system_path.'../');
         }
 
 		// Connect static collection with this dynamic field to avoid duplicates

@@ -22,6 +22,7 @@ if (!defined('__SAMSON_DEV_VENDOR_PATH')) {
     /**
      * Use standard relative path to add ability of using local module version
      * for their quick development
+     * @deprecated
      */
     define('__SAMSON_DEV_VENDOR_PATH', '../../vendor/');
 }
@@ -36,6 +37,7 @@ if (!defined('__SAMSON_COPYRIGHT')) {
 if(!defined('__DIR__')) define('__DIR__', dirname(__FILE__));
 
 /** Получим путь к фреймфорку SamsonPHP */
+/** @deprecated */
 define('__SAMSON_PATH__', __DIR__.'/../');
 
 /** Получим текущий каталог веб-приложения */
