@@ -418,7 +418,7 @@ class Module implements iModule, \ArrayAccess, iModuleViewable
         (isset($resources ) && isset($resources['views'])) ? $this->views = & $resources['views'] : '';
 		
 		// Generate unique module cache path in local web-application
-		$this->cache_path = __SAMSON_CWD__.__SAMSON_CACHE_PATH.'/'.$this->id.'/';
+		$this->cache_path = __SAMSON_CWD__.__SAMSON_CACHE_PATH.$this->id.'/';
 		
 		// Save ONLY ONE copy of this instance in static instances collection,
 		// avoiding rewriting by cloned modules

@@ -69,7 +69,7 @@ class Core implements iCore
 
     /**
      * @see \samson\core\iCore::resources()
-     * @deprecated
+     * @deprecated Use ResourceMap::find()
      */
 	public function resources( & $path, & $ls = array(), & $files = null )
 	{
@@ -461,17 +461,11 @@ class Core implements iCore
 	/** Конструктор */
 	public function __construct()
 	{
-		// Get backtrace to define witch script initiated core creation
-		$db = debug_backtrace();	
-		
-		// Get local web application path for backtrace if available
-		if (isset($db[1])) {
-            // Get correct web-application path
-            $this->system_path = normalizepath(pathname($db[1]['file'])).'/';
+        // Get correct web-application path
+        $this->system_path = __SAMSON_CWD__;
 
-            // Get web-application resource map
-            $this->map = ResourceMap::get($this->system_path.'../');
-        }
+        // Get web-application resource map
+        $this->map = ResourceMap::get($this->system_path);
 
 		// Connect static collection with this dynamic field to avoid duplicates
 		$this->module_stack = & Module::$instances;
@@ -542,33 +536,29 @@ class Core implements iCore
             }
 
 
-            // Load generic local module with all web-application resources
-            if ($this->resources($this->system_path, $ls2)) {
+            // Load local module with all web-application resources
+            $localResources = $this->map->toLoadStackFormat();
+            //trace($localResources, true);
 
-                // Create local module and set it as active
-                $this->active = new CompressableLocalModule('local', $this->system_path, $ls2);
+            // Manually include local module to load stack
+            $this->load_stack['local'] = $localResources;
+            $this->load_module_stack[ 'local' ] = $localResources;
 
-                // Manually include local module to load stack
-                $this->load_stack['local'] = $ls2;
-                $this->load_module_stack[ 'local' ] = $ls2;
+            // Create local module and set it as active
+            $this->active = new CompressableLocalModule('local', $this->system_path, $localResources);
 
-                // Require local models files
-                foreach ($ls2['models'] as $model) {
-                    require_once($model);
-                }
+            // Require all local module model files
+            foreach ($localResources['models'] as $model) {
+                require($model);
             }
 
-            // Iterate all old styled controllers
-            foreach (File::dir($this->system_path.__SAMSON_CONTROLLER_PATH) as $file) {
-                // Operate only with files
-                if(is_file($file)) {
+            // Create all local modules
+            foreach ($localResources['controllers'] as $controller) {
+                // Require class into PHP
+                require($controller);
 
-                    // Require class into PHP
-                    require($file);
-
-                    // Create module connector instance
-                    new CompressableLocalModule(basename($file, '.php'), $this->system_path, $this->map->toLoadStackFormat());
-                }
+                // Create module connector instance
+                new CompressableLocalModule(basename($controller, '.php'), $this->system_path, $localResources);
             }
 
         } else { // Signal configuration error
