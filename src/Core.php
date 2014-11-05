@@ -100,6 +100,9 @@ class Core implements iCore
         /** @var ResourceMap $resourceMap Pointer to resource map object */
         $resourceMap = ResourceMap::get($path);
 
+        trace($path);
+        trace($resourceMap, true);
+
         // Check if we have found SamsonPHP external module class
         if (isset($resourceMap->module[0])) {
             /** @var string $controllerPath Path to module controller file */

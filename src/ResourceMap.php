@@ -151,9 +151,10 @@ class ResourceMap
      * @param array  $ignoreFolders Collection of folders to be ignored in ResourceMap
      * @param array  $ignoreFiles   Collection of files to be ignored in ResourceMap
      */
-    public function __construct($entryPoint, array $ignoreFolders = array(), array $ignoreFiles = null)
+    public function __construct($entryPoint, array $ignoreFolders = array(), array $ignoreFiles = array())
     {
-        $this->entryPoint = $entryPoint;
+        // Use only real pathes
+        $this->entryPoint = realpath($entryPoint);
 
         // Combine passed folders to ignore with the default ones
         $ignoreFolders = array_merge($this->ignoreFolders, $ignoreFolders);
@@ -168,10 +169,8 @@ class ResourceMap
             }
         }
 
-        if (isset($ignoreFiles)) {
-            // Combine passed files to ignore with the default ones
-            $this->ignoreFiles = array_merge($this->ignoreFiles, $ignoreFiles);
-        }
+        // Combine passed files to ignore with the default ones
+        $this->ignoreFiles = array_merge($this->ignoreFiles, $ignoreFiles);
 
         // Store current ResourceMap in ResourceMaps collection
         self::$gathered[$this->entryPoint] = & $this;
