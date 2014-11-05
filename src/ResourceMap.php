@@ -373,6 +373,8 @@ class ResourceMap
                 }
             }
 
+            return true;
+
         } else { // Signal error
             return e('Cannot build ResourceMap from ## - path does not exists', E_SAMSON_CORE_ERROR, $path);
         }
