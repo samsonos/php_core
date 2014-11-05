@@ -162,7 +162,7 @@ class File
                     // Iterate all restrictions
                     foreach ($restrict as $ignore) {
                         // Try to find ignored path pattern in full path and store it to ignored flag
-                        if (($ignored = stripos($full_path, $ignore)) !== false) {
+                        if (($ignored = ($ignore == $full_path)) !== false) {
                             // This is ignored path - break, ignored now is false(0)
                             break;
                         }
@@ -172,7 +172,10 @@ class File
                     if ($ignored === false) {
                         // Go deeper in recursion
                         self::dir($full_path, $type, $modifier, $result, $max_level, ++$level, $restrict);
-                    }
+                    } /*else {
+                        trace('Ignoring path['.$full_path.']');
+                        trace($restrict, true);
+                    }*/
                 }
 			}
 	
