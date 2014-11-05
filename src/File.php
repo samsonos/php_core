@@ -126,7 +126,7 @@ class File
 	 * @param array		$restrict Коллекция папок которые необходимо пропускать
 	 * @return array Коллекция файлов в каталоге
 	 */
-	public static function dir($path, $type = null, $modifier = '', & $result = array(), $max_level = NULL, $level = 0, $restrict = array( '.git','.svn','.hg', '.settings'))
+	public static function dir($path, $type = null, $modifier = '', & $result = array(), $max_level = NULL, $level = 0, $restrict = array('.git','.svn','.hg', '.settings'))
 	{
 		// Если установлено ограничение на глубину - выйдем
 		if( isset( $max_level ) && $level > $max_level ) return $result;
@@ -183,21 +183,24 @@ class File
 		
 		// Соберем массив в строку
 		return $result;
-	}		
-	
-	/**
-	 * Очистить путь
-	 * Если передан путь к папке то очистим все её файлы(содержимое)
-	 * Если передан путь к файлу то удали его
-	 * 
-	 * @param string $path Путь к удаляемому ресурсу
-	 * @return TRUE / FALSE 
-	 */
-	public static function clear($path, $type = NULL)
+	}
+
+    /**
+     * Очистить путь
+     * Если передан путь к папке то очистим все её файлы(содержимое)
+     * Если передан путь к файлу то удали его
+     *
+     * @param string $path Путь к удаляемому ресурсу
+     * @param array $type Collection of file extensions for ignoring
+     * @param array $ignoreFolders Collection of folders for ignoring
+     * @return TRUE / FALSE
+     */
+	public static function clear($path, $type = NULL, $ignoreFolders = array())
 	{
 		// Если передан путь к папке то удалим все файлы в ней
 		if (is_dir($path)) {
-            foreach (self::dir($path, $type) as $file) {
+            $files = array();
+            foreach (self::dir($path, $type, '', $files, null, 0, $ignoreFolders) as $file) {
                 unlink($file);
             }
 			
