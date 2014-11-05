@@ -227,6 +227,7 @@ class File
      * @param string $path Folder path
      * @param string $group Folder group(www-data)
      * @param int $mode Folder mode(0775)
+     * @return int 1 - success, 0 - folder exists, -1 - errors
      */
     public static function mkdir($path, $group = 'www-data', $mode = 0775)
     {
@@ -236,8 +237,15 @@ class File
             if (mkdir($path, $mode, true)) {
                 // Change folder group
                 chgrp($path, $group);
+
+                return true;
+            } else {
+                return -1;
             }
         }
+
+        // Folder already exists
+        return false;
     }
 	
 	/**
