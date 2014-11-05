@@ -161,7 +161,6 @@ class ResourceMap
         // Clear original ignore folders collection
         $this->ignoreFolders = array();
         foreach ($ignoreFolders as $folder) {
-            trace($folder);
             // Build path to folder at entry point
             $folder = realpath($entryPoint.$folder);
             // If path not empty - this folder exists

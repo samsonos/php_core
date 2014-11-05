@@ -533,9 +533,6 @@ class Core implements iCore
 
             // Load local module with all web-application resources
             $localResources = $this->map->toLoadStackFormat();
-            trace('Locals');
-            trace($localResources, true);
-            die();
 
             // Manually include local module to load stack
             $this->load_stack['local'] = $localResources;
