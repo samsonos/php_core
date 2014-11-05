@@ -314,7 +314,7 @@ class ResourceMap
     /**
      * Perform resource gathering starting from $path entry point
      * @param string    $path   Entry point to start scanning resources
-     * @return array Collection of resources grouped by resource file extension
+     * @return bool True if we had no errors on building path resource map
      */
     public function build($path = null)
     {
