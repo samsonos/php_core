@@ -169,9 +169,7 @@ class File
                     }
 
                     // If this path is not restricted
-                    if (!$ignored) {
-                        trace($full_path);
-                        trace($restrict, true);
+                    if ($ignored === false) {
                         // Go deeper in recursion
                         self::dir($full_path, $type, $modifier, $result, $max_level, ++$level, $restrict);
                     }
