@@ -465,7 +465,7 @@ class Core implements iCore
         $this->system_path = __SAMSON_CWD__;
 
         // Get web-application resource map
-        $this->map = ResourceMap::get($this->system_path);
+        $this->map = ResourceMap::get($this->system_path, false, array('src/'));
 
 		// Connect static collection with this dynamic field to avoid duplicates
 		$this->module_stack = & Module::$instances;
