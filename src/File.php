@@ -126,31 +126,30 @@ class File
 	 * @param array		$restrict Коллекция папок которые необходимо пропускать
 	 * @return array Коллекция файлов в каталоге
 	 */
-	public static function dir( $path, $type = NULL, $modifier = '', & $result = array(), $max_level = NULL, $level = 0, $restrict = array( '.git','.svn','.settings') )
+	public static function dir( $path, $type = null, $modifier = '', & $result = array(), $max_level = NULL, $level = 0, $restrict = array( '.git','.svn','.settings') )
 	{
 		// Если установлено ограничение на глубину - выйдем
 		if( isset( $max_level ) && $level > $max_level ) return $result;
+
+        // If type filter is passed make it array anyway
+        $type = (isset($type) && !is_array($type)) ? array($type) : null;
 		
 		// Откроем папку
-		if ( file_exists($path) &&  $handle = opendir( $path ) )
-		{			
+		if (file_exists($path) &&  $handle = opendir($path)) {
 			/* Именно этот способ чтения элементов каталога является правильным. */
-			while ( FALSE !== ( $entry = readdir( $handle ) ) )
-			{			
-				// Если это зарезервированные ресурсы - пропустим
-				if( $entry == '..' || $entry == '.') continue;
+			while (false !== ( $entry = readdir($handle))) {
+				// Ignore root paths
+				if ($entry == '..' || $entry == '.') {
+                    continue;
+                }
 
                 // Build full REAL path to entry
                 $full_path = realpath($path . '/' . $entry);
 
                 if (is_file($full_path)) {
-                    // Если установлен Фильтр по типам файлов
-                    if (isset($type)) {
-                        // Если передан только один тип файла преобразуем в массив
-                        if (!is_array($type)) $type = array($type);
-
-                        // Если расширение файла не подходит - пропускаем
-                        if (!in_array(pathinfo($full_path, PATHINFO_EXTENSION), $type)) continue;
+                    // Check file type if ty filter is passed
+                    if (isset($type) && !in_array(pathinfo($full_path, PATHINFO_EXTENSION), $type)) {
+                        continue;
                     }
 
                     // Добавим файл
@@ -172,10 +171,7 @@ class File
                     if ($ignored === false) {
                         // Go deeper in recursion
                         self::dir($full_path, $type, $modifier, $result, $max_level, ++$level, $restrict);
-                    } /*else {
-                        trace('Ignoring path['.$full_path.']');
-                        trace($restrict, true);
-                    }*/
+                    }
                 }
 			}
 	
@@ -224,17 +220,25 @@ class File
 		
 		return FALSE;
 	}
-	
-	public static function remove( $dir )
-	{
-		foreach( glob($dir . '/*') as $file ) 
-		{
-        	if(is_dir($file)) self::remove( $file );
-        	else unlink($file);
-	    }
-	    
-	    rmdir( $dir );
-	}
+
+    /**
+     * Create folder, method use recursive approach for creating if
+     * "folder/folder/.." is passed.
+     * @param string $path Folder path
+     * @param string $group Folder group(www-data)
+     * @param int $mode Folder mode(0775)
+     */
+    public static function mkdir($path, $group = 'www-data', $mode = 0775)
+    {
+        // If folder does not exists
+        if (!file_exists($path)) {
+            // Create folder with correct mode
+            if (mkdir($path, $mode, true)) {
+                // Change folder group
+                chgrp($path, $group);
+            }
+        }
+    }
 	
 	/**
 	* Определить расширение файла по его MIME типу
@@ -287,4 +291,3 @@ class File
 
 // Сформируем обратный массив связей между расширением файла и его MIME-type
 File::$ExtensionMIME = array_flip( File::$MIMEExtension );
-?>

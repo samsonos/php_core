@@ -22,9 +22,6 @@ define('__SAMSON_PATH__', __DIR__.'/../');
 /** Namespace separator */
 define('__NS_SEPARATOR__', '\\');
 
-/** Flag that this script runs from remote app */
-define('__SAMSON_REMOTE_APP', __SAMSON_BASE__ !== '/');
-
 /** Get HTTP protocol **/
 define('__SAMSON_PROTOCOL', (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' || (isset($_SERVER['SERVER_PORT']) && $_SERVER['SERVER_PORT']== 443)) ? "https://" : "http://" );
 
@@ -102,6 +99,9 @@ if (strlen(__SAMSON_CWD__) - strlen($_SERVER['DOCUMENT_ROOT']) > 5) {
 if(!defined('__SAMSON_BASE__')) {
     define('__SAMSON_BASE__', str_ireplace( $_SERVER['DOCUMENT_ROOT'], '', __SAMSON_CWD__.__SAMSON_PUBLIC_PATH ) );
 }
+
+/** Flag that this script runs from remote app */
+define('__SAMSON_REMOTE_APP', __SAMSON_BASE__ !== '/');
 
 /** Максимальное время выполнения скрипта */
 define( '__SAMSON_MAX_EXECUTION__', 120 );

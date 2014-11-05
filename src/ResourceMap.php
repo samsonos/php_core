@@ -163,7 +163,7 @@ class ResourceMap
         $this->ignoreFolders = array();
         foreach ($ignoreFolders as $folder) {
             // Build path to folder at entry point
-            $folder = realpath($entryPoint.$folder);
+            $folder = realpath($this->entryPoint.$folder);
             // If path not empty - this folder exists
             if (isset($folder{0}) && is_dir($folder)) {
                 $this->ignoreFolders[] = $folder;
@@ -175,10 +175,10 @@ class ResourceMap
         // Iterate all public top level folders to search for internal web-applications
         $files = array();
         foreach (\samson\core\File::dir($publicPath, 'htaccess', '', $files, 1) as $file) {
-            // Get only folder path and add trailing slash
-            $folder = dirname($file).'/';
-            // If this is not current web-application public folder
-            if ($folder !== $publicPath) {
+            // Get only folder path
+            $folder = dirname($file);
+            // If this is not current web-application public folder and add trailing slash
+            if ($folder.'/' !== $publicPath && !in_array($folder, $this->ignoreFolders)) {
                 // Add internal web-application path to ignore collection
                 $this->ignoreFolders[] = $folder;
             }
@@ -341,7 +341,7 @@ class ResourceMap
     public function build($path = null)
     {
         // If no other path is passed use current entry point and convert it to *nix path format
-        $path = normalizepath(isset($path) ? $path : $this->entryPoint);
+        $path = isset($path) ? realpath(normalizepath($path)).'/' : $this->entryPoint;
 
         // Store new entry point
         $this->entryPoint = $path;
