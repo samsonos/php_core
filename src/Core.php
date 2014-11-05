@@ -100,9 +100,6 @@ class Core implements iCore
         /** @var ResourceMap $resourceMap Pointer to resource map object */
         $resourceMap = ResourceMap::get($path);
 
-        trace($path);
-        trace($resourceMap, true);
-
         // Check if we have found SamsonPHP external module class
         if (isset($resourceMap->module[0])) {
             /** @var string $controllerPath Path to module controller file */
@@ -489,13 +486,8 @@ class Core implements iCore
      */
     public function composer()
     {
-        /**
-         * Composer.json is always one level up to vendors dir, as
-         * without __SAMSON_VENDOR_PATH constant nothing will work,
-         * we can guarantee that it is correct and can use to find
-         * composer.json
-         */
-        $path = __SAMSON_VENDOR_PATH.'../'.'composer.json';
+        /** Composer.json is always in the project root folder */
+        $path = __SAMSON_CWD__.'composer.json';
 
         // If we have composer configuration file
         if (file_exists($path)) {
@@ -522,7 +514,7 @@ class Core implements iCore
                     // TODO: Force debug message if module cannot be autoloaded by PSR-* standard
 
                     // Use default path
-                    $path = __SAMSON_VENDOR_PATH.$requirement;
+                    $path = __SAMSON_CWD__.__SAMSON_VENDOR_PATH.$requirement;
 
                     // If path with underscores does not exists
                     if (!file_exists($path)) {
@@ -541,7 +533,9 @@ class Core implements iCore
 
             // Load local module with all web-application resources
             $localResources = $this->map->toLoadStackFormat();
-            //trace($localResources, true);
+            trace('Locals');
+            trace($localResources, true);
+            die();
 
             // Manually include local module to load stack
             $this->load_stack['local'] = $localResources;

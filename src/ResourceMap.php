@@ -153,19 +153,20 @@ class ResourceMap
      */
     public function __construct($entryPoint, array $ignoreFolders = array(), array $ignoreFiles = array())
     {
-        // Use only real pathes
-        $this->entryPoint = realpath($entryPoint);
+        // Use only real paths
+        $this->entryPoint = realpath($entryPoint).'/';
 
         // Combine passed folders to ignore with the default ones
         $ignoreFolders = array_merge($this->ignoreFolders, $ignoreFolders);
         // Clear original ignore folders collection
         $this->ignoreFolders = array();
         foreach ($ignoreFolders as $folder) {
-            // Define if folder exists or try to append relative path to it and try to build real path to it
-            $realPath = realpath(is_dir($folder) ? $folder : __SAMSON_REL_PATH . $folder);
+            trace($folder);
+            // Build path to folder at entry point
+            $folder = realpath($entryPoint.$folder);
             // If path not empty - this folder exists
-            if (isset($realPath{0})) {
-                $this->ignoreFolders[] = $realPath;
+            if (isset($folder{0}) && is_dir($folder)) {
+                $this->ignoreFolders[] = $folder;
             }
         }
 

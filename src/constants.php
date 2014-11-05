@@ -48,6 +48,11 @@ if (!defined('__SAMSON_CONTRIB_PATH')) {
     define('__SAMSON_CONTRIB_PATH', 'contrib/');
 }
 
+/** If no specific vendor path is defined */
+if (!defined('__SAMSON_VENDOR_PATH')) {
+    define('__SAMSON_VENDOR_PATH', 'vendor/');
+}
+
 /** Default relative path from init script to __SAMSON_CWD__ */
 if (!defined('__SAMSON_REL_PATH')) {
     define('__SAMSON_REL_PATH', '../');
@@ -111,10 +116,6 @@ define( 'A_FAILED', FALSE );
 define( '__SAMSON_GLOBAL_FILE', 'global.php' );
 
 //[PHPCOMPRESSOR(remove,start)]
-/** If no specific vendor path is defined */
-if (!defined('__SAMSON_VENDOR_PATH')) {
-    define('__SAMSON_VENDOR_PATH', __SAMSON_CWD__.'vendor/');
-}
 
 /** SamsonPHP copyright */
 if (!defined('__SAMSON_COPYRIGHT')) {
