@@ -134,7 +134,15 @@ class ResourceMap
     );
 
     /** @var array Collection of files that must be ignored by ResourceMap */
-    public $ignoreFiles = array('phpunit.php');
+    public $ignoreFiles = array(
+        'phpunit.php',
+        '.travis.yml',
+        'phpunit.xml',
+        'composer.lock',
+        'license.md',
+        '.gitignore',
+        '.readme.md',
+    );
 
     /**
      * Constructor
