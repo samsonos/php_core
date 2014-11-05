@@ -169,6 +169,20 @@ class ResourceMap
             }
         }
 
+        // Build path to web-application or module public folder
+        $publicPath = $this->entryPoint.__SAMSON_PUBLIC_PATH;
+        // Iterate all public top level folders to search for internal web-applications
+        $files = array();
+        foreach (\samson\core\File::dir($publicPath, 'htaccess', '', $files, 1) as $file) {
+            // Get only folder path and add trailing slash
+            $folder = dirname($file).'/';
+            // If this is not current web-application public folder
+            if ($folder !== $publicPath) {
+                // Add internal web-application path to ignore collection
+                $this->ignoreFolders[] = $folder;
+            }
+        }
+
         // Combine passed files to ignore with the default ones
         $this->ignoreFiles = array_merge($this->ignoreFiles, $ignoreFiles);
 
@@ -335,7 +349,6 @@ class ResourceMap
         if (file_exists($path)) {
             // Collect all resources from entry point
             $files = array();
-            //TODO: Ignore cms folder - ignore another web-applications or not parse current root web-application path
             foreach (File::dir($this->entryPoint, null, '', $files, null, 0, $this->ignoreFolders) as $file) {
                 // Get real path to file
                 $file = realpath($file);
