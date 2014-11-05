@@ -120,7 +120,18 @@ class ResourceMap
     public $coffee = array();
 
     /** @var array Collection of folders that should be ignored in anyway */
-    public $ignoreFolders = array('.svn', '.git', '.idea', __SAMSON_CACHE_PATH, __SAMSON_TEST_PATH, 'vendor', __SAMSON_CONFIG_PATH, 'cms', 'contrib', 'out');
+    public $ignoreFolders = array(
+        '.svn/',
+        '.git/',
+        '.idea/',
+        __SAMSON_CACHE_PATH,
+        __SAMSON_TEST_PATH,
+        __SAMSON_VENDOR_PATH,
+        __SAMSON_CONFIG_PATH,
+        __SAMSON_CONTRIB_PATH,
+        'cms/',
+        'out/'
+    );
 
     /** @var array Collection of files that must be ignored by ResourceMap */
     public $ignoreFiles = array('phpunit.php');
@@ -132,13 +143,21 @@ class ResourceMap
      * @param array  $ignoreFolders Collection of folders to be ignored in ResourceMap
      * @param array  $ignoreFiles   Collection of files to be ignored in ResourceMap
      */
-    public function __construct($entryPoint, array $ignoreFolders = null, array $ignoreFiles = null)
+    public function __construct($entryPoint, array $ignoreFolders = array(), array $ignoreFiles = null)
     {
         $this->entryPoint = $entryPoint;
 
-        if (isset($ignoreFolders)) {
-            // Combine passed folders to ignore with the default ones
-            $this->ignoreFolders = array_merge($this->ignoreFolders, $ignoreFolders);
+        // Combine passed folders to ignore with the default ones
+        $ignoreFolders = array_merge($this->ignoreFolders, $ignoreFolders);
+        // Clear original ignore folders collection
+        $this->ignoreFolders = array();
+        foreach ($ignoreFolders as $folder) {
+            // Define if folder exists or try to append relative path to it and try to build real path to it
+            $realPath = realpath(is_dir($folder) ? $folder : __SAMSON_REL_PATH . $folder);
+            // If path not empty - this folder exists
+            if (isset($realPath{0})) {
+                $this->ignoreFolders[] = $realPath;
+            }
         }
 
         if (isset($ignoreFiles)) {
@@ -312,7 +331,7 @@ class ResourceMap
             //TODO: Ignore cms folder - ignore another web-applications or not parse current root web-application path
             foreach (File::dir($this->entryPoint, null, '', $files, null, 0, $this->ignoreFolders) as $file) {
                 // Get real path to file
-                $file = realpath($file);
+                //$file = realpath($file);
 
                 // Ignore cache folder
                 if (strpos($file, __SAMSON_CACHE_PATH) === false) {

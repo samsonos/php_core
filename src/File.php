@@ -120,13 +120,13 @@ class File
 	 * @param string 	$path Путь к каталогу
 	 * @param string 	$type Фильтр для типа собираемых файлов
 	 * @param array  	$result Результат работі рекурсивной функции
-	 * @param string 	$modyfier Модификатор пути к файлам для изменения их пути
+	 * @param string 	$modifier Модификатор пути к файлам для изменения их пути
 	 * @param string 	$max_level Максимальная глубина работы метода
 	 * @param integer	$level Текщий уровень рекурсии
 	 * @param array		$restrict Коллекция папок которые необходимо пропускать
 	 * @return array Коллекция файлов в каталоге
 	 */
-	public static function dir( $path, $type = NULL, $modyfier = '', & $result = array(), $max_level = NULL, $level = 0, $restrict = array( '.git','.svn','.settings') )
+	public static function dir( $path, $type = NULL, $modifier = '', & $result = array(), $max_level = NULL, $level = 0, $restrict = array( '.git','.svn','.settings') )
 	{
 		// Если установлено ограничение на глубину - выйдем
 		if( isset( $max_level ) && $level > $max_level ) return $result;
@@ -139,31 +139,43 @@ class File
 			{			
 				// Если это зарезервированные ресурсы - пропустим
 				if( $entry == '..' || $entry == '.') continue;
-				
-				// Если эта папка запрещена
-				if( in_array( $entry, $restrict ) ) continue;
-				
-				// Сформируем полный путь к ресурсу
-				$full_path = $path.'/'.$entry;
-					
-				// Проверим является ли запись файлом
-				if( is_file( $full_path ) )
-				{					
-					// Если установлен Фильтр по типам файлов
-					if( isset( $type ) )
-					{						
-						// Если передан только один тип файла преобразуем в массив
-						if( ! is_array( $type ) ) $type = array( $type );
-						//trace(pathinfo( $full_path, PATHINFO_EXTENSION ));
-						// Если расширение файла не подходит - пропускаем
-						if( !in_array( pathinfo( $full_path, PATHINFO_EXTENSION ), $type )) continue;
-					}
-						
-					// Добавим файл
-					$result[] = normalizepath($modyfier.$full_path);
-				}
-				// Если это подкаталог то углубимся в рекурсию
-				else if( is_dir( $full_path ) ) self::dir( $full_path, $type, $modyfier, $result, $max_level, ++$level, $restrict );				
+
+                // Build full REAL path to entry
+                $full_path = realpath($path . '/' . $entry);
+
+                if (is_file($full_path)) {
+                    // Если установлен Фильтр по типам файлов
+                    if (isset($type)) {
+                        // Если передан только один тип файла преобразуем в массив
+                        if (!is_array($type)) $type = array($type);
+
+                        // Если расширение файла не подходит - пропускаем
+                        if (!in_array(pathinfo($full_path, PATHINFO_EXTENSION), $type)) continue;
+                    }
+
+                    // Добавим файл
+                    $result[] = normalizepath($modifier . $full_path);
+
+                } else if (is_dir($full_path)) {
+                    // Define if current path is not restricted
+                    $ignored = false;
+                    // Iterate all restrictions
+                    foreach ($restrict as $ignore) {
+                        // Try to find ignored path pattern in full path and store it to ignored flag
+                        if (($ignored = stripos($full_path, $ignore)) !== false) {
+                            // This is ignored path - break, ignored now is false(0)
+                            break;
+                        }
+                    }
+
+                    // If this path is not restricted
+                    if (!$ignored) {
+                        trace($full_path);
+                        trace($restrict, true);
+                        // Go deeper in recursion
+                        self::dir($full_path, $type, $modifier, $result, $max_level, ++$level, $restrict);
+                    }
+                }
 			}
 	
 			// Закроем чтение папки

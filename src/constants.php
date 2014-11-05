@@ -43,6 +43,16 @@ if (!defined('__SAMSON_TEST_PATH')) {
     define('__SAMSON_TEST_PATH', 'tests/');
 }
 
+/** Default path to install/update bash scripts folder */
+if (!defined('__SAMSON_CONTRIB_PATH')) {
+    define('__SAMSON_CONTRIB_PATH', 'contrib/');
+}
+
+/** Default relative path from init script to __SAMSON_CWD__ */
+if (!defined('__SAMSON_REL_PATH')) {
+    define('__SAMSON_REL_PATH', '../');
+}
+
 /** Default path to web-application code root */
 if (!defined('__SAMSON_APP_PATH')) {
     define('__SAMSON_APP_PATH', 'app/');

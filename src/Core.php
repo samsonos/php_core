@@ -467,6 +467,8 @@ class Core implements iCore
         // Get web-application resource map
         $this->map = ResourceMap::get($this->system_path);
 
+        trace($this->map, true);
+
 		// Connect static collection with this dynamic field to avoid duplicates
 		$this->module_stack = & Module::$instances;
 
