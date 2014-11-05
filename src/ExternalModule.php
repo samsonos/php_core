@@ -8,10 +8,7 @@ namespace samson\core;
  * @version 0.1
  */
 class ExternalModule extends Module implements iExternalModule
-{		
-	/** Correct name for composer generator */
-	const COMPOSER_VENDOR = 'samsonos';
-	
+{
 	/** 
 	 * Pointer to parent module 
 	 * @var \samson\core\Module
@@ -19,7 +16,7 @@ class ExternalModule extends Module implements iExternalModule
 	 */
 	public $parent = NULL;
 
-	/** Virtual module identifier */
+	/** @deprecated Virtual module identifier */
 	protected $vid = null;	
 	
 	/** Коллекция связанных модулей с текущим */
@@ -45,13 +42,8 @@ class ExternalModule extends Module implements iExternalModule
         // TODO: Do we steel need virtual id?
         $this->vid = $this->id;
 
-        //[PHPCOMPRESSOR(remove,start)]
         // Subscribe to an config ready core event
-        Event::subscribe('core.started', array($this, 'init'));
-        //[PHPCOMPRESSOR(remove,end)]
-
-      /*  // Subscribe to an module loaded core event
-        Event::subscribe('core.module_loaded', array($this, 'prepare'));*/
+        \samson\core\Event::subscribe('core.started', array(&$this, 'init'));
 		
 		// Call parent constructor
 		parent::__construct($this->id, $path, $resources );
@@ -78,7 +70,7 @@ class ExternalModule extends Module implements iExternalModule
 	/** Обработчик сериализации объекта */
 	public function __sleep()
 	{
-		// Remove all unnessesary fields from serialization
+		// Remove all unnecessary fields from serialization
 		return array_diff( array_keys( get_object_vars( $this )), array( 'view_path', 'view_html', 'view_data' ));
 	}
 
