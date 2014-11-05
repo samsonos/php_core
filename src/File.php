@@ -126,14 +126,16 @@ class File
 	 * @param array		$restrict Коллекция папок которые необходимо пропускать
 	 * @return array Коллекция файлов в каталоге
 	 */
-	public static function dir( $path, $type = null, $modifier = '', & $result = array(), $max_level = NULL, $level = 0, $restrict = array( '.git','.svn','.settings') )
+	public static function dir($path, $type = null, $modifier = '', & $result = array(), $max_level = NULL, $level = 0, $restrict = array( '.git','.svn','.hg', '.settings'))
 	{
 		// Если установлено ограничение на глубину - выйдем
 		if( isset( $max_level ) && $level > $max_level ) return $result;
 
         // If type filter is passed make it array anyway
-        $type = (isset($type) && !is_array($type)) ? array($type) : null;
-		
+        if (isset($type) && !is_array($type)) {
+            $type = array($type);
+        }
+
 		// Откроем папку
 		if (file_exists($path) &&  $handle = opendir($path)) {
 			/* Именно этот способ чтения элементов каталога является правильным. */
@@ -148,13 +150,9 @@ class File
 
                 if (is_file($full_path)) {
                     // Check file type if ty filter is passed
-                    if (isset($type) && !in_array(pathinfo($full_path, PATHINFO_EXTENSION), $type)) {
-                        continue;
+                    if (!isset($type) || in_array(pathinfo($full_path, PATHINFO_EXTENSION), $type)) {
+                        $result[] = normalizepath($modifier . $full_path);
                     }
-
-                    // Добавим файл
-                    $result[] = normalizepath($modifier . $full_path);
-
                 } else if (is_dir($full_path)) {
                     // Define if current path is not restricted
                     $ignored = false;
@@ -195,26 +193,19 @@ class File
 	 * @param string $path Путь к удаляемому ресурсу
 	 * @return TRUE / FALSE 
 	 */
-	public static function clear( $path, $type = NULL )
+	public static function clear($path, $type = NULL)
 	{
 		// Если передан путь к папке то удалим все файлы в ней
-		if( is_dir( $path ) )
-		{
-			// Получим список всех файлов в папке
-			$files = self::dir( $path, $type );
-			
-			// Получим количество файлов
-			$files_count = sizeof($files);
-			
-			// Удалим все файлы
-			for ($i = 0; $i < $files_count; $i++) unlink( $files[ $i ]);
+		if (is_dir($path)) {
+            foreach (self::dir($path, $type) as $file) {
+                unlink($file);
+            }
 			
 			return TRUE;
 		}
 		// Если передан путь к файлу то просто удалим его
-		else if( file_exists( $path ) )
-		{
-			unlink( $path );
+		else if (file_exists($path)) {
+			unlink($path);
 			return TRUE;
 		}
 		
