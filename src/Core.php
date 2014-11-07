@@ -543,7 +543,8 @@ class Core implements iCore
 
             // Require all local module model files
             foreach ($localResources['models'] as $model) {
-                require($model);
+            	// TODO: Why have to require once?
+                require_once($model);
             }
 
             // Create all local modules
