@@ -97,7 +97,7 @@ if (strlen(__SAMSON_CWD__) - strlen($_SERVER['DOCUMENT_ROOT']) > 5) {
 
 /** Get current relative url base */
 if(!defined('__SAMSON_BASE__')) {
-    define('__SAMSON_BASE__', str_ireplace( $_SERVER['DOCUMENT_ROOT'], '', __SAMSON_CWD__ ) );
+    define('__SAMSON_BASE__', str_ireplace(__SAMSON_CWD__.__SAMSON_PUBLIC_PATH, '', $_SERVER['DOCUMENT_ROOT'].'/').'/');
 }
 
 /** Flag that this script runs from remote app */
