@@ -197,12 +197,13 @@ class ResourceMap
     /**
      * Determines if file is a class
      *
-     * @param string $path  Path to file for checking
+     * @param string $path Path to file for checking
      * @param string $class Variable to return full class name with name space
+     * @param string $extends Variable to return parent class name
      *
      * @return bool True if file is a class file
      */
-    public function isClass($path, & $class = '')
+    public function isClass($path, & $class = '', & $extends = '')
     {
         // Class name space, by default - global namespace
         $namespace = '\\';
@@ -222,6 +223,9 @@ class ResourceMap
 
                 // Store module class name
                 $class = $namespace.$matches['class'];
+
+                // Store parent class
+                $extends = $matches['parent'];
 
                 // Define if this class is Module ancestor
                 if (isset(self::$moduleAncestors[$matches['parent']]) || in_array($matches['parent'], self::$moduleAncestors)) {
@@ -257,13 +261,14 @@ class ResourceMap
      *
      * @param string $path Path to file for checking
      * @param string $class Variable to return module controller class name
+     * @param string $extends Variable to return parent class name
      *
      * @return bool True if file is a SamsonPHP view file
      */
-    public function isModule($path, & $class = '')
+    public function isModule($path, & $class = '', & $extends = '')
     {
         // If this is a .php file
-        if (strpos($path, '.php') !== false && $this->isClass($path, $class)) {
+        if (strpos($path, '.php') !== false && $this->isClass($path, $class, $extends)) {
             // Check if this is not a SamsonPHP core class
             if (strpos('CompressableExternalModule, ExternalModule, Service, CompressableService', str_replace('\samson\core\\', '', $class)) === false) {
                 return true;
@@ -359,7 +364,12 @@ class ResourceMap
 
                 // Check if this file does not has to be ignored
                 if (!in_array(basename($file), $this->ignoreFiles)) {
+                    // Class name
                     $class = '';
+
+                    // Parent class
+                    $extends = '';
+
                     // We can determine SamsonPHP view files by 100%
                     if ($this->isView($file)) {
                         $this->views[] = $file;
@@ -369,9 +379,9 @@ class ResourceMap
                         $this->models[] = $file;
                     } elseif ($this->isController($file)) {
                         $this->controllers[] = $file;
-                    } elseif ($this->isModule($file, $class)) {
-                        $this->module = array($class, $file);
-                        $this->modules[] = array($class, $file);
+                    } elseif ($this->isModule($file, $class, $extends)) {
+                        $this->module = array($class, $file, $extends);
+                        $this->modules[] = array($class, $file, $extends);
                     } elseif ($this->isPHP($file)) {
                         $this->php[] = $file;
                     } else { // Save resource by file extension
