@@ -406,7 +406,7 @@ class Module implements iModule, \ArrayAccess, iModuleViewable
 		$this->id = $id;
 		
 		// Set path to module
-		$this->path($path);
+		$this->path(realpath($path));
 
 		// Generate unique module identifier
 		$this->uid = rand(0, 9999999).'_'.microtime(true);
