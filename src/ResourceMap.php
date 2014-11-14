@@ -87,8 +87,11 @@ class ResourceMap
     /** @var  array Collection of controllers actions by entry point */
     public $controllers = array();
 
-    /** @var string Path to \samson\core\Module ancestor */
+    /** @var array Path to \samson\core\Module ancestor */
     public $module = array();
+
+    /** @var array Collection of \samson\core\Module ancestors */
+    public $modules = array();
 
     /** @var  array Collection of old-fashion global namespace module files by entry point */
     public $globals = array();
@@ -368,6 +371,7 @@ class ResourceMap
                         $this->controllers[] = $file;
                     } elseif ($this->isModule($file, $class)) {
                         $this->module = array($class, $file);
+                        $this->modules[] = array($class, $file);
                     } elseif ($this->isPHP($file)) {
                         $this->php[] = $file;
                     } else { // Save resource by file extension
