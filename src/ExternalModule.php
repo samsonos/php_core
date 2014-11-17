@@ -63,6 +63,7 @@ class ExternalModule extends Module implements iExternalModule
 		$o->views = & $this->views;	
 		$o->parent = & $this->parent;
 		$o->controllers = & $this->controllers;
+        $o->path = $this->path;
 		
 		return $o;
 	}
