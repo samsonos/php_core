@@ -18,8 +18,10 @@
         },
         "files": ["src/samson.php"]
     },	
+    "require": {
+    	"samsonos/php_event": "1.0.*"	
+    },
     "require-dev": {
-		"samsonos/php_event": "1.0.*",
         "satooshi/php-coveralls": "dev-master",
         "squizlabs/php_codesniffer": "2.0.*@dev",
         "phpunit/phpunit": "4.2.*"
