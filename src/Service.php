@@ -1,6 +1,8 @@
 <?php
 namespace samson\core;
 
+use samson\core\AutoLoader;
+
 /**
  * Модуль имеющий единственный свой экземпляр c расширенными возможностями 
  * подключения к фреймворку. 
@@ -14,8 +16,8 @@ namespace samson\core;
  */
 class Service extends ExternalModule
 {
-	/** Factory instances */
-	protected static $_factory = array();
+    /** Factory instances */
+    protected static $factory = array();
 
     /** Ancestor field that must be ignored */
     protected static $ancestorIgnoreData = array('vid'=>'', 'uid'=>'', 'cache_path'=>'');
@@ -23,47 +25,58 @@ class Service extends ExternalModule
     /** Flag for gathering all ancestor data on instance creation */
     public $gatherAncestorData = true;
 
-	/**
-	 * @param $class Classname for getting instance
-	 * @return SingletonModule
-	*/
-	public static function & getInstance( $class )
-	{
-		// Получим класс из которого был вызван метод
-		$class = strtolower( isset( $class ) ? $class : e('Classname not specified', E_SAMSON_FATAL_ERROR));
-	
-		// Check if service exists
-		if( !isset(self::$_factory[ $class ])) e('Service ## does not exists', E_SAMSON_FATAL_ERROR, $class );
-		// Return service instance
-		else return self::$_factory[ $class ];
-	}
+    /**
+     * Get unique service instance. If service has not yet been created
+     * new instance will be created.
+     *
+     * @param string $className Class name for getting service instance
+     * @return Service Service instance
+    */
+    public static function & getInstance($className)
+    {
+        // Check service class existence
+        if (class_exists($className, false)) {
+            // Convert class name to avoid misspelling
+            $class = self::getName($className);
+
+            // Check if service exists
+            if (isset(self::$factory[ $class ])) {
+                // Return service instance
+                return self::$factory[ $class ];
+            } else { // Create service instance
+                $service = new $className('');
+                return $service;
+            }
+        } else {
+            return e('Service class [##] does not exists', E_SAMSON_FATAL_ERROR, $className);
+        }
+    }
 
     /**
-     *
-     * @param $baseObject
-     * @param $currentObject
+     * Generic method for setting fields to current service from its parents.
+     * Method recursively copies all unset fields of $baseObject from defined
+     * field values of its parent classes
+     * @param mixed $baseObject     Object fo set undefined fields from parents
+     * @param mixed $currentObject  Current object for recursion to find parent fields
      */
     protected static function gatherAncestorsData(& $baseObject, & $currentObject)
     {
-        //trace('Gathering ancestor data for service: "'.get_class($currentObject).'"');
         // If this is not a Service(base class) instance creation
-        $parentClass = strtolower(get_parent_class($currentObject));
-        if(strtolower(__CLASS__) != $parentClass) {
+        $parentClass = self::getName(get_parent_class($currentObject));
+        // This instance is not Service
+        if (self::getName(__CLASS__) != $parentClass) {
             // Get parent class instance
-            $parentInstance = & self::$_factory[$parentClass];
-            if(isset($parentInstance)) {
-                //trace('-Using parent class "'.$parentClass.'"');
+            $parentInstance = & self::$factory[$parentClass];
+            if (isset($parentInstance)) {
+                // Get all parent instance fields except ignored
+                $fields = array_diff_key(get_object_vars($parentInstance), self::$ancestorIgnoreData);
+
                 // Iterate all current ancestor object fields except ignored
-                foreach (array_diff_key(get_object_vars($parentInstance), self::$ancestorIgnoreData) as $field => $value) {
+                foreach ($fields as $field => $value) {
                     // If ancestor has field set and it is not set in base instance
                     if (isset($parentInstance->$field) && !isset($baseObject->$field)) {
                          $baseObject->$field = $parentInstance->$field;
                     }
-                }
-
-                // Merger service requirements
-                if (isset($parentInstance->requirements)) {
-                    $baseObject->requirements = array_unique(array_merge($baseObject->requirements, $parentInstance->requirements));
                 }
 
                 // Set parent service
@@ -75,27 +88,49 @@ class Service extends ExternalModule
         }
     }
 
-	/** Конструктор */
-	public function __construct($path = NULL, $vid = null, $resources = NULL)
-	{
-		// Получим имя класса
-		$class = strtolower(get_class( $this ));
-			
-		// Проверка на Singleton
-		if (!isset(self::$_factory[ $class ])) {
-            self::$_factory[ $class ] = $this;
+    /**
+     * Convert class name to correct service name
+     * @var string $class Class name to convert
+     * @return string Get correct service name
+     */
+    public static function getName($class)
+    {
+        // Generate correct service name
+        return AutoLoader::oldClassName($class);
+    }
+
+    /**
+     * Override constructor to support standard SamsonPHP module loading
+     * @param string $path Path to module
+     * @param string $vid Virtual identifier
+     * @param mixed $resources Resources collection
+     */
+    public function __construct($path = null, $vid = null, $resources = null)
+    {
+        // Получим имя класса
+        $class = self::getName(get_class($this));
+
+        // Search instance
+        if (!isset(self::$factory[$class])) {
+            self::$factory[ $class ] = $this;
 
             // If service is configured to gather ancestors data
             if ($this->gatherAncestorData) {
                 $this->gatherAncestorsData($this, $this);
             }
+        } else {
+            e('Attempt to create another instance of Factory class: ##', E_SAMSON_FATAL_ERROR, $class);
         }
-		else e('Attempt to create another instance of Factory class: ##', E_SAMSON_FATAL_ERROR, $class );
 
-		// Вызовем родительский конструктор
-		parent::__construct($path, $vid, $resources);
-	}
+        // Вызовем родительский конструктор
+        parent::__construct($path, $vid, $resources);
+    }
 
-	/** Обработчик десериализации объекта */
-	public function __wakeup(){	parent::__wakeup();	self::$_factory[ strtolower(get_class($this)) ] = $this;  }
+    /** Deserialization */
+    public function __wakeup()
+    {
+        parent::__wakeup();
+
+        self::$factory[self::getName(get_class($this))] = $this;
+    }
 }
