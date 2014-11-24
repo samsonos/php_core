@@ -19,7 +19,7 @@
         "files": ["src/samson.php"]
     },	
     "require": {
-    	"samsonos/php_event": "1.*"	
+    	"samsonos/php_event": "dev-master"
     },
     "require-dev": {
         "satooshi/php-coveralls": "dev-master",
