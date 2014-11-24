@@ -35,7 +35,7 @@ class Service extends ExternalModule
     public static function & getInstance($className)
     {
         // Check service class existence
-        if (class_exists($className, false)) {
+        if (class_exists($className)) {
             // Convert class name to avoid misspelling
             $class = self::getName($className);
 
