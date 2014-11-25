@@ -22,6 +22,9 @@ class CoreTest extends \PHPUnit_Framework_TestCase
     {
         trace(getcwd());
         $this->core->system_path = 'tests/';
+        if (file_exists($this->core->system_path.'composer.lock')){
+            trace('exist');
+        }
         $modulesExample = array
         (
             'samsonos/php_core' => 945,
@@ -72,6 +75,7 @@ class CoreTest extends \PHPUnit_Framework_TestCase
             'samsonos/cms_app_signin' => 1,
             'samsonos/cms_table' => 1
         );
+        $modulesExample = array();
         $modules = $this->core->composerGetModules();
         trace($modules);
         $this->assertEquals($modules, $modulesExample);
