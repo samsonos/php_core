@@ -22,9 +22,6 @@ class CoreTest extends \PHPUnit_Framework_TestCase
     {
         $this->core->system_path = 'tests/';
         $this->core->composerLockFile = 'composer.test';
-        if (file_exists($this->core->system_path.'composer.test')){
-            trace('exist');
-        }
         $modulesExample = array
         (
             'samsonos/php_core' => 945,
@@ -77,6 +74,10 @@ class CoreTest extends \PHPUnit_Framework_TestCase
         );
         //$modulesExample = array();
         $modules = $this->core->composerGetModules();
+        $this->assertEquals($modules, $modulesExample);
+        $this->core->composerLockFile = 'composer1.test';
+        $modules = $this->core->composerGetModules();
+        $modulesExample = array();
         $this->assertEquals($modules, $modulesExample);
     }
 }
