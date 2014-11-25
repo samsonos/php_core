@@ -557,7 +557,6 @@ class Core implements iCore
     {
         /** Composer.json is always in the project root folder */
         $path = $this->system_path.$this->composerLockFile;
-        trace($path);
 
         // If we have composer configuration file
         if (file_exists($path)) {

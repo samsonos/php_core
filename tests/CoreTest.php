@@ -21,7 +21,7 @@ class CoreTest extends \PHPUnit_Framework_TestCase
     public function testComposerGet()
     {
         trace(getcwd());
-        $this->core->system_path = 'tests/';
+        $this->core->system_path = '/tests/';
         if (file_exists($this->core->system_path.'composer.lock')){
             trace('exist');
         }
