@@ -59,7 +59,7 @@ class Core implements iCore
 	protected $template_path = __SAMSON_DEFAULT_TEMPLATE;
 	
 	/** @var string Path to current web-application */
-	protected $system_path = __SAMSON_CWD__;
+	public $system_path = __SAMSON_CWD__;
 	
 	/** @var string View path modifier for templates */
 	protected $view_path = '';
@@ -489,8 +489,74 @@ class Core implements iCore
      */
     public function composer()
     {
+        $composerModules = $this->composerGetModules();
+
+        // Iterate requirements
+        foreach ($composerModules as $requirement => $rating) {
+            // Ignore core module and work only with samsonos/* modules before they are not PSR- optimized
+            if(($requirement != 'samsonos/php_core') && (strpos($requirement, 'samsonos/') !== false)) {
+
+                //elapsed('Loading module '.$requirement);
+
+                // TODO: Make possible to use local modules when developing SamsonCMS - get relative path to main folder
+                // TODO: Make possible to automatically search for local modules firstly and only then default
+                // TODO: Make possible to automatically define depth of web-application to build proper paths to local modules
+                // TODO: Force debug message if module cannot be autoloaded by PSR-* standard
+
+                // Use default path
+                $path = __SAMSON_CWD__.__SAMSON_VENDOR_PATH.$requirement;
+
+                // If path with underscores does not exists
+                if (!file_exists($path)) {
+                    // Try path without underscore
+                    $path = str_replace('_', '/', $path);
+                    if (!file_exists($path)) {
+                        return e('Cannot load module(from ##): "##" - Path not found', E_SAMSON_FATAL_ERROR, array($path, $requirement));
+                    }
+                }
+
+                // Load module
+                $this->load($path);
+            }
+        }
+
+
+        // Load local module with all web-application resources
+        $localResources = $this->map->toLoadStackFormat();
+
+        // Manually include local module to load stack
+        $this->load_stack['local'] = $localResources;
+        $this->load_module_stack[ 'local' ] = $localResources;
+
+        // Create local module and set it as active
+        $this->active = new CompressableLocalModule('local', $this->system_path, $localResources);
+
+        // Require all local module model files
+        foreach ($localResources['models'] as $model) {
+            // TODO: Why have to require once?
+            require_once($model);
+        }
+
+        // Create all local modules
+        foreach ($localResources['controllers'] as $controller) {
+            // Require class into PHP
+            require($controller);
+
+            // Create module connector instance
+            new CompressableLocalModule(basename($controller, '.php'), $this->system_path, $localResources);
+        }
+
+        return $this;
+    }
+
+    /**
+     * Get composer Samsom modules list
+     * @return array Modules list
+     */
+    public function composerGetModules()
+    {
         /** Composer.json is always in the project root folder */
-        $path = __SAMSON_CWD__.$this->composerLockFile;
+        $path = $this->system_path.$this->composerLockFile;
 
         // If we have composer configuration file
         if (file_exists($path)) {
@@ -510,17 +576,19 @@ class Core implements iCore
             );
 
             // Get Samson modules list
-            foreach ( $packages as $package ) {
+            foreach ($packages as $package) {
                 $requirement = $package['name'];
-                if((strpos($requirement, 'samsonos/') !== false) && (!isset($package['extra']['samson_module_ignore']))) {
+                if ((strpos($requirement,
+                            'samsonos/') !== false) && (!isset($package['extra']['samson_module_ignore']))
+                ) {
                     $requireSamsonModules[] = $requirement;
                 }
             }
 
             // Create list of Samson modules with there require modules
-            foreach ($packages as $package ) {
+            foreach ($packages as $package) {
                 $requirement = $package['name'];
-                if(in_array($requirement, $requireSamsonModules)) {
+                if (in_array($requirement, $requireSamsonModules)) {
                     $requireList[$requirement] = array();
                     if (isset($package['require'])) {
                         foreach ($package['require'] as $subRequirement => $version) {
@@ -533,72 +601,20 @@ class Core implements iCore
             }
 
             // Set modules rating
-            foreach ($requireList as $package=>$list) {
-                $this->composerAdd($package, $addedModules, $requireList, 1);
+            foreach ($requireList as $package => $list) {
+                $this->composerRating($package, $addedModules, $requireList, 1);
             }
-            // Sort modules rated
-            arsort($addedModules);
 
-            // Iterate requirements
-            foreach ($addedModules as $requirement => $version) {
-                // Ignore core module and work only with samsonos/* modules before they are not PSR- optimized
-                if(($requirement != 'samsonos/php_core') && (strpos($requirement, 'samsonos/') !== false)) {
 
-                    //elapsed('Loading module '.$requirement);
-
-                    // TODO: Make possible to use local modules when developing SamsonCMS - get relative path to main folder
-                    // TODO: Make possible to automatically search for local modules firstly and only then default
-                    // TODO: Make possible to automatically define depth of web-application to build proper paths to local modules
-                    // TODO: Force debug message if module cannot be autoloaded by PSR-* standard
-
-                    // Use default path
-                    $path = __SAMSON_CWD__.__SAMSON_VENDOR_PATH.$requirement;
-
-                    // If path with underscores does not exists
-                    if (!file_exists($path)) {
-                        // Try path without underscore
-                        $path = str_replace('_', '/', $path);
-                        if (!file_exists($path)) {
-                            return e('Cannot load module(from ##): "##" - Path not found', E_SAMSON_FATAL_ERROR, array($path, $requirement));
-                        }
-                    }
-
-                    // Load module
-                    $this->load($path);
+            if (sizeof($addedModules)) {
+                // Sort modules rated
+                if (arsort($addedModules)) {
+                    return $addedModules;
                 }
             }
 
-
-            // Load local module with all web-application resources
-            $localResources = $this->map->toLoadStackFormat();
-
-            // Manually include local module to load stack
-            $this->load_stack['local'] = $localResources;
-            $this->load_module_stack[ 'local' ] = $localResources;
-
-            // Create local module and set it as active
-            $this->active = new CompressableLocalModule('local', $this->system_path, $localResources);
-
-            // Require all local module model files
-            foreach ($localResources['models'] as $model) {
-                // TODO: Why have to require once?
-                require_once($model);
-            }
-
-            // Create all local modules
-            foreach ($localResources['controllers'] as $controller) {
-                // Require class into PHP
-                require($controller);
-
-                // Create module connector instance
-                new CompressableLocalModule(basename($controller, '.php'), $this->system_path, $localResources);
-            }
-
-        } else { // Signal configuration error
-            return e('Project does not have composer.json', E_SAMSON_FATAL_ERROR);
         }
-
-        return $this;
+        return array();
     }
     //[PHPCOMPRESSOR(remove,end)]
 
@@ -623,7 +639,7 @@ class Core implements iCore
      * @param int $current Current rating
      * @param string $parent Parent module
      */
-    private function composerAdd($requirement, & $addedModules, $require = array(), $current = 1, $parent = ''){
+    private function composerRating($requirement, & $addedModules, $require = array(), $current = 1, $parent = ''){
         // if current module is not added to list
         if (!isset($addedModules[$requirement])){
             // set parent rating
@@ -639,7 +655,7 @@ class Core implements iCore
             // Check if two modules require each other
             if ($parent != $subRequirement) {
                 // Update submodules rating
-                $this->composerAdd($subRequirement, $addedModules, $require, $current, $requirement);
+                $this->composerRating($subRequirement, $addedModules, $require, $current, $requirement);
             }
         }
 
