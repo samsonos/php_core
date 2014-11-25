@@ -21,7 +21,7 @@ class CoreTest extends \PHPUnit_Framework_TestCase
     public function testComposerGet()
     {
         trace(getcwd());
-        $this->core->system_path = '/';
+        $this->core->system_path = 'tests/';
         $modulesExample = array
         (
             'samsonos/php_core' => 945,
