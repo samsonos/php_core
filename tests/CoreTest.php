@@ -5,7 +5,7 @@ namespace tests;
  * Created by Nikita Kotenko <kotenko@samsonos.com>
  * on 25.11.14 at 16:42
  */
-class CoreTest extends PHPUnit_Framework_TestCase
+class CoreTest extends \PHPUnit_Framework_TestCase
 {
     /** @var \samson\fs\LocalFileService Pointer to file service */
     public $core;
@@ -14,7 +14,7 @@ class CoreTest extends PHPUnit_Framework_TestCase
     public function setUp()
     {
         // Get instance using services factory as error will signal other way
-        $this->core = new Core();
+        $this->core = new \samson\core\Core();
 
     }
 
