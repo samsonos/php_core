@@ -20,6 +20,7 @@ class CoreTest extends \PHPUnit_Framework_TestCase
 
     public function testComposerGet()
     {
+        trace(getcwd());
         $this->core->system_path = '/';
         $modulesExample = array
         (
@@ -72,6 +73,7 @@ class CoreTest extends \PHPUnit_Framework_TestCase
             'samsonos/cms_table' => 1
         );
         $modules = $this->core->composerGetModules();
+        trace($modules);
         $this->assertEquals($modules, $modulesExample);
     }
 }
