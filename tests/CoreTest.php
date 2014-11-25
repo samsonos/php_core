@@ -20,9 +20,9 @@ class CoreTest extends \PHPUnit_Framework_TestCase
 
     public function testComposerGet()
     {
-        trace(getcwd());
         $this->core->system_path = '/tests/';
-        if (file_exists($this->core->system_path.'composer.lock')){
+        $this->core->composerLockFile = 'composer.test';
+        if (file_exists($this->core->system_path.'composer.test')){
             trace('exist');
         }
         $modulesExample = array
@@ -75,9 +75,8 @@ class CoreTest extends \PHPUnit_Framework_TestCase
             'samsonos/cms_app_signin' => 1,
             'samsonos/cms_table' => 1
         );
-        $modulesExample = array();
+        //$modulesExample = array();
         $modules = $this->core->composerGetModules();
-        trace($modules);
         $this->assertEquals($modules, $modulesExample);
     }
 }
