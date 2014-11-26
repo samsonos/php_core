@@ -489,35 +489,33 @@ class Core implements iCore
      */
     public function composer()
     {
-        $composerModules = $this->composerGetModules();
+        $composer = new \samson\composer\Composer($this->system_path);
+        $composer->addVendor('samsonos')->setIgnoreKey('samson_module_ignore')->addIgnorePackage('samsonos/php_core');
+        $composerModules = $composer->create();
 
         // Iterate requirements
         foreach ($composerModules as $requirement => $rating) {
-            // Ignore core module and work only with samsonos/* modules before they are not PSR- optimized
-            if(($requirement != 'samsonos/php_core') && (strpos($requirement, 'samsonos/') !== false)) {
+            //elapsed('Loading module '.$requirement);
 
-                //elapsed('Loading module '.$requirement);
+            // TODO: Make possible to use local modules when developing SamsonCMS - get relative path to main folder
+            // TODO: Make possible to automatically search for local modules firstly and only then default
+            // TODO: Make possible to automatically define depth of web-application to build proper paths to local modules
+            // TODO: Force debug message if module cannot be autoloaded by PSR-* standard
 
-                // TODO: Make possible to use local modules when developing SamsonCMS - get relative path to main folder
-                // TODO: Make possible to automatically search for local modules firstly and only then default
-                // TODO: Make possible to automatically define depth of web-application to build proper paths to local modules
-                // TODO: Force debug message if module cannot be autoloaded by PSR-* standard
+            // Use default path
+            $path = __SAMSON_CWD__.__SAMSON_VENDOR_PATH.$requirement;
 
-                // Use default path
-                $path = __SAMSON_CWD__.__SAMSON_VENDOR_PATH.$requirement;
-
-                // If path with underscores does not exists
+            // If path with underscores does not exists
+            if (!file_exists($path)) {
+                // Try path without underscore
+                $path = str_replace('_', '/', $path);
                 if (!file_exists($path)) {
-                    // Try path without underscore
-                    $path = str_replace('_', '/', $path);
-                    if (!file_exists($path)) {
-                        return e('Cannot load module(from ##): "##" - Path not found', E_SAMSON_FATAL_ERROR, array($path, $requirement));
-                    }
+                    return e('Cannot load module(from ##): "##" - Path not found', E_SAMSON_FATAL_ERROR, array($path, $requirement));
                 }
-
-                // Load module
-                $this->load($path);
             }
+
+            // Load module
+            $this->load($path);
         }
 
 
@@ -548,74 +546,6 @@ class Core implements iCore
 
         return $this;
     }
-
-    /**
-     * Get composer Samsom modules list
-     * @return array Modules list
-     */
-    public function composerGetModules()
-    {
-        /** Composer.json is always in the project root folder */
-        $path = $this->system_path.$this->composerLockFile;
-
-        // If we have composer configuration file
-        if (file_exists($path)) {
-            // Read file into object
-            $composerObject = json_decode(file_get_contents($path), true);
-
-            $addedModules = array();
-            $requireList = array();
-            // Samson modules list
-            $requireSamsonModules = array();
-
-            // Gather all possible packages
-            $packages = array_merge(
-                array(),
-                isset($composerObject['packages']) ? $composerObject['packages'] : array(),
-                isset($composerObject['packages-dev']) ? $composerObject['packages-dev'] : array()
-            );
-
-            // Get Samson modules list
-            foreach ($packages as $package) {
-                $requirement = $package['name'];
-                if ((strpos($requirement,
-                            'samsonos/') !== false) && (!isset($package['extra']['samson_module_ignore']))
-                ) {
-                    $requireSamsonModules[] = $requirement;
-                }
-            }
-
-            // Create list of Samson modules with there require modules
-            foreach ($packages as $package) {
-                $requirement = $package['name'];
-                if (in_array($requirement, $requireSamsonModules)) {
-                    $requireList[$requirement] = array();
-                    if (isset($package['require'])) {
-                        foreach ($package['require'] as $subRequirement => $version) {
-                            if (in_array($subRequirement, $requireSamsonModules)) {
-                                $requireList[$requirement][] = $subRequirement;
-                            }
-                        }
-                    }
-                }
-            }
-
-            // Set modules rating
-            foreach ($requireList as $package => $list) {
-                $this->composerRating($package, $addedModules, $requireList, 1);
-            }
-
-
-            if (sizeof($addedModules)) {
-                // Sort modules rated
-                if (arsort($addedModules)) {
-                    return $addedModules;
-                }
-            }
-
-        }
-        return array();
-    }
     //[PHPCOMPRESSOR(remove,end)]
 
 	
@@ -629,35 +559,5 @@ class Core implements iCore
 	public function __sleep()
     {
         return array( 'module_stack', 'render_mode', 'view_path' );
-    }
-
-    /**
-     * Recursive function that provide module priority count
-     * @param $requirement Current module name
-     * @param $addedModules List of modules with rating
-     * @param array $require Modules list with submodules
-     * @param int $current Current rating
-     * @param string $parent Parent module
-     */
-    private function composerRating($requirement, & $addedModules, $require = array(), $current = 1, $parent = ''){
-        // if current module is not added to list
-        if (!isset($addedModules[$requirement])){
-            // set parent rating
-            $addedModules[$requirement] = $current;
-        } else {
-            // Update module rating
-            $addedModules[$requirement] = $addedModules[$requirement] + $current;
-            // Update current rating
-            $current = $addedModules[$requirement];
-        }
-        // Iterate submodules
-        foreach ($require[$requirement] as $subRequirement) {
-            // Check if two modules require each other
-            if ($parent != $subRequirement) {
-                // Update submodules rating
-                $this->composerRating($subRequirement, $addedModules, $require, $current, $requirement);
-            }
-        }
-
     }
 }
