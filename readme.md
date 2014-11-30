@@ -7,6 +7,7 @@
 [![Coverage Status](https://img.shields.io/coveralls/samsonos/php_core.svg)](https://coveralls.io/r/samsonos/php_core?branch=master)
 [![Code Climate](https://codeclimate.com/github/samsonos/php_core/badges/gpa.svg)](https://codeclimate.com/github/samsonos/php_core) 
 [![Total Downloads](https://poser.pugx.org/samsonos/php_core/downloads.svg)](https://packagist.org/packages/samsonos/php_core)
+[![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/samsonos/php_core/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/samsonos/php_core/?branch=master)
 
 ##Using SamsonPHP in your project
 To use SamsonPHP framework in your project you must add its dependency in your ```composer.json```:
