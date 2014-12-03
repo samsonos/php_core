@@ -219,7 +219,7 @@ class ResourceMap
             if ($namespace == '\\' && preg_match('/^\s*namespace\s+(?<namespace>[^;]+)/iu', $line, $matches)) {
                 $namespace .= $matches['namespace'].'\\';
                 // Read one line from a file and try to find class pattern
-            } elseif (preg_match('/^\s*class\s+(?<class>[a-z0-9]+)\s+extends\s+(?<parent>[a-z0-9\\\]+)/iu', $line, $matches)) {
+            } elseif (preg_match('/^\s*(abstract\s*)?class\s+(?<class>[a-z0-9]+)\s+extends\s+(?<parent>[a-z0-9\\\]+)/iu', $line, $matches)) {
 
                 // Store module class name
                 $class = $namespace.$matches['class'];
@@ -407,6 +407,8 @@ class ResourceMap
                     $this->$var = & $this->resources[$var];
                 }
             }
+
+            trace($this, true);
 
             return true;
 
