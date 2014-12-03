@@ -408,8 +408,6 @@ class ResourceMap
                 }
             }
 
-            trace($this, true);
-
             return true;
 
         } else { // Signal error
