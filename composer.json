@@ -20,7 +20,7 @@
     },	
     "require": {
     	"samsonos/php_event": "1.*",
-        "samsonos/php_composer": "dev-master"
+        "samsonos/php_composer": "1.*"
     },
     "require-dev": {
         "satooshi/php-coveralls": "dev-master",
