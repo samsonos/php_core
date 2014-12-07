@@ -63,7 +63,7 @@ function & error(){static $_error; return ( $_error = isset($_error) ? $_error :
  * Error(Ошибка) - Зафиксировать ошибку работы системы
  *
  * @param string 	$error_msg	Текст ошибки
- * @param numeric 	$error_code	Код ошибки
+ * @param integer 	$error_code	Код ошибки
  * @param mixed 	$args		Специальные "жетоны" для вставки в текст ошибки
  * @param mixed 	$ret_val	Value that must be returned by the function
  * @return boolean FALSE для остановки работы функции или условия
