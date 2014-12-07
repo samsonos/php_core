@@ -264,7 +264,7 @@ class Error
 	/**
 	 * Преобразовать параметры ошибки в массив-ошибку
 	 * 
-	 * @param numeric 	$errno		Код ошибки
+	 * @param integer 	$errno		Код ошибки
 	 * @param string 	$desc		Описание ошибки
 	 * @param string 	$errstr		Текст ошибки
 	 * @param string	$errfile	Файл в котором происходит ошибка
