@@ -35,7 +35,7 @@ class Config
      * Assign configuration data to a module object
      *
      * @param string               $moduleID Module identifier
-     * @param \samson\core\iModule $module Pointer to a module instance to be configured
+     * @param mixed $module Pointer to a module instance to be configured
      */
     public static function implement($moduleID, & $module)
     {
