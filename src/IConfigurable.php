@@ -18,7 +18,7 @@ interface IConfigurable
     /**
      * Perform instance configuration
      * @param array $params Collection of parameters for configuration
-     * @return boolean True if class has been successfully configured
+     * @return bool True if class has been successfully configured
      */
     public function configure(array $params = array());
 }
