@@ -12,6 +12,7 @@ namespace samson\core;
  * Generic view rendering interface defining
  * all main view context operations.
  * @package samson\core
+ * @author Vitaly Iegorov <egorov@samsonos.com>
  */
 interface IViewable
 {
