@@ -28,6 +28,16 @@ interface IViewable
      * Method searches for the shortest matching view path by $pathPattern,
      * from loaded views.
      *
+     * Module saves all view data that has been set to a specific view in appropriate
+     * view data collection entry. By default module creates vied data entry - VD_POINTER_DEF,
+     * and until any call of iModule::view() or iModule::output(), all data that is iModule::set(),
+     * is stored to that location.
+     *
+     * On the first call of iModule::view() or iModule::output(), this method changes the view data
+     * pointer to actual relative view path, and copies(actually just sets view data pointer) all view
+     * data set before to new view data pointer. This guarantees backward compatibility and gives
+     * opportunity not to set the view path before setting view data to it.
+     *
      * @param string $pathPattern  Path pattern for view searching
      * @return IViewable Chaining
      */
