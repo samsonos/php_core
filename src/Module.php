@@ -591,10 +591,16 @@ class Module implements iModule, IViewable, \ArrayAccess, iModuleViewable
 	public function __set( $field, $value = NULL )
 	{		
 		// This is object
-		if( is_object( $field ))
-		{				
-			// If iModuleViewable implementor is passed
-			if( in_array( ns_classname('iModuleViewable','samson\core'), class_implements($field )) ) $this->_setObject( $field, $value );			
+		if (is_object($field)) {
+			$implements = class_implements($field);
+			// If iModuleViewable implements is passed
+			if(
+				// TODO: Remove old interface support in future
+				in_array(ns_classname('iModuleViewable','samson\core'), $implements)
+			||	in_array(AutoLoader::className('IViewSettable','samson\core'), $implements)
+			) {
+				$this->_setObject( $field, $value );
+			}
 		}		
 		// If array is passed 
 		else if( is_array( $field ) ) $this->_setArray( $field, $value );

@@ -34,13 +34,17 @@ class Config
     /**
      * Assign configuration data to a module object
      *
-     * @param string               $moduleID Module identifier
+     * @param string $moduleID Module identifier
      * @param mixed $module Pointer to a module instance to be configured
+     * @param array $configuration Collection of key => value configuration parameters
      */
-    public static function implement($moduleID, & $module)
+    public static function implement($moduleID, & $module, & $configuration = null)
     {
-        // Pointer to module configuration
-        $configuration = & self::$data[$moduleID];
+        // If external configuration is not passed
+        if (!isset($configuration)) {
+            // Pointer to module configuration
+            $configuration = & self::$data[$moduleID];
+        }
 
         // If module configuration loaded - set module params
         if (isset($configuration)) {
