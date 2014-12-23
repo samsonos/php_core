@@ -209,6 +209,8 @@ class ResourceMap
         $namespace = '\\';
         // Open file handle for reading
         $file = fopen($path, 'r');
+        // Uses class collection for correct class names
+        $uses = array();
         // Read lines from file
         for ($i = 0; $i<self::CLASS_FILE_LINES_LIMIT; $i++) {
             // Read one line from a file
@@ -217,7 +219,10 @@ class ResourceMap
 
             // Read one line from a file and try to find namespace definition
             if ($namespace == '\\' && preg_match('/^\s*namespace\s+(?<namespace>[^;]+)/iu', $line, $matches)) {
-                $namespace .= $matches['namespace'].'\\';
+                $namespace .= $matches['namespace'] . '\\';
+                // Try to find use statements
+            } elseif (preg_match('/^\s*use\s+/ui', $line, $matches)) {
+                trace($matches, true);
                 // Read one line from a file and try to find class pattern
             } elseif (preg_match('/^\s*(abstract\s*)?class\s+(?<class>[a-z0-9]+)\s+extends\s+(?<parent>[a-z0-9\\\]+)/iu', $line, $matches)) {
 
