@@ -248,7 +248,11 @@ function vdate( $name, $format = 'h:i d.m.y', $function = 'date' )
     $m = & m();
 
     // If view variable is set - echo with format
-    if ( $m->offsetExists( $name )) echo $function( $format, strtotime($m[ $name ]));
+    if ( $m->offsetExists( $name )) {
+        // If data passed as string - convert to number
+        $dateValue = !is_numeric($m[$name]) ? strtotime($m[$name]) : $m[$name];
+        echo $function( $format, $dateValue);
+    }
 
 }
 
