@@ -210,7 +210,8 @@ class ResourceMap
         // Open file handle for reading
         $file = fopen($path, 'r');
         // Uses class collection for correct class names
-        $uses = array();
+        $usesAliases = array();
+        $usesNamespaces = array();
         // Read lines from file
         for ($i = 0; $i<self::CLASS_FILE_LINES_LIMIT; $i++) {
             // Read one line from a file
@@ -221,21 +222,38 @@ class ResourceMap
             if ($namespace == '\\' && preg_match('/^\s*namespace\s+(?<namespace>[^;]+)/iu', $line, $matches)) {
                 $namespace .= $matches['namespace'] . '\\';
                 // Try to find use statements
-            } elseif (preg_match('/^\s*use\s+/ui', $line, $matches)) {
-                trace($matches, true);
+            } elseif (preg_match('/^\s*use\s+(?<class>[^\s;]+)(\s+as\s+(?<alias>[^;]+))*/ui', $line, $matches)) {
+                // Get only class name without namespace
+                $useClass = substr($matches['class'], strrpos($matches['class'], '\\') + 1);
+                // Store alias => full class name collection
+                if (isset($matches['alias'])) {
+                    $usesAliases[$matches['alias']] = $matches['class'];
+                }
+                // Store class name => full class name collection
+                $usesNamespaces[$useClass] = ($matches['class']{0} == '\\' ? '' : '\\').$matches['class'];
                 // Read one line from a file and try to find class pattern
             } elseif (preg_match('/^\s*(abstract\s*)?class\s+(?<class>[a-z0-9]+)\s+extends\s+(?<parent>[a-z0-9\\\]+)/iu', $line, $matches)) {
-
                 // Store module class name
-                $class = $namespace.$matches['class'];
-
+                $class = $namespace.trim($matches['class']);
                 // Store parent class
-                $extends = $matches['parent'];
+                $extends = trim($matches['parent']);
+
+                // If we have alias for this class
+                if (isset($usesAliases[$extends])) {
+                    // Get full class name
+                    $extends = $usesAliases[$extends];
+                    // Get full class name
+                } elseif (isset($usesNamespaces[$extends])) {
+                    $extends = $usesNamespaces[$extends];
+                    // If there is no namespace
+                } elseif (strpos($extends, '\\') === false) {
+                    $extends = $namespace.$extends;
+                }
 
                 // Define if this class is Module ancestor
-                if (isset(self::$moduleAncestors[$matches['parent']]) || in_array($matches['parent'], self::$moduleAncestors)) {
+                if (isset(self::$moduleAncestors[$extends])) {
                     // Save class as module ancestor
-                    self::$moduleAncestors[$namespace.$matches['class']] = $matches['class'];
+                    self::$moduleAncestors[$class] = $matches['class'];
                     // Completed my sir!
                     return true;
                 }
