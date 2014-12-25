@@ -164,7 +164,7 @@ class Core implements iCore
                     // Если в систему был загружен модуль с родительским классом
                     if (get_class($m) == $parent_class) {
                         $connector->parent = & $m;
-                        //elapsed('Parent connection for '.$class_name.'('.$connector->uid.') with '.$parent_class.'('.$m->uid.')');
+                        //elapsed('Parent connection for '.$moduleClass.'('.$connector->uid.') with '.$parent_class.'('.$m->uid.')');
                     }
                 }
             }
