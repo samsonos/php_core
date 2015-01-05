@@ -488,6 +488,7 @@ class Core implements iCore
         // Fire core creation event
         Event::fire('core.created', array(&$this));
 
+        // Load default project configuration schemes
         \samsonos\config\Scheme::init($this->system_path.__SAMSON_CONFIG_PATH);
 	}
 

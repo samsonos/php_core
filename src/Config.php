@@ -20,7 +20,7 @@ define('CONFIG_PROD', 3);
  * @package SamsonPHP
  * @author Vitaly Iegorov <egorov@samsonos.com>
  */
-class Config
+class Config extends \samsonos\config\Entity
 {	
 	/** @var integer Current web-application development stage*/
 	public static $type = CONFIG_ALL;
