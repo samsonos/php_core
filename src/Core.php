@@ -70,6 +70,12 @@ class Core implements iCore
     /** @var string  composer lock file name */
     public $composerLockFile = 'composer.lock';
 
+    /** @var string  Configuration base folder path */
+    public $configPath = __SAMSON_CONFIG_PATH;
+
+    /** @var Configuration[] Collection of possible configurations */
+    protected $configurations;
+
     /**
      * @see \samson\core\iCore::resources()
      * @deprecated Use ResourceMap::find()
@@ -481,6 +487,8 @@ class Core implements iCore
 
         // Fire core creation event
         Event::fire('core.created', array(&$this));
+
+        \samsonos\config\Scheme::init($this->system_path.__SAMSON_CONFIG_PATH);
 	}
 
     /**

@@ -20,7 +20,8 @@
     },	
     "require": {
     	"samsonos/php_event": "1.*",
-        "samsonos/php_composer": "1.*"
+        "samsonos/php_composer": "1.*",
+        "samsonos/php_config": "1.*"
     },
     "require-dev": {
         "phpunit/phpunit": "4.2.*"

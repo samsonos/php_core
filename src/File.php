@@ -4,7 +4,6 @@ namespace samson\core;
 /**
  * Общие методы для работы с файлами и каталогами
  * @author Vitaly Iegorov <vitalyiegorov@gmail.com>
- * @deprecated Use https://github.com/samsonos/php_fs methods instead
  */
 class File
 {
