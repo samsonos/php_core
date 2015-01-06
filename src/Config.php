@@ -155,7 +155,7 @@ class Config extends \samsonos\config\Entity
 \samson\core\Event::subscribe('core.created', array('\samson\core\Config', 'load'));
 
 // Subscribe to core started event to load all possible module configurations
-\samson\core\Event::subscribe('core.routing', array('\samson\core\Config', 'init'));
+//\samson\core\Event::subscribe('core.routing', array('\samson\core\Config', 'init'));
 
 // Subscribe to core module loaded core event
 \samson\core\Event::subscribe('core.module_loaded', array('\samson\core\Config', 'implement'));
