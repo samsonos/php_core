@@ -489,8 +489,8 @@ class Core implements iCore
      */
     public function composer()
     {
-        $composer = new \samson\composer\Composer($this->system_path);
-        $composer->addVendor('samsonos')->setIgnoreKey('samson_module_ignore')->addIgnorePackage('samsonos/php_core');
+        $composer = new \samsonos\composer\Composer($this->system_path);
+        $composer->vendor('samsonos')->ignoreKey('samson_module_ignore')->ignorePackage('samsonos/php_core');
         $composerModules = $composer->create();
 
         // Iterate requirements
