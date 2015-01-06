@@ -20,11 +20,10 @@
     },	
     "require": {
     	"samsonos/php_event": "1.*",
-        "samsonos/php_composer": "1.*"
+        "samsonos/php_composer": "1.*",
+        "samsonos/php_config": "1.*"
     },
     "require-dev": {
-        "satooshi/php-coveralls": "dev-master",
-        "squizlabs/php_codesniffer": "2.0.*@dev",
         "phpunit/phpunit": "4.2.*"
     }
 }

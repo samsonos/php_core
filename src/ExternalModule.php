@@ -113,43 +113,47 @@ class ExternalModule extends Module implements iExternalModule
 		// Веренем результат выполнения действия
 		return $result;
 	}
-	
-	/**
-	 * Перегружаем стандартное поведение вывода представления модуля
-	 * Если текущий модуль наследует другой <code>ModuleConnector</code>
-	 * то тогда сначала выполняется проверка существования требуемого представление
-	 * в данном модуле, а потом в его родителе. Это дает возможность выполнять наследование
-	 * представлений модулей.
-	 *
-	 * @see Module::output()
-	 */
-	public function output( $view_path = null )
-	{	
-		//elapsed($this->id.'('.$this->uid.')-'.$this->view_path);
-		// Если этот класс не прямой наследник класса "Подключаемого Модуля"
-		if( isset( $this->parent ) )
-		{
-			// Find full path to view file
-			$_view_path = $this->findView( $view_path );			
-			
-			// Если требуемое представление НЕ существует в текущем модуле -
-			// выполним вывод представления для родительского модуля
-			if( !isset($_view_path{0})  )					
-			{			
-				// Merge view data for parent module
-				$this->parent->view_data = array_merge( $this->parent->view_data, $this->view_data );
-				
-				// Switch parent view context
-				$this->parent->data = & $this->data;
-				
-				// Call parent module rendering
-				return $this->parent->output( isset($view_path) ? $view_path : $this->view_path );
-			}
-		}
-	
-		// Call regular rendering
-		return parent::output( $view_path );
-	}
+
+    /** @see iModule::view() */
+    public function view($viewPath)
+    {
+        //elapsed('['.$this->id.'] Setting view context: ['.$viewPath.']');
+        // Find full path to view file
+        $this->view_path = $this->findView($viewPath);
+
+        // If we have not found view in current module but we have parent module
+        if (isset($this->parent) && $this->view_path === false) {
+            //elapsed('['.$this->id.'] Cannot set view['.$viewPath.'] - passing it to parent['.$this->parent->id.']');
+            /*
+             * Call parent module view setting and return PARENT module to chain
+             * actually switching current module in chain
+             */
+            return $this->parent->view($viewPath);
+        } else { // Call default module behaviour
+            return parent::view($this->view_path);
+        }
+    }
+
+    /**
+     * Overloading default module rendering behaviour
+     * as it is used in templates and views using m()->render()
+     * without specifying concrete module or passing a variable
+     * @see iModule::render()
+     */
+    public function render($controller = null)
+    {
+        // If we have parent module connection and have no view set
+        if (isset($this->parent) && $this->view_path === false) {
+            // Merge current and parent module view data
+            $this->parent->view_data = array_merge($this->parent->view_data, $this->view_data);
+            // Set internal view context data pointer
+            $this->parent->data = &$this->parent->view_data[$this->parent->view_context];
+            // Call parent render
+            return $this->parent->render($controller);
+        } else { // Call default module behaviour
+            return parent::render($controller);
+        }
+    }
 	
 	/**	@see iExternalModule::prepare() */
 	public function prepare()
