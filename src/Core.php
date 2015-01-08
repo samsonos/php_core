@@ -70,11 +70,18 @@ class Core implements iCore
     /** @var string  composer lock file name */
     public $composerLockFile = 'composer.lock';
 
-    /** @var string  Configuration base folder path */
-    public $configPath = __SAMSON_CONFIG_PATH;
+    /**
+     * Change current system working environment
+     * @param string $environment Environment identifier
+     * @return self Chaining
+     */
+    public function environment($environment = \samsonos\config\Scheme::BASE)
+    {
+        // Signal core environment change
+        Event::signal('core.environment.change', array($environment, &$this));
 
-    /** @var Configuration[] Collection of possible configurations */
-    protected $configurations;
+        return $this;
+    }
 
     /**
      * @see \samson\core\iCore::resources()
@@ -141,6 +148,9 @@ class Core implements iCore
 
             // Fire core module load event
             Event::fire('core.module_loaded', array($module_id, &$connector));
+
+            // Fire core module configure event
+            Event::fire('core.module.configure', array(&$connector, $module_id));
 
             // TODO: Think how to decouple this
             // Call module preparation handler
@@ -440,7 +450,7 @@ class Core implements iCore
         // If no one has passed back routing callback
         if (!isset($result) || $result == A_FAILED) {
             // Fire core e404 - routing failed event
-            $result = Event::fire('core.e404', array(url()->module, url()->method), true);
+            $result = Event::signal('core.e404', array(url()->module, url()->method));
         }
 
 		// Response
@@ -488,8 +498,8 @@ class Core implements iCore
         // Fire core creation event
         Event::fire('core.created', array(&$this));
 
-        // Load default project configuration schemes
-        \samsonos\config\Scheme::init($this->system_path.__SAMSON_CONFIG_PATH);
+        // Signal core configure event
+        Event::signal('core.configure', array($this->system_path.__SAMSON_CONFIG_PATH));
 	}
 
     /**
