@@ -508,18 +508,17 @@ class Core implements iCore
      */
     public function composer()
     {
+        // Read dependencies from composer.lock file
         $composer = new \samsonos\composer\Composer($this->system_path);
-        $composer->vendor('samsonos')->ignoreKey('samson_module_ignore')->ignorePackage('samsonos/php_core');
-        $composerModules = $composer->create();
+        $composerModules = $composer
+            ->vendor('samsonos')
+            ->ignoreKey('samson_module_ignore')
+            ->ignorePackage('samsonos/php_core')
+            ->create();
 
         // Iterate requirements
         foreach ($composerModules as $requirement => $rating) {
             //elapsed('Loading module '.$requirement);
-
-            // TODO: Make possible to use local modules when developing SamsonCMS - get relative path to main folder
-            // TODO: Make possible to automatically search for local modules firstly and only then default
-            // TODO: Make possible to automatically define depth of web-application to build proper paths to local modules
-            // TODO: Force debug message if module cannot be autoloaded by PSR-* standard
 
             // Use default path
             $path = __SAMSON_CWD__.__SAMSON_VENDOR_PATH.$requirement;
