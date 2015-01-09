@@ -149,8 +149,8 @@ class Core implements iCore
             // Fire core module load event
             Event::fire('core.module_loaded', array($module_id, &$connector));
 
-            // Fire core module configure event
-            Event::fire('core.module.configure', array(&$connector, $module_id));
+            // Signal core module configure event
+            Event::signal('core.module.configure', array(&$connector, $module_id));
 
             // TODO: Think how to decouple this
             // Call module preparation handler
