@@ -1,4 +1,5 @@
 <?php
+//[PHPCOMPRESSOR(remove,start)]
 namespace samson\core;
 
 /** Constant to define generic stage at web-application production status */
@@ -150,6 +151,8 @@ class Config extends \samsonos\config\Entity
 	/** @var string	Path to module location if it was not loaded already */
 	protected $__path;	
 }
+//[PHPCOMPRESSOR(remove,end)]
+
 
 //[PHPCOMPRESSOR(remove,start)]
 // Subscribe to core started event to load all possible module configurations
