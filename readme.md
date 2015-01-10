@@ -1,3 +1,4 @@
+[![Stories in Ready](https://badge.waffle.io/samsonos/php_core.png?label=ready&title=Ready)](https://waffle.io/samsonos/php_core)
 #SamsonPHP
 
 [SamsonPHP](http://samsonphp.com) - Modular Event-based PHP framework
