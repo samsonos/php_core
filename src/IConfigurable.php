@@ -2,23 +2,24 @@
 /**
  * Created by PhpStorm.
  * User: egorov
- * Date: 11.12.2014
- * Time: 11:50
+ * Date: 10.01.2015
+ * Time: 15:18
  */
-
-namespace samson\core;
+namespace samsonos\core;
 
 /**
- * Interface for giving ability to class for generic configuration
- * @package samson\core
+ * Give object instances ability for custom implementation of its configuration,
+ * if class does not implements this interface then generic configure logic will
+ * be applied to it.
+ * @package samsonos\core
  * @author Vitaly Egorov <egorov@samsonos.com>
  */
 interface IConfigurable
 {
     /**
      * Perform instance configuration
-     * @param array $params Collection of parameters for configuration
-     * @return bool True if class has been successfully configured
+     * @param mixed $entity Configuration instance for configuration
+     * @return boolean False if something went wrong otherwise true
      */
-    public function configure(array $params = array());
+    public function configure($entityConfiguration);
 }
