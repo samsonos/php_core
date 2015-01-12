@@ -445,7 +445,7 @@ class Core implements iCore
         $result = A_FAILED;
 
         // Fire core routing event
-        Event::fire('core.routing', array(&$this, &$result, $default));
+        Event::signal('core.routing', array(&$this, &$result, $default));
 
         // If no one has passed back routing callback
         if (!isset($result) || $result == A_FAILED) {
