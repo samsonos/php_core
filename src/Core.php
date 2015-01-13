@@ -519,7 +519,7 @@ class Core implements iCore
 
         // Iterate requirements
         foreach ($composerModules as $requirement => $rating) {
-            elapsed('Loading module '.$requirement);
+            //elapsed('Loading module '.$requirement);
 
             // Use default path
             $path = __SAMSON_CWD__.__SAMSON_VENDOR_PATH.$requirement;
