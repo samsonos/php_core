@@ -22,7 +22,7 @@ define('CONFIG_PROD', 3);
  * @author Vitaly Iegorov <egorov@samsonos.com>
  * @deprecated Use \samsonos\config\Entity
  */
-class Config extends \samsonos\config\Entity
+class Config extends \samsonphp\config\Entity
 {	
 
 }
