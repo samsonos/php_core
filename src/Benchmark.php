@@ -82,7 +82,7 @@ class Benchmark
     private function __construct()
     {
         // Subscribe to core after render event to show benchmark
-        Event::subscribe('core.rendered', array($this, 'show'));
+        \samsonphp\event\Event::subscribe('core.rendered', array($this, 'show'));
     }
 
     // Singleton pattern

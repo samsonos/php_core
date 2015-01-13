@@ -78,7 +78,7 @@ class Core implements iCore
     public function environment($environment = \samsonos\config\Scheme::BASE)
     {
         // Signal core environment change
-        Event::signal('core.environment.change', array($environment, &$this));
+        \samsonphp\event\Event::signal('core.environment.change', array($environment, &$this));
 
         return $this;
     }
@@ -147,10 +147,10 @@ class Core implements iCore
             $module_id = $connector->id();
 
             // Fire core module load event
-            Event::fire('core.module_loaded', array($module_id, &$connector));
+            \samsonphp\event\Event::fire('core.module_loaded', array($module_id, &$connector));
 
             // Signal core module configure event
-            Event::signal('core.module.configure', array(&$connector, $module_id));
+            \samsonphp\event\Event::signal('core.module.configure', array(&$connector, $module_id));
 
             // TODO: Think how to decouple this
             // Call module preparation handler
@@ -261,7 +261,7 @@ class Core implements iCore
 		ob_end_clean();
 
         // Fire core render event
-        Event::fire('core.render', array(&$html, &$__data, &$this->active));
+        \samsonphp\event\Event::fire('core.render', array(&$html, &$__data, &$this->active));
 
 		// Iterating throw render stack, with one way template processing
 		foreach ( $this->render_stack as & $renderer )
@@ -277,7 +277,7 @@ class Core implements iCore
     //[PHPCOMPRESSOR(remove,start)]
     /**
      * Generic wrap for Event system subscription
-     * @see \samson\core\Event::subscribe()
+     * @see \samson\core\\samsonphp\event\Event::subscribe()
      *
      * @param string   $key     Event identifier
      * @param callable $handler Event handler
@@ -287,7 +287,7 @@ class Core implements iCore
      */
     public function subscribe($key, $handler, $params = array())
     {
-        Event::subscribe($key, $handler, $params);
+        \samsonphp\event\Event::subscribe($key, $handler, $params);
 
         return $this;
     }
@@ -435,7 +435,7 @@ class Core implements iCore
 	{
 		// TODO: Change ExternalModule::init() signature
         // Fire core started event
-        Event::fire('core.started');
+        \samsonphp\event\Event::fire('core.started');
 
         // TODO: Does not see why it should be here
         // Set main template path
@@ -445,12 +445,12 @@ class Core implements iCore
         $result = A_FAILED;
 
         // Fire core routing event
-        Event::signal('core.routing', array(&$this, &$result, $default));
+        \samsonphp\event\Event::signal('core.routing', array(&$this, &$result, $default));
 
         // If no one has passed back routing callback
         if (!isset($result) || $result == A_FAILED) {
             // Fire core e404 - routing failed event
-            $result = Event::signal('core.e404', array(url()->module, url()->method));
+            $result = \samsonphp\event\Event::signal('core.e404', array(url()->module, url()->method));
         }
 
 		// Response
@@ -466,14 +466,14 @@ class Core implements iCore
             $output = $this->render($this->template_path, $data);
 
             // Fire after render event
-            Event::fire('core.rendered', array(&$output, &$data, &$this->active));
+            \samsonphp\event\Event::fire('core.rendered', array(&$output, &$data, &$this->active));
 		}
 		
 		// Output results to client
 		echo $output;
 
         // Fire ended event
-        Event::fire('core.ended', array(&$output));
+        \samsonphp\event\Event::fire('core.ended', array(&$output));
     }
 
 	//[PHPCOMPRESSOR(remove,start)]
@@ -496,10 +496,10 @@ class Core implements iCore
         $this->subscribe('core.rendered', array($this, 'generate_template'));
 
         // Fire core creation event
-        Event::fire('core.created', array(&$this));
+        \samsonphp\event\Event::fire('core.created', array(&$this));
 
         // Signal core configure event
-        Event::signal('core.configure', array($this->system_path.__SAMSON_CONFIG_PATH));
+        \samsonphp\event\Event::signal('core.configure', array($this->system_path.__SAMSON_CONFIG_PATH));
 	}
 
     /**

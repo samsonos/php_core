@@ -43,7 +43,7 @@ class ExternalModule extends Module implements iExternalModule
         $this->vid = $this->id;
 
         // Subscribe to an config ready core event
-        \samson\core\Event::subscribe('core.started', array(&$this, 'init'));
+        \samsonphp\event\Event::subscribe('core.started', array(&$this, 'init'));
 		
 		// Call parent constructor
 		parent::__construct($this->id, $path, $resources );
