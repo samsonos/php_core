@@ -508,14 +508,9 @@ class Core implements iCore
      */
     public function composer()
     {
-        // Read dependencies from composer.lock file
-        $composer = new \samsonos\composer\Composer($this->system_path);
-        $composerModules = $composer
-            ->vendor('samsonphp')
-            ->vendor('samsonos')
-            ->ignoreKey('samson_module_ignore')
-            ->ignorePackage('samsonos/php_core')
-            ->create();
+        $composerModules = array();
+
+	    \samsonphp\event\Event::fire('core.composer.create', array(& $composerModules, $this->system_path));
 
         // Iterate requirements
         foreach ($composerModules as $requirement => $rating) {
