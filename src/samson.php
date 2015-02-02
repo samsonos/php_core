@@ -27,6 +27,7 @@ require('AutoLoader.php');
 
 require('Config.php');
 
+
 // Load files with functions
 require('shortcuts.php');
 require('Utils2.php');

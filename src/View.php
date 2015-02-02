@@ -228,7 +228,7 @@ function vimg( $src, $id='', $class='', $alt = '', $dummy = null )
     elseif( isset($dummy))$src = $dummy;
 
     // We always build path to images fully independant of web-application or module relatively to base web-app
-    if( $src{0} != '/' ) $src = '/'.$src;
+    //if( $src{0} != '/' ) $src = '/'.$src;
 
     // Выведем изображение
     echo '<img src="'.$src.'" id="'.$id.'" class="'.$class.'" alt="'.$alt.'" title="'.$alt.'">';

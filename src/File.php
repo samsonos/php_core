@@ -4,7 +4,6 @@ namespace samson\core;
 /**
  * Общие методы для работы с файлами и каталогами
  * @author Vitaly Iegorov <vitalyiegorov@gmail.com>
- *
  */
 class File
 {

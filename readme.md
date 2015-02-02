@@ -7,22 +7,23 @@
 [![Coverage Status](https://img.shields.io/coveralls/samsonos/php_core.svg)](https://coveralls.io/r/samsonos/php_core?branch=master)
 [![Code Climate](https://codeclimate.com/github/samsonos/php_core/badges/gpa.svg)](https://codeclimate.com/github/samsonos/php_core) 
 [![Total Downloads](https://poser.pugx.org/samsonos/php_core/downloads.svg)](https://packagist.org/packages/samsonos/php_core)
+[![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/samsonos/php_core/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/samsonos/php_core/?branch=master)
+[![Stories in Ready](https://badge.waffle.io/samsonos/php_core.png?label=ready&title=Ready)](https://waffle.io/samsonos/php_core)
 
 ##Using SamsonPHP in your project
 To use SamsonPHP framework in your project you must add its dependency in your ```composer.json```:
-```
-    "minimum-stability":"dev",
+```json
     "require": {
-        "samsonos/php_core": "*"
+        "samsonos/php_core": "1.*"
     }, 
 ```
-After doing ```composer install``` or ```composer update``` composer autoloader must be included
-into your init script(by default ```index.php```): ```require [PATH_TO_VENDOR_DIR]/autoload.php```.
-Following this line, all SamsonPHP classes and functions would be available.
+After doing ```composer install``` or ```composer update``` all SamsonPHP classes and functions would be available.
 
-> We should use ```"minimum-stability":"dev"``` composer directive as we still cannot get
-> final release version of core module and other commonly used modules, but we promise to
-> do it near future
+Example usage:
+```php
+// Run framework
+s()->start('main');
+```
 
 For further information read [Official SamsonPHP Wiki](https://github.com/samsonos/php_core/wiki)
 

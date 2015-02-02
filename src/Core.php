@@ -59,13 +59,29 @@ class Core implements iCore
 	protected $template_path = __SAMSON_DEFAULT_TEMPLATE;
 	
 	/** @var string Path to current web-application */
-	protected $system_path = __SAMSON_CWD__;
+	public $system_path = __SAMSON_CWD__;
 	
 	/** @var string View path modifier for templates */
 	protected $view_path = '';
 
 	/** @var string View path loading mode */
 	public $render_mode = self::RENDER_STANDART;
+
+    /** @var string  composer lock file name */
+    public $composerLockFile = 'composer.lock';
+
+    /**
+     * Change current system working environment
+     * @param string $environment Environment identifier
+     * @return self Chaining
+     */
+    public function environment($environment = \samsonos\config\Scheme::BASE)
+    {
+        // Signal core environment change
+        \samsonphp\event\Event::signal('core.environment.change', array($environment, &$this));
+
+        return $this;
+    }
 
     /**
      * @see \samson\core\iCore::resources()
@@ -131,7 +147,10 @@ class Core implements iCore
             $module_id = $connector->id();
 
             // Fire core module load event
-            Event::fire('core.module_loaded', array($module_id, &$connector));
+            \samsonphp\event\Event::fire('core.module_loaded', array($module_id, &$connector));
+
+            // Signal core module configure event
+            \samsonphp\event\Event::signal('core.module.configure', array(&$connector, $module_id));
 
             // TODO: Think how to decouple this
             // Call module preparation handler
@@ -161,7 +180,7 @@ class Core implements iCore
                     // Если в систему был загружен модуль с родительским классом
                     if (get_class($m) == $parent_class) {
                         $connector->parent = & $m;
-                        //elapsed('Parent connection for '.$class_name.'('.$connector->uid.') with '.$parent_class.'('.$m->uid.')');
+                        //elapsed('Parent connection for '.$moduleClass.'('.$connector->uid.') with '.$parent_class.'('.$m->uid.')');
                     }
                 }
             }
@@ -242,7 +261,7 @@ class Core implements iCore
 		ob_end_clean();
 
         // Fire core render event
-        Event::fire('core.render', array(&$html, &$__data, &$this->active));
+        \samsonphp\event\Event::fire('core.render', array(&$html, &$__data, &$this->active));
 
 		// Iterating throw render stack, with one way template processing
 		foreach ( $this->render_stack as & $renderer )
@@ -258,7 +277,7 @@ class Core implements iCore
     //[PHPCOMPRESSOR(remove,start)]
     /**
      * Generic wrap for Event system subscription
-     * @see \samson\core\Event::subscribe()
+     * @see \samson\core\\samsonphp\event\Event::subscribe()
      *
      * @param string   $key     Event identifier
      * @param callable $handler Event handler
@@ -268,7 +287,7 @@ class Core implements iCore
      */
     public function subscribe($key, $handler, $params = array())
     {
-        Event::subscribe($key, $handler, $params);
+        \samsonphp\event\Event::subscribe($key, $handler, $params);
 
         return $this;
     }
@@ -416,7 +435,7 @@ class Core implements iCore
 	{
 		// TODO: Change ExternalModule::init() signature
         // Fire core started event
-        Event::fire('core.started');
+        \samsonphp\event\Event::fire('core.started');
 
         // TODO: Does not see why it should be here
         // Set main template path
@@ -426,12 +445,12 @@ class Core implements iCore
         $result = A_FAILED;
 
         // Fire core routing event
-        Event::fire('core.routing', array(&$this, &$result, $default));
+        \samsonphp\event\Event::signal('core.routing', array(&$this, &$result, $default));
 
         // If no one has passed back routing callback
         if (!isset($result) || $result == A_FAILED) {
             // Fire core e404 - routing failed event
-            $result = Event::fire('core.e404', array(url()->module, url()->method), true);
+            $result = \samsonphp\event\Event::signal('core.e404', array(url()->module, url()->method));
         }
 
 		// Response
@@ -447,14 +466,14 @@ class Core implements iCore
             $output = $this->render($this->template_path, $data);
 
             // Fire after render event
-            Event::fire('core.rendered', array(&$output, &$data, &$this->active));
+            \samsonphp\event\Event::fire('core.rendered', array(&$output, &$data, &$this->active));
 		}
 		
 		// Output results to client
 		echo $output;
 
         // Fire ended event
-        Event::fire('core.ended', array(&$output));
+        \samsonphp\event\Event::fire('core.ended', array(&$output));
     }
 
 	//[PHPCOMPRESSOR(remove,start)]
@@ -477,7 +496,10 @@ class Core implements iCore
         $this->subscribe('core.rendered', array($this, 'generate_template'));
 
         // Fire core creation event
-        Event::fire('core.created', array(&$this));
+        \samsonphp\event\Event::fire('core.created', array(&$this));
+
+        // Signal core configure event
+        \samsonphp\event\Event::signal('core.configure', array($this->system_path.__SAMSON_CONFIG_PATH));
 	}
 
     /**
@@ -486,78 +508,54 @@ class Core implements iCore
      */
     public function composer()
     {
-        /** Composer.json is always in the project root folder */
-        $path = __SAMSON_CWD__.'composer.json';
+        $composerModules = array();
 
-        // If we have composer configuration file
-        if (file_exists($path)) {
-            // Read file into object
-            $composerObject = json_decode(file_get_contents($path), true);
+	    \samsonphp\event\Event::fire('core.composer.create', array(& $composerModules, $this->system_path));
 
-            // Gather all possible requires
-            $require = array_merge(
-                array(),
-                isset($composerObject['require']) ? $composerObject['require'] : array(),
-                isset($composerObject['require-dev']) ? $composerObject['require-dev'] : array()
-            );
+        // Iterate requirements
+        foreach ($composerModules as $requirement => $rating) {
+            //elapsed('Loading module '.$requirement);
 
-            // Iterate requirements
-            foreach ($require as $requirement => $version) {
-                // Ignore core module and work only with samsonos/* modules before they are not PSR- optimized
-                if(($requirement != 'samsonos/php_core') && (strpos($requirement, 'samsonos/') !== false)) {
+            // Use default path
+            $path = __SAMSON_CWD__.__SAMSON_VENDOR_PATH.$requirement;
 
-                   //elapsed('Loading module '.$requirement);
-
-                    // TODO: Make possible to use local modules when developing SamsonCMS - get relative path to main folder
-                    // TODO: Make possible to automatically search for local modules firstly and only then default
-                    // TODO: Make possible to automatically define depth of web-application to build proper paths to local modules
-                    // TODO: Force debug message if module cannot be autoloaded by PSR-* standard
-
-                    // Use default path
-                    $path = __SAMSON_CWD__.__SAMSON_VENDOR_PATH.$requirement;
-
-                    // If path with underscores does not exists
-                    if (!file_exists($path)) {
-                        // Try path without underscore
-                        $path = str_replace('_', '/', $path);
-                        if (!file_exists($path)) {
-                            return e('Cannot load module(from ##): "##" - Path not found', E_SAMSON_FATAL_ERROR, array($path, $requirement));
-                        }
-                    }
-
-                    // Load module
-                    $this->load($path);
+            // If path with underscores does not exists
+            if (!file_exists($path)) {
+                // Try path without underscore
+                $path = str_replace('_', '/', $path);
+                if (!file_exists($path)) {
+                    return e('Cannot load module(from ##): "##" - Path not found', E_SAMSON_FATAL_ERROR, array($path, $requirement));
                 }
             }
 
+            // Load module
+            $this->load($path);
+        }
 
-            // Load local module with all web-application resources
-            $localResources = $this->map->toLoadStackFormat();
 
-            // Manually include local module to load stack
-            $this->load_stack['local'] = $localResources;
-            $this->load_module_stack[ 'local' ] = $localResources;
+        // Load local module with all web-application resources
+        $localResources = $this->map->toLoadStackFormat();
 
-            // Create local module and set it as active
-            $this->active = new CompressableLocalModule('local', $this->system_path, $localResources);
+        // Manually include local module to load stack
+        $this->load_stack['local'] = $localResources;
+        $this->load_module_stack[ 'local' ] = $localResources;
 
-            // Require all local module model files
-            foreach ($localResources['models'] as $model) {
-            	// TODO: Why have to require once?
-                require_once($model);
-            }
+        // Create local module and set it as active
+        $this->active = new CompressableLocalModule('local', $this->system_path, $localResources);
 
-            // Create all local modules
-            foreach ($localResources['controllers'] as $controller) {
-                // Require class into PHP
-                require($controller);
+        // Require all local module model files
+        foreach ($localResources['models'] as $model) {
+            // TODO: Why have to require once?
+            require_once($model);
+        }
 
-                // Create module connector instance
-                new CompressableLocalModule(basename($controller, '.php'), $this->system_path, $localResources);
-            }
+        // Create all local modules
+        foreach ($localResources['controllers'] as $controller) {
+            // Require class into PHP
+            require($controller);
 
-        } else { // Signal configuration error
-            return e('Project does not have composer.json', E_SAMSON_FATAL_ERROR);
+            // Create module connector instance
+            new CompressableLocalModule(basename($controller, '.php'), $this->system_path, $localResources);
         }
 
         return $this;

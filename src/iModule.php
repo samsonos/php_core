@@ -56,14 +56,7 @@ interface iModule
 	 * @param string $value Значение пути к файлам модуля для установки
 	 * @return iModule Указатель на самого себя для "ЦЕПИРОВАНИЯ"
 	 */
-	public function path( $value = NULL );	
-	
-	/**
-	 * Вывести представление данного модуля в текущий поток вывода
-	 *
-	 * @param string $view_path Путь к представлению относительно расположения данного модуля
-	 */
-	public function output( $view_path = null );
+	public function path( $value = NULL );
 	
 	/**
 	 * Выполнить прорисовку данного модуля
@@ -88,48 +81,10 @@ interface iModule
 	public function action( $method_name = NULL );
 	
 	/**
-	 * Set current view path and manipulate view data collection pointer 
-	 * 
-	 * Module saves all view data that has been set to a specific view in appropriate
-	 * view data collection entry. By default module creates vied data entry - VD_POINTER_DEF,
-	 * and until any call of iModule::view() or iModule::output(), all data that is iModule::set(),
-	 * is stored to that location. 
-	 * 
-	 * On the first call of iModule::view() or iModule::output(), this method changes the view data
-	 * pointer to actual relative view path, and copies(actually just sets view data pointer) all view
-	 * data setted before to new view data pointer. This guarantees backward compatibility and gives
-	 * opportunity not to set the view path before settiing view data to it.  
-	 * 	 
-	 * 
-	 * @param string $value	Путь к файлу представлению
-	 * @return iModule Указатель на текущий модуль для цепирования
-	 */
-	public function view( $view_path );
-	
-	/**
 	 * Установить/Получить HTML представление модуля
 	 * 
 	 * @param string $value Значение HTML для установки в представление
 	 * @return iModule/string Указатель на текущий модуль для цепирования или текущее значение HTML представления 
 	 */
 	public function html( $value = NULL );
-	
-	/**
-	 * Установить значение переменной представления модуля
-	 * 
-	 * Метод также может принимать:
-	 *  - Объекты наследованные от dbRecord
-	 *  	В представление устанавливаются все поля записи из БД в формате:  <code>ClassName_FieldName</code>
-	 *  - Модули
-	 *  	В представление устанавливаются все переменные представления переданного модуля
-	 *  - Ассоциативные массивы
-	 *  	В представление устанавливаются все из переданного массива
-	 *  	
-	 * При этом все переменные установленные до этого сохраняются
-	 * При передаче сложного объекта параметр <code>$value</code> упускается 
-	 *  
-	 * @param mixed $field Имя перенной для установки или объект
-	 * @param mixed $value Значение переменной 
-	 */
-	public function set( $field, $value = NULL );
 }

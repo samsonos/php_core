@@ -16,7 +16,7 @@ use samson\core\AutoLoader;
  */
 class Service extends ExternalModule
 {
-    /** Factory instances */
+    /** @var Service[] Factory instances */
     protected static $factory = array();
 
     /** Ancestor field that must be ignored */
