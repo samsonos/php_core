@@ -1,6 +1,8 @@
 <?php
 namespace samson\core;
 
+use samsonphp\event\Event;
+
 /**
  * Класс для работы c URL
  * @package Samson
@@ -47,13 +49,16 @@ class URL implements iURL
 	 * @var string
 	 */
 	public $text;
+
+	public $httpHost;
 	
 	/**
 	 * Конструктор класса
 	 */
 	public function __construct()
     {
-        $this->parse();
+	    $this->httpHost = $_SERVER['HTTP_HOST'];
+        //$this->parse();
     }
 
     /**
@@ -65,6 +70,8 @@ class URL implements iURL
      */
     public function router(\samson\core\Core & $core, & $result, $default = 'main')
     {
+	    $this->parse();
+
         // Make module URL part case insensitive, if nothing passed use default path
         $module = isset($this->module{0}) ? mb_strtolower( $this->module, 'UTF-8') : $default;
 
@@ -210,7 +217,7 @@ class URL implements iURL
 
 		// Очистим элементы массива
 		for ($i = 0; $i < sizeof($url_params); $i++) if( !isset($url_params[$i]{0}) ) unset($url_params[$i]);
-		
+
 		// Получим количество аргументов полученных в виде параметров
 		$args_count = sizeof( $args );				
 
@@ -228,11 +235,17 @@ class URL implements iURL
 			// Если переменная модуля не существует тогда используем строковое представление аргумента
 			// добавим "разпознанное" значение аргумента в коллекцию параметров URL
 			$url_params[] = isset( $m[$arg] ) && !is_object($m[$arg])? $m->$arg : $arg;			 	
-		}		
+		}
+
+		$httpHost = $this->httpHost;
+
+		Event::fire('samson.url.build', array(& $this, & $httpHost, & $url_params));
+
+		$currentUrl = __SAMSON_PROTOCOL.$httpHost.$this->base.implode( '/', $url_params );
  		
 		// Вернем полный URL-путь относительно текущего хоста и веб-приложения
 		// Соберем все отфильтрованные сущности URL использую разделитель "/"
-		return __SAMSON_PROTOCOL.$_SERVER['HTTP_HOST'].$this->base.implode( '/', $url_params );
+		return $currentUrl;
 	}
 	
 	/**
@@ -248,8 +261,8 @@ class URL implements iURL
 		$this->last = NULL;		
 		
 		// Розпарсим URL 
-		$url = parse_url( $_SERVER["REQUEST_URI"] ); 
-		
+		$url = parse_url( $_SERVER["REQUEST_URI"] );
+
 		// Получим только путь из URL
 		$url = $url['path'];
 		
@@ -270,6 +283,8 @@ class URL implements iURL
 	
 		// Try to find locale change as url argument
 		$key = SamsonLocale::parseURL( $url_args );
+
+		Event::fire('samson.url.args.created', array(& $this, & $url_args));
 
 		//trace( $url_args, true );
 
