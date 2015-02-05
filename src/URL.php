@@ -58,7 +58,7 @@ class URL implements iURL
 	public function __construct()
     {
 	    $this->httpHost = $_SERVER['HTTP_HOST'];
-        //$this->parse();
+        $this->parse();
     }
 
     /**
@@ -70,7 +70,7 @@ class URL implements iURL
      */
     public function router(\samson\core\Core & $core, & $result, $default = 'main')
     {
-	    $this->parse();
+	    //$this->parse();
 
         // Make module URL part case insensitive, if nothing passed use default path
         $module = isset($this->module{0}) ? mb_strtolower( $this->module, 'UTF-8') : $default;
@@ -280,7 +280,7 @@ class URL implements iURL
 		// Clear last element if it's empty string 
 		$lidx = sizeof( $url_args ) - 1;		
 		if( !isset($url_args[ $lidx ]{0}) ) unset( $url_args[ $lidx ] );
-	
+
 		// Try to find locale change as url argument
 		$key = SamsonLocale::parseURL( $url_args );
 
