@@ -241,7 +241,8 @@ class URL implements iURL
 
 		Event::fire('samson.url.build', array(& $this, & $httpHost, & $url_params));
 
-		$currentUrl = __SAMSON_PROTOCOL.$httpHost.$this->base.implode( '/', $url_params );
+	
+		$currentUrl = __SAMSON_PROTOCOL.$httpHost.$this->base.implode( '/', $url_params ).'/';
  		
 		// Вернем полный URL-путь относительно текущего хоста и веб-приложения
 		// Соберем все отфильтрованные сущности URL использую разделитель "/"
