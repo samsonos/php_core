@@ -160,6 +160,8 @@ class Core implements iCore
             // TODO: Add ability to get configuration from parent classes
             // TODO: Code lower to be removed, or do we still need this
 
+            $ls = $resourceMap->toLoadStackFormat();
+
             // Get module name space
             $ns = AutoLoader::getOnlyNameSpace($moduleClass);
 
@@ -540,7 +542,7 @@ class Core implements iCore
         $this->load_module_stack[ 'local' ] = $localResources;
 
         // Create local module and set it as active
-        $this->active = new CompressableLocalModule('local', $this->system_path, $localResources);
+        $this->active = new CompressableLocalModule('local', $this->system_path, $this->map);
 
         // Require all local module model files
         foreach ($localResources['models'] as $model) {
@@ -554,7 +556,7 @@ class Core implements iCore
             require($controller);
 
             // Create module connector instance
-            new CompressableLocalModule(basename($controller, '.php'), $this->system_path, $localResources);
+            new CompressableLocalModule(basename($controller, '.php'), $this->system_path, $this->map);
         }
 
         return $this;
