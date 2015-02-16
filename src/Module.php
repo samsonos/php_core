@@ -402,7 +402,7 @@ class Module implements iModule, IViewable, \ArrayAccess, iModuleViewable
         // Store pointer to module resource map
         $this->resourceMap = & $resourceMap;
         // Save views list
-        $this->views = & $resourceMap->views;
+        $this->views = $resourceMap->views;
 
         // Set default view context name
         $this->view_context = self::VD_POINTER_DEF;
