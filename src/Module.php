@@ -17,6 +17,9 @@ class Module implements iModule, IViewable, \ArrayAccess, iModuleViewable
     /** Uniquer identifier to check pointers */
     public $uid;
 
+    /** @var ResourceMap Pointer to module resource map */
+    public $resourceMap;
+
     /** Collection for callable controllers of module */
     protected $controllers = array();
 
@@ -390,12 +393,17 @@ class Module implements iModule, IViewable, \ArrayAccess, iModuleViewable
     /**
      * Constructor
      *
-     * @param string 	$id 		Module unique identifier
-     * @param string 	$path 		Module location
-     * @param array 	$resources	Module resources list
+     * @param string 	    $id 		    Module unique identifier
+     * @param string 	    $path 		    Module location
+     * @param ResourceMap 	$resourceMap	Pointer to module resource map
      */
-    public function __construct($id, $path = NULL, $resources = NULL)
+    public function __construct($id, $path = NULL, ResourceMap $resourceMap = null)
     {
+        // Store pointer to module resource map
+        $this->resourceMap = & $resourceMap;
+        // Save views list
+        $this->views = & $resourceMap->views;
+
         // Set default view context name
         $this->view_context = self::VD_POINTER_DEF;
 
@@ -413,9 +421,6 @@ class Module implements iModule, IViewable, \ArrayAccess, iModuleViewable
 
         // Add to module identifier to view data stack
         $this->data['id'] = $this->id;
-
-        // Save views list
-        (isset($resources ) && isset($resources['views'])) ? $this->views = & $resources['views'] : '';
 
         // Generate unique module cache path in local web-application
         $this->cache_path = __SAMSON_CWD__.__SAMSON_CACHE_PATH.$this->id.'/';

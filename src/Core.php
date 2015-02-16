@@ -140,8 +140,7 @@ class Core implements iCore
             }
 
             /** @var \samson\core\ExternalModule $connector Create module controller instance */
-            // TODO: Add  Resource map support to modules, move from old array
-            $connector = new $moduleClass($path, $module_id, $ls = $resourceMap->toLoadStackFormat());
+            $connector = new $moduleClass($path, $module_id, $resourceMap);
 
             // Get module identifier
             $module_id = $connector->id();
