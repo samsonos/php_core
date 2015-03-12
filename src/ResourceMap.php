@@ -259,7 +259,7 @@ class ResourceMap
                 }
 
                 // Add class to classes array
-                $this->classes[] = $class;
+                $this->classes[$path] = $class;
 
                 return false;
             }
