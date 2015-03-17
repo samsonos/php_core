@@ -152,36 +152,34 @@ class AutoLoader
         }
 
         // If class not found
-        if (!isset($path)) {
-            return e('Class location ## not found by namespace ##', E_SAMSON_CORE_ERROR, array($className, $ns));
-        }
-
-        $path .= '/';
-
-        // Build files tree once for each namespace
-        if (!isset(self::$fileCache[$nameSpace])) {
-            self::$fileCache[$nameSpace] = File::dir($path, 'php');
-        }
-
-        // Trying to find class by class name in folder files collection
-        if (sizeof($files = preg_grep('/\/'.$className.'\.php/i', self::$fileCache[$nameSpace]))) {
-            // If we have found several files matching this class
-            if (sizeof($files) > 1) {
-                return e('Cannot autoload class(##), too many files matched ##', E_SAMSON_CORE_ERROR, array($className,$files));
+        if (isset($path)) {
+            $path .= '/';
+    
+            // Build files tree once for each namespace
+            if (!isset(self::$fileCache[$nameSpace])) {
+                self::$fileCache[$nameSpace] = File::dir($path, 'php');
             }
-
-            // Return last array element as file path
-            $file = end($files);
-
-            //elapsed('  Loaded class['.$key.'] from "'.$file.'"');
-
-            // Everything is OK
-            return true;
-
+    
+            // Trying to find class by class name in folder files collection
+            if (sizeof($files = preg_grep('/\/'.$className.'\.php/i', self::$fileCache[$nameSpace]))) {
+                // If we have found several files matching this class
+                if (sizeof($files) > 1) {
+                    return e('Cannot autoload class(##), too many files matched ##', E_SAMSON_CORE_ERROR, array($className,$files));
+                }
+    
+                // Return last array element as file path
+                $file = end($files);
+    
+                //elapsed('  Loaded class['.$key.'] from "'.$file.'"');
+    
+                // Everything is OK
+                return true;
+            }
         }
 
         // If we are here - signal error
-        return e('Cannot autoload class(##), class file not found in ##', E_SAMSON_CORE_ERROR, array($className,$path));
+        //return e('Cannot autoload class(##), class file not found in ##', D_SAMSON_DEBUG, array($className,$path));
+        return false;
     }
 
     /**
