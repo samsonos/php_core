@@ -242,7 +242,12 @@ class URL implements iURL
 		Event::fire('samson.url.build', array(& $this, & $httpHost, & $url_params));
 
 	
-		$currentUrl = __SAMSON_PROTOCOL.$httpHost.$this->base.implode( '/', $url_params ).'/';
+		$currentUrl = __SAMSON_PROTOCOL.$httpHost.$this->base.implode( '/', $url_params );
+		
+		// Add trailing slash only if this is not 'home' url(/)
+		if (sizeof($currentUrl) > 1) {
+			$currentUrl .= '/';
+		}
  		
 		// Вернем полный URL-путь относительно текущего хоста и веб-приложения
 		// Соберем все отфильтрованные сущности URL использую разделитель "/"
