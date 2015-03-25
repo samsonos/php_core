@@ -133,7 +133,7 @@ class ResourceMap
         __SAMSON_VENDOR_PATH,
         __SAMSON_CONFIG_PATH,
         __SAMSON_CONTRIB_PATH,
-        'cms/',
+        'www/cms/',
         'out/'
     );
 

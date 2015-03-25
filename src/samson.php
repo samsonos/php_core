@@ -16,8 +16,6 @@ date_default_timezone_set(date_default_timezone_get());
 set_time_limit( __SAMSON_MAX_EXECUTION__ );
 ini_set('max_execution_time', __SAMSON_MAX_EXECUTION__);
 
-ini_set("session.cookie_domain", ".landscape.dev");
-
 // Start session
 session_start();
 
