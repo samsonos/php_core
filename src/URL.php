@@ -210,10 +210,11 @@ class URL implements iURL
 		// Получим все аргументы функции начиная с 2-го
         $args = func_get_args();
 		$args = array_slice( $args, 1 );
-		
+
 		// Получим все сущности переданные в URL, разбив их в массив по символу "/",
 		// чистим полученный массив от пустых элементов,		
 		$url_params = explode( '/', $url );
+
 
 		// Очистим элементы массива
 		for ($i = 0; $i < sizeof($url_params); $i++) if( !isset($url_params[$i]{0}) ) unset($url_params[$i]);
@@ -229,23 +230,22 @@ class URL implements iURL
 		for ($i = 0; $i < $args_count; $i++) 
 		{
 			// Получим строковое представление аргумента функции
-			$arg = $args[ $i ];			
-			
-			// Попытаемся получить переменную с указанным именем в текущем модуле 			
+			$arg = $args[ $i ];
+
+			// Попытаемся получить переменную с указанным именем в текущем модуле
 			// Если переменная модуля не существует тогда используем строковое представление аргумента
 			// добавим "разпознанное" значение аргумента в коллекцию параметров URL
-			$url_params[] = isset( $m[$arg] ) && !is_object($m[$arg])? $m->$arg : $arg;			 	
+			$url_params = array_merge($url_params, explode( '/',isset( $m[$arg] ) && !is_object($m[$arg])? $m->$arg : $arg));
 		}
 
 		$httpHost = $this->httpHost;
 
 		Event::fire('samson.url.build', array(& $this, & $httpHost, & $url_params));
 
-	
-		$currentUrl = __SAMSON_PROTOCOL.$httpHost.$this->base.implode( '/', $url_params ).'/';
+		// Соберем все отфильтрованные сущности URL использую разделитель "/"
+		$currentUrl = __SAMSON_PROTOCOL.$httpHost.$this->base.implode( '/', $url_params );
  		
 		// Вернем полный URL-путь относительно текущего хоста и веб-приложения
-		// Соберем все отфильтрованные сущности URL использую разделитель "/"
 		return $currentUrl;
 	}
 	
