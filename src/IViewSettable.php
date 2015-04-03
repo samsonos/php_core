@@ -8,13 +8,15 @@
 
 namespace samson\core;
 
+use samsonframework\core\RenderInterface;
+
 /**
  * Interface for giving an object ability to be passed
  * to IViewable for rendering
  * @package samson\core
  * @author Vitaly Iegorov <egorov@samsonos.com>
  */
-interface IViewSettable
+interface IViewSettable extends RenderInterface
 {
     /**
      * Generate collection of view variables, prefixed if needed, that should be passed to

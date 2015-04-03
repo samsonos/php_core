@@ -8,13 +8,15 @@
 
 namespace samson\core;
 
+use samsonframework\core\RenderInterface;
+
 /**
  * Generic view rendering interface defining
  * all main view context operations.
  * @package samson\core
  * @author Vitaly Iegorov <egorov@samsonos.com>
  */
-interface IViewable
+interface IViewable extends RenderInterface
 {
     /**
      * Set view variable

@@ -1,6 +1,8 @@
 <?php
 namespace samson\core;
 
+use samsonframework\core\RenderInterface;
+
 /**
  * Интерфейс определяющий возможность создавания
  * своего представления для отображения в представлении модуля 
@@ -9,7 +11,7 @@ namespace samson\core;
  * @author Vitaly Iegorov <vitalyiegorov@gmail.com>
  * @version 0.1
  */
-interface iModuleViewable
+interface iModuleViewable extends RenderInterface
 {
 	/**
 	 * Сгенерировать представление данных текущего объекта
