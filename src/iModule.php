@@ -1,12 +1,14 @@
 <?php
 namespace samson\core;
 
+use samsonframework\core\RenderInterface;
+
 /**
  * Интерфейс для модуля системы
  * @author Vitaly Iegorov <vitalyiegorov@gmail.com>
  *
  */
-interface iModule
+interface iModule extends RenderInterface
 {
 	/** Identifier for default view data entry */
 	const VD_POINTER_DEF = '';
