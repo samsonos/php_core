@@ -235,7 +235,8 @@ class URL implements iURL
 			// Попытаемся получить переменную с указанным именем в текущем модуле
 			// Если переменная модуля не существует тогда используем строковое представление аргумента
 			// добавим "разпознанное" значение аргумента в коллекцию параметров URL
-			$url_params = array_merge($url_params, explode( '/',isset( $m[$arg] ) && !is_object($m[$arg])? $m->$arg : $arg));
+			$value = explode( '/',isset( $m[$arg] ) && !is_object($m[$arg]) && !is_array($m[$arg])? $m->$arg : $arg);
+			$url_params = array_merge($url_params, $value);
 		}
 
 		$httpHost = $this->httpHost;
