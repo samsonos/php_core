@@ -232,7 +232,7 @@ class ResourceMap
                 // Store class name => full class name collection
                 $usesNamespaces[$useClass] = ($matches['class']{0} == '\\' ? '' : '\\').$matches['class'];
                 // Read one line from a file and try to find class pattern
-            } elseif (preg_match('/^\s*(abstract\s*)?class\s+(?<class>[a-z0-9]+)\s+extends\s+(?<parent>[a-z0-9\\\]+)/iu', $line, $matches)) {
+            } elseif (preg_match('/^\s*(abstract\s*)?class\s+(?<class>[a-z0-9]+)\s+(extends|implements)\s+(?<parent>[a-z0-9\\\]+)/iu', $line, $matches)) {
                 // Store module class name
                 $class = $namespace.trim($matches['class']);
                 // Store parent class
