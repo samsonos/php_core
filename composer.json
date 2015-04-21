@@ -1,29 +1,35 @@
 {
-    "name":"samsonos/php_core",
-    "description": "SamsonPHP framework core module",
-    "keywords": [ "php", "framework", "samsonos", "samsonphp"],
-    "authors":[
-        {
-            "name":"Vitaly Iegorov",
-            "email":"egorov@samsonos.com"
-        }
-    ],
-    "license":"Open Software License (OSL) v 3.0",
-    "homepage":"http://samsonphp.com/",
-    "autoload" : {
-        "classmap": ["src/"],
-        "psr-0": {
-            "samsonos\\core\\": "src/",
-            "samson\\core\\": "src/"
-        },
-        "files": ["src/samson.php"]
-    },	
-    "require": {
-    	"samsonphp/event": "1.*",
-        "samsonphp/composer": "1.*",
-        "samsonphp/config": "1.*"
-    },
-    "require-dev": {
-        "phpunit/phpunit": "4.2.*"
+  "name": "samsonos/php_core",
+  "description": "SamsonPHP framework core module",
+  "keywords": [
+    "php",
+    "framework",
+    "samsonos",
+    "samsonphp"
+  ],
+  "authors": [
+    {
+      "name": "Vitaly Iegorov",
+      "email": "egorov@samsonos.com"
     }
+  ],
+  "license": "Open Software License (OSL) v 3.0",
+  "homepage": "http://samsonphp.com/",
+  "autoload": {
+    "classmap": ["src/"],
+    "psr-0": {
+      "samsonos\\core\\": "src/",
+      "samson\\core\\": "src/"
+    },
+    "files": ["src/samson.php"]
+  },
+  "require": {
+    "samsonframework/base": "*",
+    "samsonphp/event": "1.*",
+    "samsonphp/composer": "1.*",
+    "samsonphp/config": "1.*"
+  },
+  "require-dev": {
+    "phpunit/phpunit": "4.2.*"
+  }
 }
