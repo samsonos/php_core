@@ -127,6 +127,8 @@ class Core implements iCore
             // Define default module identifier if it is not passed
             $module_id = isset($module_id) ? $module_id : AutoLoader::oldClassName($moduleClass);
 
+            //elapsed($module_id);
+
             // Require module controller class into PHP
             if (file_exists($controllerPath)) {
                 //elapsed('+ ['.$module_id.'] Including module controller '.$controllerPath);
@@ -138,6 +140,8 @@ class Core implements iCore
             foreach ($resourceMap->controllers as $controller) {
                 require($controller);
             }
+
+            //elapsed($moduleClass);
 
             /** @var \samson\core\ExternalModule $connector Create module controller instance */
             $connector = new $moduleClass($path, $module_id, $resourceMap);
