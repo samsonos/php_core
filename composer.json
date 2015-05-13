@@ -20,7 +20,8 @@
     "psr-0": {
       "samsonos\\core\\": "src/",
       "samson\\core\\": "src/"
-    }
+    },
+    "files": ["src/samson.php"]
   },
   "require": {
     "samsonframework/base": "*",
