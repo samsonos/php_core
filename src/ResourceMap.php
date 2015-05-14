@@ -134,7 +134,8 @@ class ResourceMap
         __SAMSON_CONFIG_PATH,
         __SAMSON_CONTRIB_PATH,
         'www/cms/',
-        'out/'
+        'out/',
+	    'features/'
     );
 
     /** @var array Collection of files that must be ignored by ResourceMap */
