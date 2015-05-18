@@ -67,9 +67,6 @@ class Core implements iCore
 	/** @var string View path loading mode */
 	public $render_mode = self::RENDER_STANDART;
 
-    /** @var string  composer lock file name */
-    public $composerLockFile = 'composer.lock';
-
     /**
      * Change current system working environment
      * @param string $environment Environment identifier
@@ -509,13 +506,20 @@ class Core implements iCore
 
     /**
      * Load system from composer.json
+     * @param string $dependencyFilePath Path to dependencies file
      * @return $this Chaining
      */
-    public function composer()
+    public function composer($dependencyFilePath = null)
     {
         $composerModules = array();
 
-	    \samsonphp\event\Event::fire('core.composer.create', array(& $composerModules, $this->system_path));
+        \samsonphp\event\Event::fire(
+            'core.composer.create',
+            array(
+                & $composerModules,
+                isset($dependencyFilePath) ? $dependencyFilePath : $this->system_path
+            )
+        );
 
         // Iterate requirements
         foreach ($composerModules as $requirement => $rating) {
