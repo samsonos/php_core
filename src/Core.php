@@ -521,12 +521,15 @@ class Core implements iCore
             )
         );
 
+        // Go one level up as project root one level up regarding to document root
+        $dependencyFilePath = dirname($dependencyFilePath).'/';
+
         // Iterate requirements
         foreach ($composerModules as $requirement => $rating) {
             //elapsed('Loading module '.$requirement);
 
             // Use default path
-            $path = __SAMSON_CWD__.__SAMSON_VENDOR_PATH.$requirement;
+            $path = realpath(__SAMSON_CWD__.$dependencyFilePath.__SAMSON_VENDOR_PATH.$requirement);
 
             // If path with underscores does not exists
             if (!file_exists($path)) {
