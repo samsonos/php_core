@@ -90,6 +90,9 @@ if (!defined('__SAMSON_CWD__')) {
     define('__SAMSON_CWD__', realpath(str_ireplace('\\', '/', getcwd() . '/').'../').'/');
 }
 
+var_dump($_SERVER['DOCUMENT_ROOT']);
+var_dump($_SERVER['SCRIPT_FILENAME']);
+
 // Fix for apache mod_vhost_alias
 if (strlen(__SAMSON_CWD__) - strlen($_SERVER['DOCUMENT_ROOT']) > 5) {
     $_SERVER['DOCUMENT_ROOT'] = dirname($_SERVER['SCRIPT_FILENAME']);
@@ -97,7 +100,7 @@ if (strlen(__SAMSON_CWD__) - strlen($_SERVER['DOCUMENT_ROOT']) > 5) {
 
 /** Get current relative url base */
 if(!defined('__SAMSON_BASE__')) {
-    define('__SAMSON_BASE__', str_ireplace(__SAMSON_CWD__.__SAMSON_PUBLIC_PATH, '', $_SERVER['DOCUMENT_ROOT'].'/').'/');
+    define('__SAMSON_BASE__', str_replace('//', '/', str_ireplace(__SAMSON_CWD__.__SAMSON_PUBLIC_PATH, '', $_SERVER['DOCUMENT_ROOT'].'/').'/'));
 }
 
 /** Flag that this script runs from remote app */
