@@ -13,6 +13,7 @@
       "email": "egorov@samsonos.com"
     }
   ],
+  "minimum-stability": "dev",
   "license": "Open Software License (OSL) v 3.0",
   "homepage": "http://samsonphp.com/",
   "autoload": {
