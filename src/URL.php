@@ -193,6 +193,9 @@ class URL implements iURL
 	{
 		// Сформируем полный путь для переадресации
 		$full_url = $this->base.locale_path().$url;
+		
+		// Replace double slashes
+		$full_url = str_replace('//', '/', $full_url);
 
 		// Перейдем к форме авторизации		
 		header('Location: '.$full_url );
