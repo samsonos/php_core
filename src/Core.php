@@ -108,7 +108,7 @@ class Core implements iCore
 	}
 
 	/** @see \samson\core\iCore::load() */
-	public function load($path = NULL, $module_id = null)
+	public function load($path = NULL, $module_id = null, $parameters = array())
 	{
         /** @var ResourceMap $resourceMap Pointer to resource map object */
         $resourceMap = ResourceMap::get($path);
@@ -176,7 +176,7 @@ class Core implements iCore
 
             // Trying to find parent class for connecting to it to use View/Controller inheritance
             $parent_class = get_parent_class( $connector );
-            if ($parent_class !== AutoLoader::className('samson\core\ExternalModule')) {
+            if (!in_array($parent_class, array(AutoLoader::className('samson\core\ExternalModule'), AutoLoader::className('samson\core\CompressableExternalModule')))) {
                 // Переберем загруженные в систему модули
                 foreach ($this->module_stack as & $m){
                     // Если в систему был загружен модуль с родительским классом
@@ -186,8 +186,23 @@ class Core implements iCore
                     }
                 }
             }
-        } else {// Signal error
-            e('Cannot load module from: "##"', D_SAMSON_DEBUG, $path);
+        } elseif (is_array($parameters)&&isset($parameters['samsonphp_package_compressable'])&&($parameters['samsonphp_package_compressable'] == 1)) {
+	        // Define default module identifier if it is not passed
+	        $module_id = str_replace('/','',$parameters['module_id']);
+
+	        /** @var \samson\core\ExternalModule $connector Create module controller instance */
+	        $connector = new CompressableExternalModule($path, $module_id, $resourceMap);
+
+	        // Get module identifier
+	        $module_id = $connector->id();
+
+	        $ls = $resourceMap->toLoadStackFormat();
+
+	        // Save module resources
+	        $this->load_module_stack[$module_id] = $ls;
+        } else {
+	        // Signal error
+	        e('Cannot load module from: "##"', D_SAMSON_DEBUG, $path);
         }
 		
 		// Chaining
@@ -520,16 +535,14 @@ class Core implements iCore
                 isset($dependencyFilePath) ? $dependencyFilePath : $this->system_path
             )
         );
-
-        // Go one level up as project root one level up regarding to document root
-        $dependencyFilePath = dirname($dependencyFilePath).'/';
+	    //trace($composerModules);
 
         // Iterate requirements
-        foreach ($composerModules as $requirement => $rating) {
+        foreach ($composerModules as $requirement => $parameters) {
             //elapsed('Loading module '.$requirement);
 
             // Use default path
-            $path = realpath(__SAMSON_CWD__.$dependencyFilePath.__SAMSON_VENDOR_PATH.$requirement);
+            $path = __SAMSON_CWD__.__SAMSON_VENDOR_PATH.$requirement;
 
             // If path with underscores does not exists
             if (!file_exists($path)) {
@@ -541,7 +554,7 @@ class Core implements iCore
             }
 
             // Load module
-            $this->load($path);
+            $this->load($path, null, array_merge($parameters, array('module_id'=>$requirement)));
         }
 
 
