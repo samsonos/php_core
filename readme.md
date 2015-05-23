@@ -17,6 +17,7 @@ To use SamsonPHP framework in your project you must add its dependency in your `
         "samsonos/php_core": "1.*"
     }, 
 ```
+
 After doing ```composer install``` or ```composer update``` all SamsonPHP classes and functions would be available.
 
 Example usage:
