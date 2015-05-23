@@ -25,6 +25,9 @@ define('__NS_SEPARATOR__', '\\');
 /** Get HTTP protocol **/
 define('__SAMSON_PROTOCOL', (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' || (isset($_SERVER['SERVER_PORT']) && $_SERVER['SERVER_PORT']== 443)) ? "https://" : "http://" );
 
+/** Apache2 mod_vhost_alias fix - makes $_SERVER['DOCUMENT_ROOT'] always correct */
+$_SERVER['DOCUMENT_ROOT'] = str_replace($_SERVER['SCRIPT_NAME'], '', $_SERVER['SCRIPT_FILENAME']);
+
 /** Default path to web-application public resources */
 if (!defined('__SAMSON_PUBLIC_PATH')) {
     define('__SAMSON_PUBLIC_PATH', 'www/');
