@@ -535,28 +535,21 @@ class Core implements iCore
                 isset($dependencyFilePath) ? $dependencyFilePath : $this->system_path
             )
         );
-	    //trace($composerModules);
 
         // Iterate requirements
         foreach ($composerModules as $requirement => $parameters) {
             //elapsed('Loading module '.$requirement);
 
-            // Use default path
-            $path = __SAMSON_CWD__.__SAMSON_VENDOR_PATH.$requirement;
-
-            // If path with underscores does not exists
-            if (!file_exists($path)) {
-                // Try path without underscore
-                $path = str_replace('_', '/', $path);
-                if (!file_exists($path)) {
-                    return e('Cannot load module(from ##): "##" - Path not found', E_SAMSON_FATAL_ERROR, array($path, $requirement));
-                }
-            }
-
             // Load module
-            $this->load($path, null, array_merge($parameters, array('module_id'=>$requirement)));
+            $this->load(
+                __SAMSON_CWD__.__SAMSON_VENDOR_PATH.$requirement,
+                null,
+                array_merge(
+                    is_array($parameters) ? $parameters : array($parameters),
+                    array('module_id'=>$requirement)
+                )
+            );
         }
-
 
         // Load local module with all web-application resources
         $localResources = $this->map->toLoadStackFormat();

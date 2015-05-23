@@ -90,14 +90,22 @@ if (!defined('__SAMSON_CWD__')) {
     define('__SAMSON_CWD__', realpath(str_ireplace('\\', '/', getcwd() . '/').'../').'/');
 }
 
-// Fix for apache mod_vhost_alias
-if (strlen(__SAMSON_CWD__) - strlen($_SERVER['DOCUMENT_ROOT']) > 5) {
-    $_SERVER['DOCUMENT_ROOT'] = dirname($_SERVER['SCRIPT_FILENAME']);
-}
-
 /** Get current relative url base */
 if(!defined('__SAMSON_BASE__')) {
-    define('__SAMSON_BASE__', str_replace('//', '/', str_ireplace(__SAMSON_CWD__.__SAMSON_PUBLIC_PATH, '', $_SERVER['DOCUMENT_ROOT'].'/').'/'));
+    /**
+     * Defining base url for framework, we take web-server document root and path to script that
+     * has started all this process, and remove document root from it, if we are running the script
+     * from internal folder, does not matter any depth of it, we will always get correct relative
+     * path in document root, and so this would be our url base for all resources and links.
+     */
+    define(
+        '__SAMSON_BASE__',
+        str_ireplace(
+            __SAMSON_PUBLIC_PATH,
+            '',
+            str_ireplace($_SERVER['DOCUMENT_ROOT'], '', dirname($_SERVER['SCRIPT_FILENAME']).'/')
+        )
+    );
 }
 
 /** Flag that this script runs from remote app */
