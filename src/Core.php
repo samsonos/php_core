@@ -532,7 +532,13 @@ class Core implements iCore
             'core.composer.create',
             array(
                 & $composerModules,
-                isset($dependencyFilePath) ? $dependencyFilePath : $this->system_path
+                isset($dependencyFilePath) ? $dependencyFilePath : $this->system_path,
+	            array(
+		            'vendorsList' => array('samsonphp/', 'samsonos/', 'samsoncms/'),
+		            'ignoreKey' => 'samson_module_ignore',
+		            'includeKey' => 'samson_module_include',
+		            'ignorePackages' => array('samsonos/php_core')
+	            )
             )
         );
 
