@@ -184,7 +184,9 @@ class Core implements iCore
                         $connector->parent = & $m;
                         // Fill nested module with parent configuration
                         foreach (get_object_vars($m) as $k=>$v){
-                            $connector->$k = $v;
+                            if (!isset($connector->$k)) {
+                                $connector->$k = $v;
+                            }
                         }
                         //elapsed('Parent connection for '.$moduleClass.'('.$connector->uid.') with '.$parent_class.'('.$m->uid.')');
                     }
