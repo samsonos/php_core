@@ -182,6 +182,10 @@ class Core implements iCore
                     // Если в систему был загружен модуль с родительским классом
                     if (get_class($m) == $parent_class) {
                         $connector->parent = & $m;
+                        // Fill nested module with parent configuration
+                        foreach (get_object_vars($m) as $k=>$v){
+                            $connector->$k = $v;
+                        }
                         //elapsed('Parent connection for '.$moduleClass.'('.$connector->uid.') with '.$parent_class.'('.$m->uid.')');
                     }
                 }
