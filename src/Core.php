@@ -182,12 +182,6 @@ class Core implements iCore
                     // Если в систему был загружен модуль с родительским классом
                     if (get_class($m) == $parent_class) {
                         $connector->parent = & $m;
-                        // Fill nested module with parent configuration
-                        foreach (get_object_vars($m) as $k=>$v){
-                            if (!isset($connector->$k)) {
-                                $connector->$k = $v;
-                            }
-                        }
                         //elapsed('Parent connection for '.$moduleClass.'('.$connector->uid.') with '.$parent_class.'('.$m->uid.')');
                     }
                 }
@@ -464,11 +458,19 @@ class Core implements iCore
         // Set main template path
         $this->template($this->template_path);
 
+        // Security layer
+        $securityResult = true;
+        // Fire core security event
+        \samsonphp\event\Event::fire('core.security', array(&$this, &$securityResult));
+
         /** @var mixed $result External route controller action result */
         $result = A_FAILED;
 
-        // Fire core routing event
-        \samsonphp\event\Event::signal('core.routing', array(&$this, &$result, $default));
+        // If we have passed security application layer
+        if ($securityResult) {
+            // Fire core routing event - go to routing application layer
+            \samsonphp\event\Event::signal('core.routing', array(&$this, &$result, $default));
+        }
 
         // If no one has passed back routing callback
         if (!isset($result) || $result == A_FAILED) {
