@@ -24,7 +24,7 @@ interface IViewable extends RenderInterface
      * @param mixed $value Variable value
      * @return IViewable Chaining
      */
-    public function set($key, $value);
+    public function set($key, $value = null);
 
     /**
      * Set current view for rendering.
