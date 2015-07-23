@@ -124,15 +124,22 @@ class ExternalModule extends Module implements iExternalModule
         // If we have not found view in current module but we have parent module
         if (isset($this->parent) && $this->view_path === false) {
             //elapsed('['.$this->id.'] Cannot set view['.$viewPath.'] - passing it to parent['.$this->parent->id.']');
-            // Switch core active module to parent module
-            s()->active($this->parent);
+           
             /*
              * Call parent module view setting and return PARENT module to chain
              * actually switching current module in chain
              */
             return $this->parent->view($viewPath);
         } else { // Call default module behaviour
-            return parent::view($this->view_path);
+            // Call default module behaviour
+            parent::view($this->view_path);
+
+            // If view has not been set at final stage - trigger error
+            if ($this->view_path === false) {
+                e('[##] Cannot find view "##"', E_SAMSON_FATAL_ERROR, array( $this->id, $viewPath));
+            }
+
+            return $this;
         }
     }
 
