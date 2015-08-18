@@ -56,7 +56,7 @@ class ExternalModule extends Module implements iExternalModule
 		$classname = get_class( $this );
 		
 		// Generate unique virtual id for copy
-		$id = $this->id.'_'.rand( 0, 99999999 );
+		$id = $this->id;
 		
 		// Create copy instance
 		$o = new $classname( $this->path, $id, $this->resourceMap);	
