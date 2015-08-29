@@ -129,13 +129,13 @@ class Core implements iCore
             // Require module controller class into PHP
             if (file_exists($controllerPath)) {
                 //elapsed('+ ['.$module_id.'] Including module controller '.$controllerPath);
-                require($controllerPath);
+                require_once($controllerPath);
             }
 
             // TODO: this should be done via composer autoload file field
             // Iterate all function-style controllers and require them
             foreach ($resourceMap->controllers as $controller) {
-                require($controller);
+                require_once($controller);
             }
 
             //elapsed($moduleClass);
