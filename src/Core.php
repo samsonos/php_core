@@ -110,6 +110,11 @@ class Core implements iCore
 	/** @see \samson\core\iCore::load() */
 	public function load($path = NULL, $module_id = null, $parameters = array())
 	{
+		// Check path
+        if(!file_exists($path)) {
+            return e('Cannot load module from[##]', E_SAMSON_FATAL_ERROR, $path);
+        }
+        
         /** @var ResourceMap $resourceMap Pointer to resource map object */
         $resourceMap = ResourceMap::get($path);
 
