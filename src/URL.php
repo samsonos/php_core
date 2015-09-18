@@ -294,6 +294,25 @@ class URL implements iURL
 		// Try to find locale change as url argument
 		$key = SamsonLocale::parseURL( $url_args );
 
+	        // Get all locales
+	        $locales = \samson\core\SamsonLocale::get();
+	
+	        // Set current locale as first value of array
+	        $localArray = array(locale());
+	
+	        // Iterate all locales
+	        foreach($locales as $local) {
+	
+	            // Avoid current locale
+	            if ($local == locale()) {
+	                continue;
+	            }
+	            $localArray[] = $local;
+	        }
+	
+	        // Set locales in the new order
+	        \samson\core\SamsonLocale::$locales = $localArray;
+
 		Event::fire('samson.url.args.created', array(& $this, & $url_args));
 
 		//trace( $url_args, true );
