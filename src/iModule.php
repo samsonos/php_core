@@ -15,6 +15,9 @@ interface iModule extends RenderInterface
 	
 	/** Pointer to plain html entry in view data entry */
 	const VD_HTML = '__html__';
+
+	/** Controller action cache name marker */
+	const CTR_CACHE = 'cache_';
 	
 	/** Default controller name */
 	const CTR_BASE = '__base';

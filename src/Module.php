@@ -373,18 +373,14 @@ class Module implements iModule, IViewable, \ArrayAccess, iModuleViewable
             if (isset(url()->method{0})) array_unshift($parameters, url()->method);
         }
 
-
-        //trace($controller,1 );
-
-        //elapsed('Performing #'.$this->id.' controller action -'.$controller);
-
         // Retrieve controller action callback name
-        //$controllerName = is_array($controller) ? $controller[1] : $controller;
-        //trace($controller, 1);
-        // If this controller action
-        //if (isset($this->cacheControllers[$controllerName])) {
-
-        //}
+        $controllerName = is_array($controller) ? $controller[1] : $controller;
+        // If this controller has cached marker
+        if (stripos($controllerName, self::CTR_CACHE) !== false) {
+            // perform caching
+            s()->cached();
+        }
+        //elapsed('Performing #'.$this->id.' controller action -'.$controller);
 
         // Perform controller action
         $action_result = isset($controller) ? call_user_func_array($controller, $parameters) : A_FAILED;
