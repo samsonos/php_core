@@ -87,9 +87,15 @@ class Core implements iCore
      */
     public function cached($cacheLife = 3600, $accessibility = 'public')
     {
-        header('Expires: '.gmdate('D, d M Y H:i:s T', time()+$cacheLife));
-        header('Cache-Control: '.$accessibility.', max-age='.$cacheLife);
-        header('Pragma: cache');
+		static $cached;
+		// Protect sending cached headers once
+		if (!isset($cached) or $cached !== true) {
+			header('Expires: ' . gmdate('D, d M Y H:i:s T', time() + $cacheLife));
+			header('Cache-Control: ' . $accessibility . ', max-age=' . $cacheLife);
+			header('Pragma: cache');
+			
+			$cached = true;
+		}
     }
 
     /**
