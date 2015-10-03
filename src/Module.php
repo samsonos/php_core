@@ -20,6 +20,9 @@ class Module implements iModule, IViewable, \ArrayAccess, iModuleViewable
     /** @var ResourceMap Pointer to module resource map */
     public $resourceMap;
 
+    /** Collection for cachable callable controllers of module */
+    protected $cacheControllers = array();
+
     /** Collection for callable controllers of module */
     protected $controllers = array();
 
@@ -476,12 +479,20 @@ class Module implements iModule, IViewable, \ArrayAccess, iModuleViewable
                     break;
 
                 // Check if regular controller
-                default: if( preg_match('/^'.self::OBJ_PREFIX.'(?<controller>.+)/i', $method, $matches ) )
+                default: if( preg_match('/^'.self::OBJ_PREFIX.'(?<cache>cache_)?(?<controller>.+)/i', $method, $matches ) )
                 {
+                    // If this controller has a cachable mark - store them in special collection
+                    if(isset($matches['cache']) && isset($matches['cache']{1})) {
+                        $this->cacheControllers[ $matches['controller'] ] = array( $this, $method );
+                    }
+
+                    // Just regular controller
                     $this->controllers[ $matches['controller'] ] = array( $this, $method );
                 }
             }
         }
+
+
 
         if( function_exists( $this->id )) $this->controllers[ self::CTR_BASE ] 	= $this->id;
         if( method_exists($this, self::CTR_BASE)) $this->controllers[ self::CTR_BASE ] 	= array( $this, self::CTR_BASE );
