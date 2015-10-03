@@ -79,6 +79,18 @@ class Core implements iCore
 
         return $this;
     }
+    
+    /**
+     * Generate special response header triggering caching mechanisms
+     * @param int $cacheLife Amount of seconds for cache(default 3600 - 1 hour)
+     * @param string $accessibility Cache-control accessibility value(default public)
+     */
+    public function cached($cacheLife = 3600, $accessibility = 'public')
+    {
+        header('Expires: '.gmdate('D, d M Y H:i:s T', time()+$cacheLife));
+        header('Cache-Control: '.$accessibility.', max-age='.$cacheLife);
+        header('Pragma: cache');
+    }
 
     /**
      * @see \samson\core\iCore::resources()
