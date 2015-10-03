@@ -17,19 +17,24 @@ interface iModule extends RenderInterface
 	const VD_HTML = '__html__';
 	
 	/** Default controller name */
-	const CTR_BASE = '__base';	
+	const CTR_BASE = '__base';
+	const CTR_CACHE_BASE = '__cache_base';
 	
 	/** Universal controller name */
-	const CTR_UNI = '__handler';	
+	const CTR_UNI = '__handler';
+	const CTR_CACHE_UNI = '__cache_handler';
 	
 	/** Post controller name */
 	const CTR_POST = '__post';
+	const CTR_CACHE_POST = '__cache_post';
 	
 	/** Put controller name */
 	const CTR_PUT = '__put';
+	const CTR_CACHE_PUT = '__cache_put';
 	
 	/** Delete controller name */
 	const CTR_DELETE = '__delete';
+	const CTR_CACHE_DELETE = '__delete';
 
     /** Controllers naming conventions */
 

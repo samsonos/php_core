@@ -373,7 +373,18 @@ class Module implements iModule, IViewable, \ArrayAccess, iModuleViewable
             if (isset(url()->method{0})) array_unshift($parameters, url()->method);
         }
 
+
+        //trace($controller,1 );
+
         //elapsed('Performing #'.$this->id.' controller action -'.$controller);
+
+        // Retrieve controller action callback name
+        //$controllerName = is_array($controller) ? $controller[1] : $controller;
+        //trace($controller, 1);
+        // If this controller action
+        //if (isset($this->cacheControllers[$controllerName])) {
+
+        //}
 
         // Perform controller action
         $action_result = isset($controller) ? call_user_func_array($controller, $parameters) : A_FAILED;
@@ -447,7 +458,7 @@ class Module implements iModule, IViewable, \ArrayAccess, iModuleViewable
 
         // Iterate class methods
         foreach (get_class_methods($this) as $method) {
-            // Try to find standart controllers
+            // Try to find standard controllers
             switch (strtolower($method)) {
                 // Ignore special controllers
                 case self::CTR_UNI:
@@ -483,18 +494,23 @@ class Module implements iModule, IViewable, \ArrayAccess, iModuleViewable
 
         if (function_exists($this->id)) $this->controllers[self::CTR_BASE] = $this->id;
         if (method_exists($this, self::CTR_BASE)) $this->controllers[self::CTR_BASE] = array($this, self::CTR_BASE);
+        else if (method_exists($this, self::CTR_CACHE_BASE)) $this->controllers[self::CTR_BASE] = array($this, self::CTR_CACHE_BASE);
 
         if (function_exists($this->id . self::CTR_POST)) $this->controllers[self::CTR_POST] = $this->id . self::CTR_POST;
         if (method_exists($this, self::CTR_POST)) $this->controllers[self::CTR_POST] = array($this, self::CTR_POST);
+        else if (method_exists($this, 'cache_'.self::CTR_CACHE_POST)) $this->controllers[self::CTR_POST] = array($this, self::CTR_CACHE_POST);
 
         if (function_exists($this->id . self::CTR_PUT)) $this->controllers[self::CTR_PUT] = $this->id . self::CTR_PUT;
         if (method_exists($this, self::CTR_PUT)) $this->controllers[self::CTR_PUT] = array($this, self::CTR_PUT);
+        else if (method_exists($this, self::CTR_CACHE_PUT)) $this->controllers[self::CTR_PUT] = array($this, self::CTR_CACHE_PUT);
 
         if (function_exists($this->id . self::CTR_DELETE)) $this->controllers[self::CTR_DELETE] = $this->id . self::CTR_DELETE;
         if (method_exists($this, self::CTR_DELETE)) $this->controllers[self::CTR_DELETE] = array($this, self::CTR_DELETE);
+        else if (method_exists($this, self::CTR_CACHE_DELETE)) $this->controllers[self::CTR_DELETE] = array($this, self::CTR_CACHE_DELETE);
 
         if (function_exists($this->id . self::CTR_UNI)) $this->controllers[self::CTR_UNI] = $this->id . self::CTR_UNI;
         if (method_exists($this, self::CTR_UNI)) $this->controllers[self::CTR_UNI] = array($this, self::CTR_UNI);
+        else if (method_exists($this, self::CTR_CACHE_UNI)) $this->controllers[self::CTR_UNI] = array($this, self::CTR_CACHE_UNI);
 
         // Make view path relative to module - remove module path from view path
         $this->views = str_replace($this->path, '', $this->views);
