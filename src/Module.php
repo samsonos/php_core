@@ -498,7 +498,7 @@ class Module implements iModule, IViewable, \ArrayAccess, iModuleViewable
 
         if (function_exists($this->id . self::CTR_POST)) $this->controllers[self::CTR_POST] = $this->id . self::CTR_POST;
         if (method_exists($this, self::CTR_POST)) $this->controllers[self::CTR_POST] = array($this, self::CTR_POST);
-        else if (method_exists($this, 'cache_'.self::CTR_CACHE_POST)) $this->controllers[self::CTR_POST] = array($this, self::CTR_CACHE_POST);
+        else if (method_exists($this, self::CTR_CACHE_POST)) $this->controllers[self::CTR_POST] = array($this, self::CTR_CACHE_POST);
 
         if (function_exists($this->id . self::CTR_PUT)) $this->controllers[self::CTR_PUT] = $this->id . self::CTR_PUT;
         if (method_exists($this, self::CTR_PUT)) $this->controllers[self::CTR_PUT] = array($this, self::CTR_PUT);
