@@ -47,6 +47,8 @@ interface iModule extends RenderInterface
     const OBJ_PREFIX = '__';
     /** AJAX controller prefix */
     const ASYNC_PREFIX = 'async_';
+	/** CACHE controller prefix */
+	const CACHE_PREFIX = 'cache_';
 	
 	/**
 	 * Установить заголовок страницы

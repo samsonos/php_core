@@ -66,9 +66,10 @@ class URL implements iURL
      *
      * @param \samson\core\Core $core       Pointer to core object
      * @param mixed             $result     Return value as routing result
+	 * @param string			$path 		Request path for analyzing
      * @param string            $default    Default route path
      */
-    public function router(\samson\core\Core & $core, & $result, $default = 'main')
+    public function router(\samson\core\Core & $core, & $result, & $path, $default = 'main')
     {
 	    //$this->parse();
 

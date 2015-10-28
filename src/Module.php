@@ -9,7 +9,7 @@ namespace samson\core;
  * @author Vitaly Iegorov <vitalyiegorov@gmail.com>
  * @version 1.0
  */
-class Module implements iModule, IViewable, \ArrayAccess, iModuleViewable
+class Module implements iModule, IViewable, \ArrayAccess, iModuleViewable, \samsonphp\router\RouteInterface
 {
     /** Static module instances collection */
     public static $instances = array();
@@ -20,7 +20,7 @@ class Module implements iModule, IViewable, \ArrayAccess, iModuleViewable
     /** @var ResourceMap Pointer to module resource map */
     public $resourceMap;
 
-    /** Collection for cacheable callable controllers of module */
+    /** Collection for cachable callable controllers of module */
     protected $cacheControllers = array();
 
     /** Collection for callable controllers of module */
@@ -477,7 +477,7 @@ class Module implements iModule, IViewable, \ArrayAccess, iModuleViewable
                 // Check if regular controller
                 default:
                     if (preg_match('/^' . self::OBJ_PREFIX . '(?<cache>cache_)?(?<controller>.+)/i', $method, $matches)) {
-                        // If this controller has a cacheable mark - store them in special collection
+                        // If this controller has a cachable mark - store them in special collection
                         if (isset($matches['cache']) && isset($matches['cache']{1})) {
                             $this->cacheControllers[$matches['controller']] = array($this, $method);
                         }
@@ -676,6 +676,14 @@ class Module implements iModule, IViewable, \ArrayAccess, iModuleViewable
     public function offsetExists($offset)
     {
         return isset($this->data[$offset]);
+    }
+
+    /**
+     * @return array Collection of route identifiers, their patterns and callbacks
+     */
+    public function routes()
+    {
+        return array();
     }
 }
 
