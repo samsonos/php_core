@@ -9,7 +9,7 @@ namespace samson\core;
  * @author Vitaly Iegorov <vitalyiegorov@gmail.com>
  * @version 1.0
  */
-class Module implements iModule, IViewable, \ArrayAccess, iModuleViewable, \samsonphp\router\RouteInterface
+class Module implements iModule, IViewable, \ArrayAccess, iModuleViewable
 {
     /** Static module instances collection */
     public static $instances = array();
@@ -676,14 +676,6 @@ class Module implements iModule, IViewable, \ArrayAccess, iModuleViewable, \sams
     public function offsetExists($offset)
     {
         return isset($this->data[$offset]);
-    }
-
-    /**
-     * @return array Collection of route identifiers, their patterns and callbacks
-     */
-    public function routes()
-    {
-        return array();
     }
 }
 

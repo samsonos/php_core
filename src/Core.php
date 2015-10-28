@@ -492,7 +492,7 @@ class Core implements iCore
         // If we have passed security application layer
         if ($securityResult) {
             // Fire core routing event - go to routing application layer
-            \samsonphp\event\Event::signal('core.routing', array(&$this, &$result, &$_SERVER['REQUEST_URI'], $default));
+            \samsonphp\event\Event::signal('core.routing', array(&$this, &$result, $default));
         }
 
         // If no one has passed back routing callback
@@ -523,7 +523,7 @@ class Core implements iCore
         // Fire ended event
         \samsonphp\event\Event::fire('core.ended', array(&$output));
 
-		elapsed('Core::start() ended');
+		//elapsed('Core::start() ended');
     }
 
 	//[PHPCOMPRESSOR(remove,start)]

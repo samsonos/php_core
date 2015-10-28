@@ -69,7 +69,7 @@ class URL implements iURL
 	 * @param string			$path 		Request path for analyzing
      * @param string            $default    Default route path
      */
-    public function router(\samson\core\Core & $core, & $result, & $path, $default = 'main')
+    public function router(\samson\core\Core & $core, & $result, $default = 'main')
     {
 	    //$this->parse();
 
