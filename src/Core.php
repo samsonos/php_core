@@ -72,7 +72,7 @@ class Core implements iCore
      * @param string $environment Environment identifier
      * @return self Chaining
      */
-    public function environment($environment = \samsonos\config\Scheme::BASE)
+    public function environment($environment = \samsonphp\config\Scheme::BASE)
     {
         // Signal core environment change
         \samsonphp\event\Event::signal('core.environment.change', array($environment, &$this));
