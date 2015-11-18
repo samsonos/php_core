@@ -30,4 +30,5 @@ For further information read [Official SamsonPHP Wiki](https://github.com/samson
 
 Developed by [SamsonOS](http://samsonos.com/)
 
-Thanks (PHPStorm)[https://lh3.googleusercontent.com/-yVTWu-r8fZ4/AAAAAAAAAAI/AAAAAAAAAAA/7Sddz6VRuyg/photo.jpg]
+![PHPStorm](https://lh3.googleusercontent.com/-yVTWu-r8fZ4/AAAAAAAAAAI/AAAAAAAAAAA/7Sddz6VRuyg/photo.jpg)
+Thanks to the best PHP IDE [PHPStorm](https://lh3.googleusercontent.com/-yVTWu-r8fZ4/AAAAAAAAAAI/AAAAAAAAAAA/7Sddz6VRuyg/photo.jpg) that we are using for developing this project!
