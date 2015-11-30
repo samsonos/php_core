@@ -34,6 +34,8 @@ class SamsonLocale
 	const FR = 'fr';
 	/** Корейская локализация */
 	const KO = 'ko';
+	/** Немецкая локализация */
+	const DE = 'de';
 	
 	/**
 	 * Коллекция поддерживаемых локализаций
@@ -48,7 +50,8 @@ class SamsonLocale
 		SamsonLocale::CH,
 		SamsonLocale::RU,
 		SamsonLocale::FR,
-        SamsonLocale::KO,
+        	SamsonLocale::KO,
+        	SamsonLocale::DE,
 	);
 
     /**
