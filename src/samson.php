@@ -32,12 +32,16 @@ if (php_sapi_name() !== 'cli') {
 
     require('Config.php');
 
-
-// Load files with functions
-    require('shortcuts.php');
+    // Load files with functions
     require('Utils2.php');
+
+    require('shortcuts.php');
+
     require('View.php');
+
     require('deprecated.php');
+
+
 
 //[PHPCOMPRESSOR(remove,start)]
     require('Benchmark.php');

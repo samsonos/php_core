@@ -72,12 +72,30 @@ class Core implements iCore
      * @param string $environment Environment identifier
      * @return self Chaining
      */
-    public function environment($environment = \samsonos\config\Scheme::BASE)
+    public function environment($environment = \samsonphp\config\Scheme::BASE)
     {
         // Signal core environment change
         \samsonphp\event\Event::signal('core.environment.change', array($environment, &$this));
 
         return $this;
+    }
+    
+    /**
+     * Generate special response header triggering caching mechanisms
+     * @param int $cacheLife Amount of seconds for cache(default 3600 - 1 hour)
+     * @param string $accessibility Cache-control accessibility value(default public)
+     */
+    public function cached($cacheLife = 3600, $accessibility = 'public')
+    {
+		static $cached;
+		// Protect sending cached headers once
+		if (!isset($cached) or $cached !== true) {
+			header('Expires: ' . gmdate('D, d M Y H:i:s T', time() + $cacheLife));
+			header('Cache-Control: ' . $accessibility . ', max-age=' . $cacheLife);
+			header('Pragma: cache');
+			
+			$cached = true;
+		}
     }
 
     /**
@@ -110,6 +128,11 @@ class Core implements iCore
 	/** @see \samson\core\iCore::load() */
 	public function load($path = NULL, $module_id = null, $parameters = array())
 	{
+		// Check path
+        if(!file_exists($path)) {
+            return e('Cannot load module from[##]', E_SAMSON_FATAL_ERROR, $path);
+        }
+        
         /** @var ResourceMap $resourceMap Pointer to resource map object */
         $resourceMap = ResourceMap::get($path);
 
@@ -129,13 +152,13 @@ class Core implements iCore
             // Require module controller class into PHP
             if (file_exists($controllerPath)) {
                 //elapsed('+ ['.$module_id.'] Including module controller '.$controllerPath);
-                require($controllerPath);
+                require_once($controllerPath);
             }
 
             // TODO: this should be done via composer autoload file field
             // Iterate all function-style controllers and require them
             foreach ($resourceMap->controllers as $controller) {
-                require($controller);
+                require_once($controller);
             }
 
             //elapsed($moduleClass);
@@ -309,7 +332,7 @@ class Core implements iCore
         return $this;
     }
     //[PHPCOMPRESSOR(remove,end)]
-	 
+
 	/**	@see iCore::async() */
 	public function async( $async = NULL )
 	{ 
@@ -499,6 +522,8 @@ class Core implements iCore
 
         // Fire ended event
         \samsonphp\event\Event::fire('core.ended', array(&$output));
+
+		//elapsed('Core::start() ended');
     }
 
 	//[PHPCOMPRESSOR(remove,start)]

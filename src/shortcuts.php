@@ -57,7 +57,11 @@ function & m( $module = NULL )
  *
  * @return \samson\core\Error Класс для работы с ошибками и отладкой системы
  */
-function & error(){static $_error; return ( $_error = isset($_error) ? $_error : new \samson\core\Error());}
+function & error(){
+    static $_error;
+    $_error = isset($_error) ? $_error : new \samson\core\Error();
+    return $_error;
+}
 
 /**
  * Error(Ошибка) - Зафиксировать ошибку работы системы
@@ -143,7 +147,11 @@ function locale_path( $l = null )
  * URL(УРЛ) - Получить объект для работы с URL
  * @return samson\core\URL Объект для работы с URL
  */
-function & url(){ static $_v; return ( $_v = isset($_v) ? $_v : new \samson\core\URL()); }
+function & url(){
+    static $_v;
+    $_v = isset($_v) ? $_v : new \samson\core\URL();
+    return $_v;
+}
 
 /**
  * Build URL relative to current web-application, method accepts any number of arguments,
