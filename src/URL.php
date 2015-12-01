@@ -338,8 +338,7 @@ class URL implements iURL
 		if( !isset($_SESSION[ self::S_BOOKMARK_KEY ]) ) $_SESSION[ self::S_BOOKMARK_KEY ] = array();
 
 		// Фильтруем аяксовые запросы
-		if($_SERVER['HTTP_ACCEPT'] != '*/*')
-		{
+		if (isset($_SERVER['HTTP_ACCEPT']) && ($_SERVER['HTTP_ACCEPT'] != '*/*')) {
 			// Запишем в сессию объект URL для хранения параметров предыдущего маршрута		 
 			array_unshift( $_SESSION[ self::S_PREVIOUS_KEY ], serialize($this) );	
 	
