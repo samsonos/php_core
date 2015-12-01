@@ -290,7 +290,7 @@ class Module implements iModule, IViewable, \ArrayAccess, iModuleViewable
         // NEW ASYNC EVENT CHAIN LOGIC
         // If this is AJAX request - try to call async handlers
         // Added support for SamsonJS special header
-        if ($_SERVER['HTTP_ACCEPT'] == '*/*' || isset($_SERVER['HTTP_SJSASYNC']) || isset($_POST['SJSASYNC'])) {
+        if ((isset($_SERVER['HTTP_ACCEPT']) && $_SERVER['HTTP_ACCEPT'] == '*/*') || isset($_SERVER['HTTP_SJSASYNC']) || isset($_POST['SJSASYNC'])) {
             // Copy parameters
             $arguments = $parameters;
             array_unshift($arguments, url()->method);
