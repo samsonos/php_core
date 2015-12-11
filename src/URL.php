@@ -251,7 +251,7 @@ class URL implements iURL
 		$currentUrl = __SAMSON_PROTOCOL.$httpHost.$this->base.implode( '/', $url_params );
 		
 		// Add trailing slash only if this is not 'home' url(/)
-		if (sizeof($currentUrl) > 1) {
+		if (strlen($currentUrl) > 1) {
 			$currentUrl .= '/';
 		}
  		

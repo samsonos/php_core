@@ -166,6 +166,8 @@ class Core implements iCore
             /** @var \samson\core\ExternalModule $connector Create module controller instance */
             $connector = new $moduleClass($path, $module_id, $resourceMap);
 
+	        $connector->composerParameters = $parameters;
+
             // Get module identifier
             $module_id = $connector->id();
 

@@ -20,6 +20,8 @@ class Module implements iModule, IViewable, \ArrayAccess, iModuleViewable
     /** @var ResourceMap Pointer to module resource map */
     public $resourceMap;
 
+    public $composerParameters = array();
+
     /** Collection for cachable callable controllers of module */
     protected $cacheControllers = array();
 
