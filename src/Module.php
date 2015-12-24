@@ -2,6 +2,7 @@
 namespace samson\core;
 
 // TODO: Разобраться почему с вызовом m()->render() во вьюхе, и почему не передаются параметры
+use samsonframework\resource\ResourceMap;
 
 /**
  * Модуль системы
