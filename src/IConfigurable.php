@@ -17,7 +17,8 @@ namespace samsonos\core;
 interface IConfigurable
 {
     /**
-     * Perform instance configuration
+     * Perform instance configuration.
+     *
      * @param mixed $entity Configuration instance for configuration
      * @return boolean False if something went wrong otherwise true
      */

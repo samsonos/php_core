@@ -1,6 +1,8 @@
 <?php
 namespace samson\core;
 
+// TODO: Should separated to external module
+
 //
 // Коды ошибок
 // Новые коды должны попадать в диапазон ( E_SAMSON_FATAL_ERROR - D_SAMSON_DEBUG )

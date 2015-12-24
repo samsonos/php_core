@@ -1,6 +1,8 @@
 <?php
 namespace samson\core;
 
+// TODO: Should separated to external module
+
 /**
  * Общие методы для работы с файлами и каталогами
  * @author Vitaly Iegorov <vitalyiegorov@gmail.com>
