@@ -26,6 +26,7 @@
   },
   "require": {
     "samsonframework/base": "*",
+    "samsonframework/resource": "*",
     "samsonphp/event": "1.*",
     "samsonphp/composer": "1.*",
     "samsonphp/config": "1.*"
