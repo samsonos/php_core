@@ -9,6 +9,7 @@
 namespace samson\core;
 
 use samsonframework\core\SystemInterface;
+use samsonframework\resource\ResourceMap;
 
 /**
  * Core of SamsonPHP
