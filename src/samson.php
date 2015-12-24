@@ -31,5 +31,4 @@ if (php_sapi_name() !== 'cli') {
     require('Utils2.php');
     require('shortcuts.php');
     require('View.php');
-    require('deprecated.php');
 }

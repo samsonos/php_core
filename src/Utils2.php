@@ -620,3 +620,17 @@ function generate_password( $count )
     }
     return $pass;
 }
+
+/**
+ * Сформировать правильное имя класса с использованием namespace, если оно не указано
+ * Функция нужна для обратной совместимости с именами классов без NS
+ *
+ * @param string $class_name Имя класса для исправления
+ * @param string $ns		 Пространство имен которому принадлежит класс
+ * @deprecated use \samson\core\AutoLoader::className() and pass full class name to it without splitting into class name and namespace
+ * @return string Исправленное имя класса
+ */
+function ns_classname($class_name, $ns = null)
+{
+    return \samson\core\AutoLoader::className($class_name, $ns);
+}
