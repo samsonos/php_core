@@ -13,6 +13,12 @@ class Module implements iModule, IViewable, \ArrayAccess, iModuleViewable
 {
     /** Static module instances collection */
     public static $instances = array();
+    
+    /** @var Core Instance for interaction with framework */
+    protected $system;
+
+    /** @var URL Instance for interaction with request/response */
+    protected $request;
 
     /** Uniquer identifier to check pointers */
     public $uid;
@@ -400,6 +406,10 @@ class Module implements iModule, IViewable, \ArrayAccess, iModuleViewable
      */
     public function __construct($id, $path = NULL, ResourceMap $resourceMap = null)
     {
+        // Inject generic module dependencies
+        $this->system = s();
+        $this->request = url();
+        
         // Store pointer to module resource map
         $this->resourceMap = &$resourceMap;
         // Save views list
