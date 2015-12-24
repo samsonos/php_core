@@ -350,10 +350,12 @@ class Core implements iCore
 	}		
 		
 	/**	@see iCore::template() */
-	public function template( $template = NULL )
+	public function template( $template = NULL, $absolutePath = false )
 	{
 		// Если передан аргумент
-		if( func_num_args() ){ $this->template_path = $this->active->path().$template;	} 
+		if( func_num_args() ){
+			$this->template_path = ($absolutePath)?$template:$this->active->path().$template;
+		}
 
 		// Аргументы не переданы - вернем текущий путь к шаблону системы
 		return $this->template_path;
