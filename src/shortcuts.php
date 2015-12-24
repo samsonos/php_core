@@ -142,17 +142,6 @@ function locale_path( $l = null )
     return ($l != \samson\core\SamsonLocale::DEF)? $l.'/' : '';
 }
 
-
-/**
- * URL(УРЛ) - Получить объект для работы с URL
- * @return samson\core\URL Объект для работы с URL
- */
-function & url(){
-    static $_v;
-    $_v = isset($_v) ? $_v : new \samson\core\URL();
-    return $_v;
-}
-
 /**
  * Build URL relative to current web-application, method accepts any number of arguments,
  * every argument starting from 2-nd firstly considered as module view parameter, if no such
