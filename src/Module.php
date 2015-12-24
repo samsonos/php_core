@@ -9,7 +9,7 @@ namespace samson\core;
  * @author Vitaly Iegorov <vitalyiegorov@gmail.com>
  * @version 1.0
  */
-class Module implements iModule, IViewable, \ArrayAccess, iModuleViewable
+class Module implements iModule, \ArrayAccess
 {
     /** Static module instances collection */
     public static $instances = array();
