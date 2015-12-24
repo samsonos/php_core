@@ -28,7 +28,8 @@
     "samsonframework/base": "*",
     "samsonphp/event": "1.*",
     "samsonphp/composer": "1.*",
-    "samsonphp/config": "1.*"
+    "samsonphp/config": "1.*",
+    "samsonos/php_url": "*"
   },
   "require-dev": {
     "phpunit/phpunit": "4.2.*"
