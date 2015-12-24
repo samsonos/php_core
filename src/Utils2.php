@@ -129,7 +129,10 @@ function pathname( $path )
  * @param string $path Path to be normalized
  * @return mixed Normalized path
  */
-function normalizepath( $path ){ return str_replace( array('\\\\','///', '//','\\'), '/', $path );}
+function normalizepath( $path )
+{
+	return str_replace( array('\\\\','///', '//','\\'), '/', $path );
+}
 
 /**
  * Изменить регистр ключей массива, с поддержкой UNICODE
@@ -176,36 +179,6 @@ function array_filter_recursive( array & $input )
 
 	// Выполним фильтрацию массива от пустых значений
 	return array_filter($input);
-}
-
-/**
- * Обновить индексацию в таблице "Маппинга"
- * 
- * @param string $mapper_selector
- */
-function mapping_renew_indeces( $mapper_selector )
-{
-	// Коллекция для хранения индексов таблиц 
-	$e = array();
-	
-	// Переберем все записи в общей таблице "Маппинга"
-	foreach ( $mapper_selector()->all() as $r)
-	{
-		// Если для данной таблицы мы еще не создали коллекцию индексов
-		if( ! isset( $e[ $r->Entity ] ) )$e[ $r->Entity ] = array();
-	
-		// Сформируем уникальный индекс для записи в общей и внутренней таблице
-		$key = $r->Entity . '_' . sizeof($e[ $r->Entity ]);
-	
-		// Сохраним индекс
-		$e[ $r->Entity ][] = $key;
-	
-		// Запишем индекс в текущую строку общей таблицы
-		$r->EntityID = $key;
-	
-		// Сохраним строку
-		$r->save();
-	}
 }
 
 /**
@@ -403,62 +376,6 @@ function elapsed( $text = '' )
 }
 
 /**
- * Универсальный метод для установки значения переменной с учетом
- * приоритетов устанавливаемых значений.
- * Значение переменной выставляется только в том случаи если оно еще не выставлено
- * и равно NULL. Тогда метод по очереди подставляет переданные значения для
- * переменной, и устанавливает ей первое выставленное значение не равное NULL
- *
- * @param mixed $value Указатель на устанавливаемую переменную
- * @param mixed $value1 Альтернативное значение переменной
- * @param mixed $value2 Альтернативное значение переменной
- */
-function & uniset( & $value = NULL, $value1 = NULL, $value2 = NULL )
-{	
-	// Если устанавливаемая переменная не задана
-	if( ! isset($value) ) 
-	{
-		// Если задан второй параметр то установим его иначе третий
-		$value = ( isset( $value1 ) ? $value1 : $value2); 
-	}
-	
-	// Вернем указатель на установленную переменную
-	return $value; 
-}
-
-/**
- * Сгенерировать HTML элементы не нумерованного списка доступных локализаций сайта
- * @return string HTML элементы не нумерованного списка 
- */
-function html_locale_ul()
-{
-	// Соберем HTML представление сюда
-	$result = '';	
-	
-	// Описание действия
-	$desc = array(
-		'UA' => 'title="Відкрити українську версію сайта"',
-		'RU' => 'title="Открыть русскую версию сайта"',
-		'EN' => 'title="Open English version"',
-	);
-
-	// Переберем разрешенные локали для сайта
-	foreach( SamsonLocale::get() as $locale )
-	{		
-		// Определим если это текущая локаль	
-		$class = locale() == $locale ? 'class="active"' : '';
-	
-		// Установим правильное представление локали для вывода
-		$locale_name = $locale == '' ? 'RU' : strtoupper($locale);
-						
-		// Сформируем элемент списка
-		$result .= '<li '.$desc[ $locale_name ].' id="'.$locale_name.'_locale"><a '.$class.' href="'.url()->build( url()->text(), 'locale', $locale).'">'.$locale_name.'</a></li>';
-	}
-	
-	return $result;
-}
-
-/**
  * Перевести в верхний регистр первую букву в строке
  * 
  * @param string $string 	Строка для преобразования
@@ -559,7 +476,10 @@ function utf8_translit( $str )
  * @param string $charset	Кодировка
  * @return string	Закодированные данные для передачи
  */
-function mail_encode( $str, $charset ) { return '=?' . $charset . '?B?' . base64_encode($str) . '?='; }
+function mail_encode( $str, $charset )
+{
+    return '=?' . $charset . '?B?' . base64_encode($str) . '?=';
+}
 
 /**
  * Отправить HTML письмо
@@ -601,12 +521,13 @@ function mail_send( $to, $from = 'info@samsonos.com', $message = '', $subject = 
  * @param int $n число
  * @return string Сгенерированный код формы для отправки на LIQPAY
  */
-function incline_word($words,$n){
-	if($n%100>4 && $n%100<20){
-		return $words[2];
-	}
-	$a = array(2,0,1,1,1,2);
-	return $words[$a[min($n%10,5)]];
+function incline_word($words,$n)
+{
+    if ($n % 100 > 4 && $n % 100 < 20) {
+        return $words[2];
+    }
+    $a = array(2, 0, 1, 1, 1, 2);
+    return $words[$a[min($n % 10, 5)]];
 }
 
 /**
@@ -659,16 +580,17 @@ function date_format_ru($date)
  */
 function get_child_classes( $parent )
 {
-	$ancestors = array();
-	
-	// Перерберем все задекларированные классы и посмотрим те которые наследуют нужный класс
-	foreach ( get_declared_classes() as $class )
-	{
-		// Если класс наследует нужный нам класс 
-		if( in_array( $parent, class_parents( $class ) )) $ancestors[] = $class;		
-	}
-	
-	return $ancestors;
+    $ancestors = array();
+
+    // Перерберем все задекларированные классы и посмотрим те которые наследуют нужный класс
+    foreach (get_declared_classes() as $class) {
+        // Если класс наследует нужный нам класс
+        if (in_array($parent, class_parents($class))) {
+            $ancestors[] = $class;
+        }
+    }
+
+    return $ancestors;
 }
 
 /**
