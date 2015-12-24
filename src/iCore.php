@@ -45,10 +45,9 @@ interface iCore
 	 * Установить/Получить путь к основному шаблону системы
 	 * 
 	 * @param string $template Путь к основному шаблону системы
-	 * @param string $absolutePath $template is absolute
 	 * @return iCore/string Указатель на ядро системы для цепирования / Путь к основному шаблону системы
 	 */
-	public function template( $template = NULL, $absolutePath = false );
+	public function template( $template = NULL );
 	
 	/**
 	 * Установить относительный путь к файлам и ресурсам данного Веб-приложения
@@ -63,7 +62,7 @@ interface iCore
 	 * @param mixed $module Указатель на модуль для установки
 	 * @return iModule Текущий модуль системы до момента вызова данного метода
 	 */
-	public function & active( iModule & $module = NULL );
+	public function &active( iModule & $module = NULL );
 	
 	
 	/**
@@ -74,7 +73,7 @@ interface iCore
 	 * @param string $module Имя модуля
 	 * @return iModule Модуль системы 
 	 */
-	public function & module( & $module = NULL );	
+	public function &module( & $module = NULL );
 	
 	/**
 	 * Load module into the framework core

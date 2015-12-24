@@ -1,6 +1,7 @@
 <?php
 namespace samson\core;
 
+use samsonframework\core\RequestInterface;
 use samsonphp\event\Event;
 
 /**
@@ -9,7 +10,7 @@ use samsonphp\event\Event;
  * @author Vitaly Iegorov <vitalyiegorov@gmail.com>
  * @version 1.0
  */
-class URL implements iURL
+class URL implements iURL, RequestInterface
 {	
 	/**
 	 * Дополнительный параметр в URL

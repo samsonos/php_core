@@ -29,5 +29,5 @@ interface iExternalModule
 	 * Create module copy
 	 * @return iExternalModule Copied module instance
 	 */
-	public function & copy();
+	public function &copy();
 }

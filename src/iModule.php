@@ -87,10 +87,10 @@ interface iModule extends RenderInterface
 	 * 	- Если передан специальный идентификатор типа контроллера то выполняется попытка его вызова 
 	 * 		<code>ИМЯ_МОДУЛЯ__[POST,PUT,DELETE]( $p1, $p2, ... )</code>
 	 *
-	 * @param string $method_name 	Имя метода контроллера для выполнения
+	 * @param string $methodName 	Имя метода контроллера для выполнения
 	 * @return integer Результат выполнения метода контроллера
 	 */
-	public function action( $method_name = NULL );
+	public function action($methodName = NULL );
 	
 	/**
 	 * Установить/Получить HTML представление модуля

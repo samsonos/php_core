@@ -2,6 +2,9 @@
 namespace samson\core;
 
 use samson\core\AutoLoader;
+use samsonframework\core\RequestInterface;
+use samsonframework\core\ResourcesInterface;
+use samsonframework\core\SystemInterface;
 
 /**
  * Модуль имеющий единственный свой экземпляр c расширенными возможностями 
@@ -32,7 +35,7 @@ class Service extends ExternalModule
      * @param string $className Class name for getting service instance
      * @return Service Service instance
     */
-    public static function & getInstance($className)
+    public static function &getInstance($className)
     {
         // Check service class existence
         if (class_exists($className)) {
@@ -100,12 +103,14 @@ class Service extends ExternalModule
     }
 
     /**
-     * Override constructor to support standard SamsonPHP module loading
+     * ExternalModule constructor.
+     *
      * @param string $path Path to module
-     * @param string $vid Virtual identifier
-     * @param mixed $resources Resources collection
+     * @param ResourcesInterface $resources
+     * @param SystemInterface $system Framework instance
+     * @param RequestInterface $request Request instance
      */
-    public function __construct($path = null, $vid = null, $resources = null)
+    public function  __construct($path, ResourcesInterface $resources, SystemInterface $system, RequestInterface $request)
     {
         // Получим имя класса
         $class = self::getName(get_class($this));
@@ -123,7 +128,7 @@ class Service extends ExternalModule
         }
 
         // Вызовем родительский конструктор
-        parent::__construct($path, $vid, $resources);
+        parent::__construct($path, $resources, $system, $request);
     }
 
     /** Deserialization */

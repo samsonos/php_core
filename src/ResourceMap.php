@@ -5,14 +5,15 @@
  */
 namespace samson\core;
 
+use samsonframework\core\ResourcesInterface;
+
 /**
  * Generic class to manage all web-application resources
  * @author Vitaly Egorov <egorov@samsonos.com>
  * @copyright 2014 SamsonOS
  */
-class ResourceMap
+class ResourceMap implements ResourcesInterface
 {
-
     /** Number of lines to read in file to determine its PHP class */
     const CLASS_FILE_LINES_LIMIT = 50;
 

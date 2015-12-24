@@ -8,6 +8,8 @@
  */
 namespace samson\core;
 
+use samsonframework\core\SystemInterface;
+
 /**
  * Core of SamsonPHP
  * 
@@ -15,7 +17,7 @@ namespace samson\core;
  * @author 	Vitaly Iegorov <vitalyiegorov@gmail.com>
  * @version @version@
  */
-class Core implements iCore
+class Core implements iCore, SystemInterface
 {
     /** @deprecated Collection of paths ignored by resources collector */
     public static $resourceIgnorePath = array(
@@ -102,7 +104,7 @@ class Core implements iCore
      * @see \samson\core\iCore::resources()
      * @deprecated Use ResourceMap::find()
      */
-	public function resources( & $path, & $ls = array(), & $files = null )
+	public function resources( &$path, &$ls = array(), &$files = null )
 	{
         if (!isset( $this->load_path_stack[$path])) {
             // Get the resource map for this entry point
@@ -115,7 +117,7 @@ class Core implements iCore
             $ls['php'] = $resourceMap->php;
 
             // Save path resources data
-            $this->load_path_stack[ $path ] = & $ls;
+            $this->load_path_stack[ $path ] = &$ls;
 
             return true;
         } else {
@@ -164,7 +166,7 @@ class Core implements iCore
             //elapsed($moduleClass);
 
             /** @var \samson\core\ExternalModule $connector Create module controller instance */
-            $connector = new $moduleClass($path, $module_id, $resourceMap);
+            $connector = new $moduleClass($path, $resourceMap, $this, url());
 
 	        // Set composer parameters
 	        $connector->composerParameters = $parameters;
@@ -196,7 +198,7 @@ class Core implements iCore
             $this->load_module_stack[$module_id] = $ls;
 
             // Check for namespace uniqueness
-            if( !isset($this->load_stack[ $ns ])) $this->load_stack[ $ns ] = & $ls;
+            if( !isset($this->load_stack[ $ns ])) $this->load_stack[ $ns ] = &$ls;
             // Merge another ns location to existing
             else $this->load_stack[ $ns ] = array_merge_recursive ( $this->load_stack[ $ns ], $ls );
 
@@ -204,10 +206,10 @@ class Core implements iCore
             $parent_class = get_parent_class( $connector );
             if (!in_array($parent_class, array(AutoLoader::className('samson\core\ExternalModule'), AutoLoader::className('samson\core\CompressableExternalModule')))) {
                 // Переберем загруженные в систему модули
-                foreach ($this->module_stack as & $m){
+                foreach ($this->module_stack as &$m){
                     // Если в систему был загружен модуль с родительским классом
                     if (get_class($m) == $parent_class) {
-                        $connector->parent = & $m;
+                        $connector->parent = &$m;
                         //elapsed('Parent connection for '.$moduleClass.'('.$connector->uid.') with '.$parent_class.'('.$m->uid.')');
                     }
                 }
@@ -217,7 +219,7 @@ class Core implements iCore
 	        $module_id = str_replace('/','',$parameters['module_id']);
 
 	        /** @var \samson\core\ExternalModule $connector Create module controller instance */
-	        $connector = new CompressableExternalModule($path, $module_id, $resourceMap);
+	        $connector = new CompressableExternalModule($path, $resourceMap, $this, url());
 	        
 	        // Set composer parameters
 	        $connector->composerParameters = $parameters;
@@ -279,9 +281,9 @@ class Core implements iCore
 			// View rendering algorithm form array of view pathes 
 			case self::RENDER_ARRAY:				
 				// Collection of view pathes
-				$views = & $GLOBALS['__compressor_files'];
+				$views = &$GLOBALS['__compressor_files'];
 				// Trying to find another template path, by default it's an default template path
-				if( isset($views[ $__template_view ]) && file_exists( $views[ $__template_view ] ) ) include( $views[ $__template_view ] );
+				if( isset($views[ $__template_view ]) &&file_exists( $views[ $__template_view ] ) ) include( $views[ $__template_view ] );
 				// If another template wasn't found - we will use default template path
 				else if( isset($views[ $__view ]) && file_exists( $views[ $__view ] ) ) include( $views[ $__view ] );
 				// Error no template view was found
@@ -291,7 +293,7 @@ class Core implements iCore
 			// View rendering algorithm from array of view variables
 			case self::RENDER_VARIABLE:
 				// Collection of views
-				$views = & $GLOBALS['__compressor_files'];
+				$views = &$GLOBALS['__compressor_files'];
 				// Trying to find another template path, by default it's an default template path
 				if( isset($views[ $__template_view ])) eval(' ?>'.$views[ $__template_view ].'<?php ');
 				// If another template wasn't found - we will use default template path
@@ -311,7 +313,7 @@ class Core implements iCore
         \samsonphp\event\Event::fire('core.render', array(&$html, &$__data, &$this->active));
 
 		// Iterating throw render stack, with one way template processing
-		foreach ( $this->render_stack as & $renderer )
+		foreach ( $this->render_stack as &$renderer )
 		{
 			// Выполним одностороннюю обработку шаблона
 			$html = call_user_func( $renderer, $html, $__data, $this->active );
@@ -350,12 +352,10 @@ class Core implements iCore
 	}		
 		
 	/**	@see iCore::template() */
-	public function template( $template = NULL, $absolutePath = false )
+	public function template( $template = NULL )
 	{
 		// Если передан аргумент
-		if( func_num_args() ){
-			$this->template_path = ($absolutePath)?$template:$this->active->path().$template;
-		}
+		if( func_num_args() ){ $this->template_path = $this->active->path().$template;	} 
 
 		// Аргументы не переданы - вернем текущий путь к шаблону системы
 		return $this->template_path;
@@ -381,14 +381,14 @@ class Core implements iCore
 	}	
 	
 	/**	@see iModule::active() */
-	public function & active(iModule & $module = null)
+	public function &active(iModule &$module = null)
 	{
 		// Сохраним старый текущий модуль		
-		$old = & $this->active;
+		$old = &$this->active;
 		
 		// Если передано значение модуля для установки как текущий - проверим и установим его
 		if (isset($module)) {
-            $this->active = & $module;
+            $this->active = &$module;
         }
 
 		// Вернем значение текущего модуля  
@@ -396,14 +396,14 @@ class Core implements iCore
 	}
 			
 	/**	@see iCore::module() */
-	public function & module( & $_module = NULL )
+	public function &module( &$_module = NULL )
 	{		
 		$ret_val = null;
 		
 		// Ничего не передано - вернем текущуй модуль системы
-		if( !isset($_module) && isset( $this->active ) ) $ret_val = & $this->active;	
+		if( !isset($_module) &&isset( $this->active ) ) $ret_val = &$this->active;
 		// Если уже передан какой-то модуль - просто вернем его
-		else if( is_object( $_module ) ) $ret_val = & $_module;
+		else if( is_object( $_module ) ) $ret_val = &$_module;
 		// If module name is passed - try to find it
 		else if( is_string( $_module ) && isset( $this->module_stack[ $_module ] ) ) $ret_val = & $this->module_stack[ $_module ];				
 		
@@ -422,7 +422,7 @@ class Core implements iCore
 		if( isset($this->module_stack[ $_id ]) )
 		{	
 			// Get module instance
-			$m = & $this->module_stack[ $_id ];
+			$m = &$this->module_stack[ $_id ];
 			
 			// Remove load stack data of this module 
 			$ns = nsname( get_class($m) );			
@@ -440,7 +440,7 @@ class Core implements iCore
      * @deprecated Must be moved to a new HTML output object
      * @return mixed Changed HTML template
      */
-    public function generate_template( & $template_html )
+    public function generate_template( &$template_html )
 	{
 		// Добавим путь к ресурсам для браузера
 		$head_html = "\n".'<base href="'.url()->base().'">';
@@ -546,7 +546,7 @@ class Core implements iCore
         $this->map = ResourceMap::get($this->system_path, false, array('src/'));
 
 		// Connect static collection with this dynamic field to avoid duplicates
-		$this->module_stack = & Module::$instances;
+		$this->module_stack = &Module::$instances;
 
 		// Load samson\core module
         $this->load(__SAMSON_PATH__);
@@ -573,7 +573,7 @@ class Core implements iCore
         \samsonphp\event\Event::fire(
             'core.composer.create',
             array(
-                & $composerModules,
+                &$composerModules,
                 isset($dependencyFilePath) ? $dependencyFilePath : $this->system_path,
 	            array(
 		            'vendorsList' => array('samsonphp/', 'samsonos/', 'samsoncms/'),
@@ -632,7 +632,7 @@ class Core implements iCore
 	/** Магический метод для десериализации объекта */
 	public function __wakeup()
     {
-        $this->active = & $this->module_stack['local'];
+        $this->active = &$this->module_stack['local'];
     }
 	
 	/** Магический метод для сериализации объекта */

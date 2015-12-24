@@ -13,12 +13,6 @@ class Module implements iModule, IViewable, \ArrayAccess, iModuleViewable
 {
     /** Static module instances collection */
     public static $instances = array();
-    
-    /** @var Core Instance for interaction with framework */
-    protected $system;
-
-    /** @var URL Instance for interaction with request/response */
-    protected $request;
 
     /** Uniquer identifier to check pointers */
     public $uid;
@@ -60,6 +54,12 @@ class Module implements iModule, IViewable, \ArrayAccess, iModuleViewable
 
     /** Unique module cache path in local web-application */
     protected $cache_path;
+
+    /** @var Core Instance for interaction with framework */
+    protected $system;
+
+    /** @var URL Instance for interaction with request/response */
+    protected $request;
 
     /**
      * Perform module view context switching
@@ -288,7 +288,7 @@ class Module implements iModule, IViewable, \ArrayAccess, iModuleViewable
     }
 
     /** @see iModule::action() */
-    public function action($method_name = NULL)
+    public function action($methodName = NULL)
     {
         //trace( array_keys($this->controllers), true );
 
@@ -364,9 +364,9 @@ class Module implements iModule, IViewable, \ArrayAccess, iModuleViewable
         $request_type = $_SERVER['REQUEST_METHOD'];
 
         // Controller by name
-        $naming = $method_name;
+        $naming = $methodName;
         // Controller by server request type
-        $request = !isset($method_name{0}) ? strtolower($request_type == 'GET' ? self::CTR_BASE : self::OBJ_PREFIX . $request_type) : '';
+        $request = !isset($methodName{0}) ? strtolower($request_type == 'GET' ? self::CTR_BASE : self::OBJ_PREFIX . $request_type) : '';
         // Universal controller
         $universal = self::CTR_UNI;
 
@@ -406,10 +406,6 @@ class Module implements iModule, IViewable, \ArrayAccess, iModuleViewable
      */
     public function __construct($id, $path = NULL, ResourceMap $resourceMap = null)
     {
-        // Inject generic module dependencies
-        $this->system = s();
-        $this->request = url();
-        
         // Store pointer to module resource map
         $this->resourceMap = &$resourceMap;
         // Save views list
