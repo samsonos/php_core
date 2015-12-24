@@ -110,7 +110,7 @@ class Service extends ExternalModule
      * @param SystemInterface $system Framework instance
      * @param RequestInterface $request Request instance
      */
-    public function  __construct($path, ResourcesInterface $resources, SystemInterface $system, RequestInterface $request)
+    public function  __construct($path, ResourcesInterface $resources, SystemInterface $system)
     {
         // Получим имя класса
         $class = self::getName(get_class($this));
@@ -128,7 +128,7 @@ class Service extends ExternalModule
         }
 
         // Вызовем родительский конструктор
-        parent::__construct($path, $resources, $system, $request);
+        parent::__construct($path, $resources, $system);
     }
 
     /** Deserialization */

@@ -58,9 +58,6 @@ class Module implements iModule, IViewable, \ArrayAccess, iModuleViewable
     /** @var Core Instance for interaction with framework */
     protected $system;
 
-    /** @var URL Instance for interaction with request/response */
-    protected $request;
-
     /**
      * Perform module view context switching
      * @param string $view_path New view context name

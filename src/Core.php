@@ -166,7 +166,7 @@ class Core implements iCore, SystemInterface
             //elapsed($moduleClass);
 
             /** @var \samson\core\ExternalModule $connector Create module controller instance */
-            $connector = new $moduleClass($path, $resourceMap, $this, url());
+            $connector = new $moduleClass($path, $resourceMap, $this);
 
 	        // Set composer parameters
 	        $connector->composerParameters = $parameters;

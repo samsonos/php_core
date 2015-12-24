@@ -30,11 +30,10 @@ class ExternalModule extends Module implements iExternalModule
      * @param Core $system Framework instance
      * @param Url $request Request instance
      */
-    public function  __construct($path, ResourcesInterface $resources, SystemInterface $system, RequestInterface $request)
+    public function  __construct($path, ResourcesInterface $resources, SystemInterface $system)
     {
         // Inject generic module dependencies
         $this->system = $system;
-        $this->request = $request;
 
         // Module identifier not specified - set it to NameSpace\Classname
         if (!isset($this->id{0}) && !isset($identifier)) {
