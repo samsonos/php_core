@@ -6,6 +6,8 @@
  */
  namespace samson\core;
 
+ // TODO: Should be separated from core
+
  /**
  * Class to build system execution profile to find weak places
  * @author Vitaly Egorov <egorov@samsonos.com>
