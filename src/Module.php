@@ -2,7 +2,7 @@
 namespace samson\core;
 
 // TODO: Разобраться почему с вызовом m()->render() во вьюхе, и почему не передаются параметры
-use samsonframework\resource\ResourceMap;
+use samsonframework\core\ResourcesInterface;
 
 /**
  * Модуль системы
@@ -18,7 +18,7 @@ class Module implements iModule, \ArrayAccess
     /** Uniquer identifier to check pointers */
     public $uid;
 
-    /** @var ResourceMap Pointer to module resource map */
+    /** @var ResourcesInterface Pointer to module resource map */
     public $resourceMap;
 
     public $composerParameters = array();
@@ -400,9 +400,9 @@ class Module implements iModule, \ArrayAccess
      *
      * @param string $id Module unique identifier
      * @param string $path Module location
-     * @param ResourceMap $resourceMap Pointer to module resource map
+     * @param ResourcesInterface $resourceMap Pointer to module resource map
      */
-    public function __construct($id, $path = NULL, ResourceMap $resourceMap = null)
+    public function __construct($id, $path = NULL, ResourcesInterface $resourceMap = null)
     {
         // Store pointer to module resource map
         $this->resourceMap = &$resourceMap;
