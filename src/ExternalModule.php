@@ -1,8 +1,10 @@
 <?php
 namespace samson\core;
+
 use samsonframework\core\RequestInterface;
 use samsonframework\core\ResourcesInterface;
 use samsonframework\core\SystemInterface;
+use samsonphp\event\Event;
 
 /**
  * SamsonPHP external module
@@ -12,12 +14,8 @@ use samsonframework\core\SystemInterface;
  */
 class ExternalModule extends Module implements iExternalModule
 {
-    /**
-     * Pointer to parent module
-     * @var \samson\core\Module
-     * @see \samson\core\Module
-     */
-    public $parent = NULL;
+    /** @var Module Pointer to parent module */
+    public $parent = null;
 
     /** Коллекция связанных модулей с текущим */
     protected $requirements = array();
@@ -25,24 +23,23 @@ class ExternalModule extends Module implements iExternalModule
     /**
      * ExternalModule constructor.
      *
-     * @param string $path Path to module
-     * @param ResourceMap $resources
-     * @param Core $system Framework instance
-     * @param Url $request Request instance
+     * @param string $path
+     * @param ResourcesInterface $resources
+     * @param SystemInterface $system
      */
-    public function  __construct($path, ResourcesInterface $resources, SystemInterface $system)
+    public function __construct($path, ResourcesInterface $resources, SystemInterface $system)
     {
         // Inject generic module dependencies
         $this->system = $system;
 
         // Module identifier not specified - set it to NameSpace\Classname
-        if (!isset($this->id{0}) && !isset($identifier)) {
+        if (!isset($this->id{0})) {
             // Generate identifier from module class
             $this->id = AutoLoader::oldClassName(get_class($this));
         }
 
         // Subscribe to an config ready core event
-        \samsonphp\event\Event::subscribe('core.started', array(&$this, 'init'));
+        Event::subscribe('core.started', array(&$this, 'init'));
 
         // Call parent constructor
         parent::__construct($this->id, $path, $resources);
@@ -54,17 +51,14 @@ class ExternalModule extends Module implements iExternalModule
         // Get current class name
         $classname = get_class($this);
 
-        // Generate unique virtual id for copy
-        $id = $this->id;
-
         // Create copy instance
-        $o = new $classname($this->path, $id, $this->resourceMap);
-        $o->views = &$this->views;
-        $o->parent = &$this->parent;
-        $o->controllers = &$this->controllers;
-        $o->path = $this->path;
+        $clone = new $classname($this->path, $this->resourceMap, $this->system);
+        $clone->views = &$this->views;
+        $clone->parent = &$this->parent;
+        $clone->controllers = &$this->controllers;
+        $clone->path = $this->path;
 
-        return $o;
+        return $clone;
     }
 
     /** Обработчик сериализации объекта */
@@ -81,16 +75,17 @@ class ExternalModule extends Module implements iExternalModule
      * а потом в его родителе. Это дает возможность выполнять наследование
      * контроллеров модулей.
      *
-     * @see iModule::action()
+     * @param string $methodName Controller action name
+     * @return bool|mixed
      */
-    public function action($methodName = NULL)
+    public function action($methodName = null)
     {
         // Выполним стандартное действие
         $result = parent::action($methodName);
 
         // Если мы не смогли выполнить действие для текущего модуля
         // и задан родительский модуль
-        if ($result === A_FAILED && isset($this->parent)) {
+        if ($result === false && isset($this->parent)) {
             // Выполним действие для родительского модуля
             return $this->parent->action($methodName);
         }
@@ -99,7 +94,12 @@ class ExternalModule extends Module implements iExternalModule
         return $result;
     }
 
-    /** @see iModule::view() */
+    /**
+     * Set current view for rendering.
+     *
+     * @param string $viewPath Path for view searching
+     * @return self Chaining
+     */
     public function view($viewPath)
     {
         //elapsed('['.$this->id.'] Setting view context: ['.$viewPath.']');
@@ -133,7 +133,7 @@ class ExternalModule extends Module implements iExternalModule
      * as it is used in templates and views using m()->render()
      * without specifying concrete module or passing a variable.
      *
-     * @see parent::render()
+     * @param string $controller Controller action name
      */
     public function render($controller = null)
     {
@@ -144,9 +144,9 @@ class ExternalModule extends Module implements iExternalModule
             // Set internal view context data pointer
             $this->parent->data = &$this->parent->view_data[$this->parent->view_context];
             // Call parent render
-            return $this->parent->render($controller);
+            $this->parent->render($controller);
         } else { // Call default module behaviour
-            return parent::render($controller);
+            parent::render($controller);
         }
     }
 
