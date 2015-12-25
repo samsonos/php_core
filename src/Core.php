@@ -18,8 +18,16 @@ use samsonframework\resource\ResourceMap;
  * @author 	Vitaly Iegorov <vitalyiegorov@gmail.com>
  * @version @version@
  */
-class Core implements iCore, SystemInterface
+class Core implements SystemInterface
 {
+    /* Rendering models */
+    /** Standard algorithm for view rendering */
+    const RENDER_STANDART = 1;
+    /** View rendering algorithm from array of view paths */
+    const RENDER_ARRAY = 2;
+    /** View rendering algorithm from array of view variables */
+    const RENDER_VARIABLE = 3;
+
     /** @deprecated Collection of paths ignored by resources collector */
     public static $resourceIgnorePath = array(
         '.git',

@@ -4,6 +4,7 @@ namespace samson\core;
 /**
  * Интерфейс для ядра системы
  * @author Vitaly Iegorov <vitalyiegorov@gmail.com>
+ * @deprecated Use samsonframework\core\SystemInterface
  */
 interface iCore
 {
