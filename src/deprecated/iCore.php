@@ -60,7 +60,7 @@ interface iCore
     /**
      * Установить/Получить текущий активный модуль системы
      *
-     * @param mixed $module Указатель на модуль для установки
+     * @param null|iModule $module Указатель на модуль для установки
      * @return iModule Текущий модуль системы до момента вызова данного метода
      */
     public function &active(iModule & $module = NULL);
