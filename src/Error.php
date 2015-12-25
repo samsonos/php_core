@@ -186,7 +186,6 @@ class Error
 	 * Сигнатура метода совпадает с требованиями PHP
 	 * 
 	 * @param integer 	$errno		Код ошибки
-	 * @param string 	$errstr		Описание ошибки
 	 * @param string	$errfile	Файл в котором происходит ошибка
 	 * @param string 	$errline	Строка в которой была ошибка
 	 * @param string 	$errcontext	Контекст в котором произошла ошибка
@@ -268,9 +267,10 @@ class Error
 	 * 
 	 * @param integer 	$errno		Код ошибки
 	 * @param string 	$desc		Описание ошибки
-	 * @param string 	$errstr		Текст ошибки
 	 * @param string	$errfile	Файл в котором происходит ошибка
 	 * @param string 	$errline	Строка в которой была ошибка
+	 * @param string $error_msg
+	 * @param string $class
 	 * @return array Массив ошибка
 	 */
 	private function toError( $errno , $desc, $error_msg, $errfile = NULL, $errline = NULL, $class = NULL )
