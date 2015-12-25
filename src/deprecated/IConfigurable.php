@@ -7,20 +7,17 @@
  */
 namespace samsonos\core;
 
+use samsonframework\core\ConfigurableInterface;
+
 /**
  * Give object instances ability for custom implementation of its configuration,
  * if class does not implements this interface then generic configure logic will
  * be applied to it.
  * @package samsonos\core
  * @author Vitaly Egorov <egorov@samsonos.com>
+ * @deprecated Use samsonframework\core\ConfigurableInterface
  */
-interface IConfigurable
+interface IConfigurable extends ConfigurableInterface
 {
-    /**
-     * Perform instance configuration.
-     *
-     * @param mixed $entity Configuration instance for configuration
-     * @return boolean False if something went wrong otherwise true
-     */
-    public function configure($entityConfiguration);
+
 }
