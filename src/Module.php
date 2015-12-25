@@ -111,26 +111,24 @@ class Module implements iModule, \ArrayAccess
 
     /**
      * Find view file by its part in module view resources and return full path to it
-     * @param string $view_path Part of path to module view file
+     * @param string $viewPath Part of path to module view file
      * @return string Full path to view file
      */
-    public function findView($view_path)
+    public function findView($viewPath)
     {
         // Remove file extension for correct array searching
-        $view_path = str_replace(array('.php', '.vphp'), '', $view_path);
+        $viewPath = str_replace(array('.php', '.vphp'), '', $viewPath);
 
         // Try to find passed view_path in  resources views collection
-        if (sizeof($view = preg_grep('/' . addcslashes($view_path, '/\\') . '(\.php|\.vphp)/ui', $this->views))) {
-            // Sort view pathes to get the shortest path
+        if (sizeof($view = preg_grep('/' . addcslashes($viewPath, '/\\') . '(\.php|\.vphp)/ui', $this->views))) {
+            // Sort view paths to get the shortest path
             usort($view, array($this, 'sortStrings'));
 
             // Set current full view path as last found view
             return end($view);
-        } else return false;
-        {
-            //elapsed($this->views);
-            //return e('Cannot find ## view ## - file does not exists', E_SAMSON_RENDER_ERROR, array( $this->id, $view_path));
         }
+
+        return false;
     }
 
 
@@ -184,9 +182,11 @@ class Module implements iModule, \ArrayAccess
         //elapsed($this->id.' - Setting HTML for '.array_search(  $this->data, $this->view_data ).'('.strlen($value).')');
 
         // Если передан параметр то установим его
-        if (func_num_args()) $this->data[self::VD_HTML] = $value;
-        // Вернем значение текущего представления модели
-        else return $this->data['html'];
+        if (func_num_args()) {
+            $this->data[self::VD_HTML] = $value;
+        } else {
+            return $this->data['html'];
+        }
 
         return $this;
     }
@@ -268,7 +268,7 @@ class Module implements iModule, \ArrayAccess
     {
         //trace($this->id.'-'.$controller);
         // Временно изменим текущий модуль системы
-        $old = &s()->active($this);
+        $old = &$this->system->active($this);
 
         // Если если передан контроллер модуля для выполнения перед его прорисовкой - выполним его
         if (isset($controller)) {
@@ -279,10 +279,10 @@ class Module implements iModule, \ArrayAccess
         //elapsed( $this->id.' - Rendering '.$this->view_path );
 
         // Прорисуем представление и выведем его в текущий поток вывода
-        echo $this->output( /*$this->view_path*/);
+        echo $this->output();
 
         // Ввостановим предыдущий текущий модуль контролера
-        s()->active($old);
+        $this->system->active($old);
     }
 
     /** @see iModule::action() */
