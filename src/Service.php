@@ -23,7 +23,7 @@ class Service extends ExternalModule
     protected static $factory = array();
 
     /** Ancestor field that must be ignored */
-    protected static $ancestorIgnoreData = array('vid'=>'', 'uid'=>'', 'cache_path'=>'');
+    protected static $ancestorIgnoreData = array('vid' => '', 'uid' => '', 'cache_path' => '');
 
     /** Flag for gathering all ancestor data on instance creation */
     public $gatherAncestorData = true;
@@ -34,7 +34,7 @@ class Service extends ExternalModule
      *
      * @param string $className Class name for getting service instance
      * @return Service Service instance
-    */
+     */
     public static function &getInstance($className)
     {
         // Check service class existence
@@ -43,9 +43,9 @@ class Service extends ExternalModule
             $class = self::getName($className);
 
             // Check if service exists
-            if (isset(self::$factory[ $class ])) {
+            if (isset(self::$factory[$class])) {
                 // Return service instance
-                return self::$factory[ $class ];
+                return self::$factory[$class];
             } else { // Create service instance
                 $service = new $className('');
                 return $service;
@@ -59,8 +59,8 @@ class Service extends ExternalModule
      * Generic method for setting fields to current service from its parents.
      * Method recursively copies all unset fields of $baseObject from defined
      * field values of its parent classes
-     * @param mixed $baseObject     Object fo set undefined fields from parents
-     * @param mixed $currentObject  Current object for recursion to find parent fields
+     * @param mixed $baseObject Object fo set undefined fields from parents
+     * @param mixed $currentObject Current object for recursion to find parent fields
      */
     protected static function gatherAncestorsData(& $baseObject, & $currentObject)
     {
@@ -69,7 +69,7 @@ class Service extends ExternalModule
         // This instance is not Service
         if (self::getName(__CLASS__) != $parentClass) {
             // Get parent class instance
-            $parentInstance = & self::$factory[$parentClass];
+            $parentInstance = &self::$factory[$parentClass];
             if (isset($parentInstance)) {
                 // Get all parent instance fields except ignored
                 $fields = array_diff_key(get_object_vars($parentInstance), self::$ancestorIgnoreData);
@@ -78,12 +78,12 @@ class Service extends ExternalModule
                 foreach ($fields as $field => $value) {
                     // If ancestor has field set and it is not set in base instance
                     if (isset($parentInstance->$field) && !isset($baseObject->$field)) {
-                         $baseObject->$field = $parentInstance->$field;
+                        $baseObject->$field = $parentInstance->$field;
                     }
                 }
 
                 // Set parent service
-                $baseObject->parent = & $parentInstance;
+                $baseObject->parent = &$parentInstance;
 
                 // Go deeper in recursion
                 self::gatherAncestorsData($baseObject, $parentInstance);
@@ -117,7 +117,7 @@ class Service extends ExternalModule
 
         // Search instance
         if (!isset(self::$factory[$class])) {
-            self::$factory[ $class ] = $this;
+            self::$factory[$class] = $this;
 
             // If service is configured to gather ancestors data
             if ($this->gatherAncestorData) {
