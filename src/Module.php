@@ -3,6 +3,7 @@ namespace samson\core;
 
 // TODO: Разобраться почему с вызовом m()->render() во вьюхе, и почему не передаются параметры
 use samsonframework\core\ResourcesInterface;
+use samsonframework\core\SystemInterface;
 
 /**
  * Модуль системы
@@ -56,7 +57,7 @@ class Module implements iModule, \ArrayAccess
     /** Unique module cache path in local web-application */
     protected $cache_path;
 
-    /** @var Core Instance for interaction with framework */
+    /** @var SystemInterface Instance for interaction with framework */
     protected $system;
 
     /**
@@ -134,7 +135,7 @@ class Module implements iModule, \ArrayAccess
 
 
     /**    @see iModule::title() */
-    public function title($title = NULL)
+    public function title($title = null)
     {
         return $this->set('title', $title);
     }
@@ -146,7 +147,7 @@ class Module implements iModule, \ArrayAccess
     }
 
     /** @see iModule::set() */
-    public function set($field, $value = NULL)
+    public function set($field, $value = null)
     {
         $this->__set($field, $value);
 
@@ -154,7 +155,7 @@ class Module implements iModule, \ArrayAccess
     }
 
     /** @see iModuleViewable::toView() */
-    public function toView($prefix = NULL, array $restricted = array())
+    public function toView($prefix = null, array $restricted = array())
     {
         // Get all module data variables
         $view_data = array_merge($this->data, get_object_vars($this));
@@ -166,7 +167,7 @@ class Module implements iModule, \ArrayAccess
     }
 
     /** @see iModule::path() */
-    public function path($value = NULL)
+    public function path($value = null)
     {
         // Если передан параметр - установим его
         if (func_num_args()) {
@@ -178,7 +179,7 @@ class Module implements iModule, \ArrayAccess
     }
 
     /** @see iModule::html() */
-    public function html($value = NULL)
+    public function html($value = null)
     {
         //elapsed($this->id.' - Setting HTML for '.array_search(  $this->data, $this->view_data ).'('.strlen($value).')');
 
@@ -190,7 +191,6 @@ class Module implements iModule, \ArrayAccess
         return $this;
     }
 
-    /** @see iModule::view() */
     public function view($viewPath)
     {
         // Find full path to view file
@@ -264,7 +264,7 @@ class Module implements iModule, \ArrayAccess
     }
 
     /**    @see iModule::render() */
-    public function render($controller = NULL)
+    public function render($controller = null)
     {
         //trace($this->id.'-'.$controller);
         // Временно изменим текущий модуль системы
@@ -286,7 +286,7 @@ class Module implements iModule, \ArrayAccess
     }
 
     /** @see iModule::action() */
-    public function action($methodName = NULL)
+    public function action($methodName = null)
     {
         //trace( array_keys($this->controllers), true );
 
@@ -402,7 +402,7 @@ class Module implements iModule, \ArrayAccess
      * @param string $path Module location
      * @param ResourcesInterface $resourceMap Pointer to module resource map
      */
-    public function __construct($id, $path = NULL, ResourcesInterface $resourceMap = null)
+    public function __construct($id, $path = null, ResourcesInterface $resourceMap = null)
     {
         // Store pointer to module resource map
         $this->resourceMap = &$resourceMap;
@@ -533,7 +533,7 @@ class Module implements iModule, \ArrayAccess
     public function __get($field)
     {
         // Установим пустышку как значение переменной
-        $result = NULL;
+        $result = null;
 
         // Если указанная переменная представления существует - получим её значение
         if (isset($this->data[$field])) $result = &$this->data[$field];
@@ -608,7 +608,7 @@ class Module implements iModule, \ArrayAccess
     }
 
     // Магический метод для установки переменных представления модуля
-    public function __set($field, $value = NULL)
+    public function __set($field, $value = null)
     {
         // This is object
         if (is_object($field)) {
@@ -684,4 +684,3 @@ class Module implements iModule, \ArrayAccess
         return isset($this->data[$offset]);
     }
 }
-
