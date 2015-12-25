@@ -13,6 +13,7 @@ interface iExternalModule extends iModule
     /**
      * Специальный обработчик для выполнения процесса проверки и подготовки
      * подключаемого в ядро системы модуля.
+     * @return boolean
      */
     public function prepare();
 
@@ -22,6 +23,7 @@ interface iExternalModule extends iModule
      * необходимых классов модуля и их инициализацию.
      *
      * @param array $params Необязательная коллекция параметров для инициализации модуля
+     * @return boolean
      */
     public function init(array $params = array());
 

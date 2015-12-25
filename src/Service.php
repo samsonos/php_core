@@ -59,8 +59,8 @@ class Service extends ExternalModule
      * Generic method for setting fields to current service from its parents.
      * Method recursively copies all unset fields of $baseObject from defined
      * field values of its parent classes
-     * @param mixed $baseObject Object fo set undefined fields from parents
-     * @param mixed $currentObject Current object for recursion to find parent fields
+     * @param Service $baseObject Object fo set undefined fields from parents
+     * @param Service $currentObject Current object for recursion to find parent fields
      */
     protected static function gatherAncestorsData(& $baseObject, & $currentObject)
     {
@@ -94,6 +94,7 @@ class Service extends ExternalModule
     /**
      * Convert class name to correct service name
      * @var string $class Class name to convert
+     * @param string $class
      * @return string Get correct service name
      */
     public static function getName($class)
@@ -108,7 +109,6 @@ class Service extends ExternalModule
      * @param string $path Path to module
      * @param ResourcesInterface $resources
      * @param SystemInterface $system Framework instance
-     * @param RequestInterface $request Request instance
      */
     public function  __construct($path, ResourcesInterface $resources, SystemInterface $system)
     {

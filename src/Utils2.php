@@ -1,5 +1,4 @@
 <?php
-use samson\core\SamsonLocale;
 
 /**
  * Get difference time entities between two dates
@@ -127,7 +126,7 @@ function pathname( $path )
  * double slashes
  * 
  * @param string $path Path to be normalized
- * @return mixed Normalized path
+ * @return string Normalized path
  */
 function normalizepath( $path )
 {
@@ -184,7 +183,7 @@ function array_filter_recursive( array & $input )
 /**
  * Оберточная функция для print_r только выводит все красиво в HTML
  *
- * @param mixed $data Объект для представления
+ * @param string $data Объект для представления
  */
 function print_a( $data, $return = FALSE )
 {	
@@ -400,7 +399,7 @@ function utf8_ucfirst( $string, $encoding = 'utf-8'  )
  * @param integer 	$width	Желаемая длина строка в символах
  * @param string 	$break  Символ разделения строк
  * @param string 	$cut	Флаг обрезания больших слов
- * @return mixed Обрезанную строку
+ * @return string Обрезанную строку
  */
 function utf8_wordwrap($string, $width=75, $break="\n", $cut=FALSE)
 {
@@ -439,7 +438,7 @@ function utf8_limit_string( $str, $length, $limit_marker = '...' )
 /**
  * Perform string transliteration from UTF-8 Cyrilic to Latin
  * @param string $str String to transliterate
- * @return mixed Transliterated string
+ * @return string Transliterated string
  */
 function utf8_translit( $str )
 {
