@@ -15,15 +15,9 @@ use samsonframework\core\RenderInterface;
  * to IViewable for rendering
  * @package samson\core
  * @author Vitaly Iegorov <egorov@samsonos.com>
+ * @deprecated Use samsonframework\core\RenderInterface
  */
 interface IViewSettable extends RenderInterface
 {
-    /**
-     * Generate collection of view variables, prefixed if needed, that should be passed to
-     * view context.
-     *
-     * @param string $prefix Prefix to be added to all keys in returned data collection
-     * @return array Collection(key => value) of data for view context
-     */
-    public function toView($prefix = '');
+
 }

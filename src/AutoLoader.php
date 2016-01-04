@@ -10,6 +10,7 @@ namespace samson\core;
  * @author Vitaly Egorov <egorov@samsonos.com>
  * @copyright 2014 SamsonOS
  * @version 1.0.0
+ * @deprecated All loading logic should go to composer
  */
 class AutoLoader
 {
@@ -59,7 +60,7 @@ class AutoLoader
             return $className;
         } else if (strpos($className, '\\') === false) { // If class name has no namespace separator
             // Add namespace to it
-            $className = $namespace.'\\'.$className;
+            $className = $namespace . '\\' . $className;
         }
 
         // If this is an old PHP version - remove namespaces
@@ -76,7 +77,7 @@ class AutoLoader
     public static function getOnlyClass($className)
     {
         // Try to find namespace separator
-        if (($p = strrpos( $className, self::NS_SEPARATOR )) !== false) {
+        if (($p = strrpos($className, self::NS_SEPARATOR)) !== false) {
             $className = substr($className, $p + 1);
         }
 
@@ -93,8 +94,8 @@ class AutoLoader
     public static function getOnlyNameSpace($className)
     {
         // Try to find namespace separator
-        if (($p = strrpos( $className, self::NS_SEPARATOR )) !== false ) {
-            $className = substr( $className, 0, $p);
+        if (($p = strrpos($className, self::NS_SEPARATOR)) !== false) {
+            $className = substr($className, 0, $p);
         }
 
         return $className;
@@ -131,14 +132,14 @@ class AutoLoader
 
                 // Build all possible module location for backward compatibility
                 $locations = array(
-                    __SAMSON_VENDOR_PATH.str_replace('samson/', 'samsonos/', $ns).'/'.strtolower($className),
-                    __SAMSON_VENDOR_PATH.str_replace('samson/', 'samsonos/', $ns),
-                    __SAMSON_VENDOR_PATH.str_replace('samson/', 'samsonos/'.$type.'/', $ns),
-                    __SAMSON_VENDOR_PATH.str_replace('samson/', 'samsonos/'.$type.'/', $ns).'/api',
-                    __SAMSON_VENDOR_PATH.str_replace('samson/', 'samsonos/'.$type.'_', $ns),
-                    strpos($ns, 'cms') !== false ? __SAMSON_VENDOR_PATH.'samsonos/cms_api' : '_', // use cms api if class name has "cms"
-                    strpos($ns, 'cms') !== false ? __SAMSON_VENDOR_PATH.'samsonos/cms/api' : '_', // use cms api if class name has "cms"
-                    __SAMSON_CWD__.__SAMSON_MODEL_PATH, // use local model path as the last variant of class location
+                    __SAMSON_VENDOR_PATH . str_replace('samson/', 'samsonos/', $ns) . '/' . strtolower($className),
+                    __SAMSON_VENDOR_PATH . str_replace('samson/', 'samsonos/', $ns),
+                    __SAMSON_VENDOR_PATH . str_replace('samson/', 'samsonos/' . $type . '/', $ns),
+                    __SAMSON_VENDOR_PATH . str_replace('samson/', 'samsonos/' . $type . '/', $ns) . '/api',
+                    __SAMSON_VENDOR_PATH . str_replace('samson/', 'samsonos/' . $type . '_', $ns),
+                    strpos($ns, 'cms') !== false ? __SAMSON_VENDOR_PATH . 'samsonos/cms_api' : '_', // use cms api if class name has "cms"
+                    strpos($ns, 'cms') !== false ? __SAMSON_VENDOR_PATH . 'samsonos/cms/api' : '_', // use cms api if class name has "cms"
+                    __SAMSON_CWD__ . __SAMSON_MODEL_PATH, // use local model path as the last variant of class location
                 );
 
                 // Iterate all locations and try to find correct existing path
@@ -154,24 +155,24 @@ class AutoLoader
         // If class not found
         if (isset($path)) {
             $path .= '/';
-    
+
             // Build files tree once for each namespace
             if (!isset(self::$fileCache[$nameSpace])) {
                 self::$fileCache[$nameSpace] = File::dir($path, 'php');
             }
-    
+
             // Trying to find class by class name in folder files collection
-            if (sizeof($files = preg_grep('/\/'.$className.'\.php/i', self::$fileCache[$nameSpace]))) {
+            if (sizeof($files = preg_grep('/\/' . $className . '\.php/i', self::$fileCache[$nameSpace]))) {
                 // If we have found several files matching this class
                 if (sizeof($files) > 1) {
-                    return e('Cannot autoload class(##), too many files matched ##', E_SAMSON_CORE_ERROR, array($className,$files));
+                    return e('Cannot autoload class(##), too many files matched ##', E_SAMSON_CORE_ERROR, array($className, $files));
                 }
-    
+
                 // Return last array element as file path
                 $file = end($files);
-    
+
                 //elapsed('  Loaded class['.$key.'] from "'.$file.'"');
-    
+
                 // Everything is OK
                 return true;
             }
@@ -194,19 +195,19 @@ class AutoLoader
         // Get just class name without ns
         $className = self::getOnlyClass($class);
         // Get just ns without class name
-        $nameSpace = self::getOnlyNameSpace($class );
+        $nameSpace = self::getOnlyNameSpace($class);
 
         // If this is not core class
         if ($nameSpace != __NAMESPACE__) {
             // Convert namespace to base directory add class
-            $path = __SAMSON_VENDOR_PATH.str_replace('\\', DIRECTORY_SEPARATOR, $nameSpace).DIRECTORY_SEPARATOR.$className.'.php';
+            $path = __SAMSON_VENDOR_PATH . str_replace('\\', DIRECTORY_SEPARATOR, $nameSpace) . DIRECTORY_SEPARATOR . $className . '.php';
 
             // Load class by file name
             if (file_exists($path)) {
                 //elapsed('Autoloading class '.$class.' at '.$path);
                 require_once($path);
                 // old school compatibility will be removed when old modules will be updated
-            } else if(self::oldModule($className, $nameSpace, $path)) {
+            } else if (self::oldModule($className, $nameSpace, $path)) {
                 //elapsed('Autoloading(old style) class '.$class.' at '.$path);
                 require_once($path);
                 // Handle old module loading
@@ -215,7 +216,7 @@ class AutoLoader
             }
 
         } else { // Load core classes separately using this class location
-            require_once(__DIR__.'/'.$className.'.php');
+            require_once(__DIR__ . '/' . $className . '.php');
         }
 
         return true;

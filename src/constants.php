@@ -16,7 +16,7 @@ if (!defined('__DIR__')) {
     define('__DIR__', dirname(__FILE__));
 }
 
-/** Define path to SamsonPHP framework */
+/** @deprecated Define path to SamsonPHP framework */
 define('__SAMSON_PATH__', __DIR__.'/../');
 
 /** Namespace separator */
@@ -44,7 +44,7 @@ if (!defined('__SAMSON_TEST_PATH')) {
     define('__SAMSON_TEST_PATH', 'tests/');
 }
 
-/** Default path to install/update bash scripts folder */
+/** @deprecated Default path to install/update bash scripts folder */
 if (!defined('__SAMSON_CONTRIB_PATH')) {
     define('__SAMSON_CONTRIB_PATH', 'contrib/');
 }
@@ -112,19 +112,19 @@ if(!defined('__SAMSON_BASE__')) {
     );
 }
 
-/** Flag that this script runs from remote app */
+/** @deprecated Flag that this script runs from remote app */
 define('__SAMSON_REMOTE_APP', __SAMSON_BASE__ !== '/');
 
 /** Максимальное время выполнения скрипта */
 define( '__SAMSON_MAX_EXECUTION__', 120 );
 
-/** Действие контроллера выполнено успешно */
+/** @deprecated Действие контроллера выполнено успешно */
 define( 'A_SUCCESS', TRUE );
 
-/** Действие контроллера НЕ выполнено */
+/** @deprecated Действие контроллера НЕ выполнено */
 define( 'A_FAILED', FALSE );
 
-/** Путь к файлу с глобальными данными модуля */
+/** @deprecated Путь к файлу с глобальными данными модуля */
 define( '__SAMSON_GLOBAL_FILE', 'global.php' );
 
 //[PHPCOMPRESSOR(remove,start)]
