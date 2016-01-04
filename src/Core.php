@@ -434,7 +434,7 @@ class Core implements SystemInterface
             $m = &$this->module_stack[$_id];
 
             // Remove load stack data of this module
-            $ns = nsname(get_class($m));
+            $ns = \samson\core\AutoLoader::getOnlyNameSpace(get_class($m));
             if (isset($this->load_stack[$ns])) unset($this->load_stack[$ns]);
 
             // Очистим коллекцию загруженых модулей
