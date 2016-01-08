@@ -618,6 +618,7 @@ class Module implements iModule, \ArrayAccess
                 // TODO: Remove old interface support in future
                 in_array(ns_classname('iModuleViewable', 'samson\core'), $implements)
                 || in_array(AutoLoader::className('IViewSettable', 'samson\core'), $implements)
+                || in_array('samsonframework\core\RenderInterface', $implements)
             ) {
                 $this->_setObject($field, $value);
             }
