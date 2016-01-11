@@ -29,3 +29,7 @@ s()->start('main');
 For further information read [Official SamsonPHP Wiki](https://github.com/samsonos/php_core/wiki)
 
 Developed by [SamsonOS](http://samsonos.com/)
+
+![PHPStorm](https://lh3.googleusercontent.com/-yVTWu-r8fZ4/AAAAAAAAAAI/AAAAAAAAAAA/7Sddz6VRuyg/photo.jpg)
+
+Thanks to the best PHP IDE [PHPStorm](https://www.jetbrains.com/phpstorm/) that we are using for developing this project!

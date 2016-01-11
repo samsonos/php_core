@@ -1,6 +1,8 @@
 <?php
 namespace samson\core;
 
+// TODO: Should separated to external module
+
 /**
  * Общие методы для работы с файлами и каталогами
  * @author Vitaly Iegorov <vitalyiegorov@gmail.com>
@@ -192,7 +194,7 @@ class File
      * @param string $path Путь к удаляемому ресурсу
      * @param array $type Collection of file extensions for ignoring
      * @param array $ignoreFolders Collection of folders for ignoring
-     * @return TRUE / FALSE
+     * @return boolean / FALSE
      */
 	public static function clear($path, $type = NULL, $ignoreFolders = array())
 	{

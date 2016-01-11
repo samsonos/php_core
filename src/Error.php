@@ -1,6 +1,8 @@
 <?php
 namespace samson\core;
 
+// TODO: Should separated to external module
+
 //
 // Коды ошибок
 // Новые коды должны попадать в диапазон ( E_SAMSON_FATAL_ERROR - D_SAMSON_DEBUG )
@@ -99,7 +101,7 @@ class Error
 		register_shutdown_function( array( $this, 'shutdown' ) );		
 		
 		// Сформируем "универсально" путь к CSS представлению ошибок
-		if( file_exists(__SAMSON_PATH__.'css/error.css') ) self::$css = file_get_contents( __SAMSON_PATH__.'css/error.css');	
+		if( file_exists(__SAMSON_PATH__.'css/error.css') ) self::$css = file_get_contents( __SAMSON_PATH__.'css/error.css');
 	}
 	
 	/**
@@ -109,7 +111,7 @@ class Error
 	{
 		// Если установлен обработчик завершения выполнения скрипта - вызовем его
 		if( isset( self::$shutdown_handler ) && ( call_user_func( self::$shutdown_handler ) === false )) return null;		
-				
+
 		//echo 'Конец';
 		
 		// Выведем все накопленные ошибки 
@@ -184,13 +186,12 @@ class Error
 	 * Сигнатура метода совпадает с требованиями PHP
 	 * 
 	 * @param integer 	$errno		Код ошибки
-	 * @param string 	$errstr		Описание ошибки
 	 * @param string	$errfile	Файл в котором происходит ошибка
 	 * @param string 	$errline	Строка в которой была ошибка
 	 * @param string 	$errcontext	Контекст в котором произошла ошибка
 	 */
 	public function handler( $errno , $error_msg, $errfile = NULL, $errline = NULL, $errcontext = NULL, $backtrace = NULL )
-	{		
+	{
 		// Если вывод ошибок включен
 		if( ! self::$OUTPUT ) return NULL;
 		
@@ -266,9 +267,10 @@ class Error
 	 * 
 	 * @param integer 	$errno		Код ошибки
 	 * @param string 	$desc		Описание ошибки
-	 * @param string 	$errstr		Текст ошибки
 	 * @param string	$errfile	Файл в котором происходит ошибка
 	 * @param string 	$errline	Строка в которой была ошибка
+	 * @param string $error_msg
+	 * @param string $class
 	 * @return array Массив ошибка
 	 */
 	private function toError( $errno , $desc, $error_msg, $errfile = NULL, $errline = NULL, $class = NULL )
