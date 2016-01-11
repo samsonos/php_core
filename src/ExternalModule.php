@@ -35,11 +35,12 @@ class ExternalModule extends Module implements iExternalModule
         // Module identifier not specified - set it to NameSpace\Classname
         if (!isset($this->id{0})) {
             // Generate identifier from module class
-            $this->id = AutoLoader::oldClassName(get_class($this));
+            //$this->id = AutoLoader::oldClassName(get_class($this));
+            $this->id = str_replace('/', '',$path);
         }
 
         // Subscribe to an config ready core event
-        Event::subscribe('core.started', array(&$this, 'init'));
+        Event::subscribe('core.started', array(& $this, 'init'));
 
         // Call parent constructor
         parent::__construct($this->id, $path, $resources);

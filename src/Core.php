@@ -149,16 +149,13 @@ class Core implements SystemInterface
 
         // Check if we have found SamsonPHP external module class
         if (isset($resourceMap->module[0])) {
+
             /** @var string $controllerPath Path to module controller file */
             $controllerPath = $resourceMap->module[1];
 
             /** @var string $moduleClass Name of module controller class to load */
             $moduleClass = $resourceMap->module[0];
 
-            // Define default module identifier if it is not passed
-            $module_id = isset($module_id) ? $module_id : AutoLoader::oldClassName($moduleClass);
-
-            //elapsed($module_id);
 
             // Require module controller class into PHP
             if (file_exists($controllerPath)) {
@@ -176,6 +173,8 @@ class Core implements SystemInterface
 
             /** @var \samson\core\ExternalModule $connector Create module controller instance */
             $connector = new $moduleClass($path, $resourceMap, $this);
+
+            //trace($connector, true);
 
             // Set composer parameters
             $connector->composerParameters = $parameters;
@@ -199,6 +198,7 @@ class Core implements SystemInterface
             // TODO: Code lower to be removed, or do we still need this
 
             $ls = $resourceMap->toLoadStackFormat();
+            //trace($ls, true);trace();
 
             // Get module name space
             $ns = AutoLoader::getOnlyNameSpace($moduleClass);
@@ -228,14 +228,15 @@ class Core implements SystemInterface
             $module_id = str_replace('/', '', $parameters['module_id']);
 
             /** @var \samson\core\ExternalModule $connector Create module controller instance */
-            $connector = new CompressableExternalModule($path, $resourceMap, $this, url());
+            $connector = new CompressableExternalModule($path, $resourceMap, $this);
 
             // Set composer parameters
             $connector->composerParameters = $parameters;
 
-
             // Get module identifier
             $module_id = $connector->id();
+
+           //elapsed($module_id);
 
             $ls = $resourceMap->toLoadStackFormat();
 
@@ -558,7 +559,7 @@ class Core implements SystemInterface
         $this->module_stack = &Module::$instances;
 
         // Load samson\core module
-        $this->load(__SAMSON_PATH__);
+        //$this->load(__SAMSON_PATH__);
 
         // Temporary add template worker
         $this->subscribe('core.rendered', array($this, 'generate_template'));
@@ -587,16 +588,13 @@ class Core implements SystemInterface
                 array(
                     'vendorsList' => array('samsonphp/', 'samsonos/', 'samsoncms/'),
                     'ignoreKey' => 'samson_module_ignore',
-                    'includeKey' => 'samson_module_include',
-                    'ignorePackages' => array('samsonos/php_core')
+                    'includeKey' => 'samson_module_include'
                 )
             )
         );
 
         // Iterate requirements
         foreach ($composerModules as $requirement => $parameters) {
-            //elapsed('Loading module '.$requirement);
-
             // Load module
             $this->load(
                 __SAMSON_CWD__ . __SAMSON_VENDOR_PATH . $requirement,
