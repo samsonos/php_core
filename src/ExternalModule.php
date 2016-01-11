@@ -29,9 +29,6 @@ class ExternalModule extends Module implements iExternalModule
      */
     public function __construct($path, ResourcesInterface $resources, SystemInterface $system)
     {
-        // Inject generic module dependencies
-        $this->system = $system;
-
         // Module identifier not specified - set it to NameSpace\Classname
         if (!isset($this->id{0})) {
             // Generate identifier from module class
@@ -43,7 +40,7 @@ class ExternalModule extends Module implements iExternalModule
         Event::subscribe('core.started', array(& $this, 'init'));
 
         // Call parent constructor
-        parent::__construct($this->id, $path, $resources);
+        parent::__construct($this->id, $path, $resources, $system);
     }
 
     /** @see \samson\core\iExternalModule::copy() */
