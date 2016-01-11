@@ -361,7 +361,7 @@ class Module implements iModule, \ArrayAccess
     /** Обработчик сериализации объекта */
     public function __sleep()
     {
-        return array('id', 'path', 'version', 'data', 'controllers', 'views');
+        return array('id', 'path', 'data', 'views');
     }
 
     /** Обработчик десериализации объекта */
