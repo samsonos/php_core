@@ -501,13 +501,13 @@ function mail_send( $to, $from = 'info@samsonos.com', $message = '', $subject = 
 
 	// Установим необходимые заголовки
 	$headers  = 'MIME-Version: 1.0' . "\r\n";
-	$headers .= 'Content-type: text/html; charset=UTF-8' . "\r\n";
+	$headers .= 'Content-type: text/html; charset="UTF-8"' . "\r\n";
 	//"Content-Type: multipart/mixed; boundary=\"".$strSid."\"\n\n";
 	//$strHeader .= "This is a multi-part message in MIME format.\n";
 	$headers .= 'From: '.$from_user.'<'.$from.'>'."\r\n";
 
 	// Добавим в сообщение HTML тэги
-	$message = '<html><head></head><body>'.$message.'</body></html>';
+	$message = '<html><head><meta charset="utf-8"></head><body>'.$message.'</body></html>';
 
 	// Если письмо отправленно вернем 1
 	return mail( $to, $subject, $message, $headers );	
