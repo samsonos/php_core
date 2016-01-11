@@ -614,7 +614,7 @@ class Core implements SystemInterface
         $this->load_module_stack['local'] = $localResources;
 
         // Create local module and set it as active
-        $this->active = new CompressableLocalModule('local', $this->system_path, $this->map);
+        $this->active = new CompressableLocalModule('local', $this->system_path, $this->map, $this);
 
         // Require all local module model files
         foreach ($localResources['models'] as $model) {
@@ -628,7 +628,7 @@ class Core implements SystemInterface
             require($controller);
 
             // Create module connector instance
-            new CompressableLocalModule(basename($controller, '.php'), $this->system_path, $this->map);
+            new CompressableLocalModule(basename($controller, '.php'), $this->system_path, $this->map, $this);
         }
 
         return $this;
