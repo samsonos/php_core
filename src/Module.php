@@ -401,9 +401,13 @@ class Module implements iModule, \ArrayAccess
      * @param string $id Module unique identifier
      * @param string $path Module location
      * @param ResourcesInterface $resourceMap Pointer to module resource map
+     * @param SystemInterface $system
      */
-    public function __construct($id, $path = null, ResourcesInterface $resourceMap = null)
+    public function __construct($id, $path, ResourcesInterface $resourceMap, SystemInterface $system)
     {
+        // Inject generic module dependencies
+        $this->system = $system;
+
         // Store pointer to module resource map
         $this->resourceMap = &$resourceMap;
         // Save views list
