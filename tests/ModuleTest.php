@@ -101,5 +101,6 @@ class ModuleTest extends \PHPUnit_Framework_TestCase
         $unserialized = unserialize($serialized);
 
         $this->assertEquals($this->module->path(), $unserialized->path());
+        $this->assertEquals($this->module->id(), $unserialized->id());
     }
 }
