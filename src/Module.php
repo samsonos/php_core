@@ -26,9 +26,6 @@ class Module implements iModule, \ArrayAccess
     /** @var array TODO: WTF? */
     public $composerParameters = array();
 
-    /** Collection for cachable callable controllers of module */
-    protected $cacheControllers = array();
-
     /** Module views collection */
     protected $views = array();
 

@@ -10,7 +10,6 @@ use samsonphp\event\Event;
  * SamsonPHP external module
  *
  * @author Vitaly Iegorov <egorov@samsonos.com>
- * @version 0.1
  */
 class ExternalModule extends Module implements iExternalModule
 {
@@ -53,7 +52,6 @@ class ExternalModule extends Module implements iExternalModule
         $clone = new $classname($this->path, $this->resourceMap, $this->system);
         $clone->views = &$this->views;
         $clone->parent = &$this->parent;
-        $clone->controllers = &$this->controllers;
         $clone->path = $this->path;
 
         return $clone;
@@ -64,32 +62,6 @@ class ExternalModule extends Module implements iExternalModule
     {
         // Remove all unnecessary fields from serialization
         return array_diff(array_keys(get_object_vars($this)), array('view_path', 'view_html', 'view_data'));
-    }
-
-    /**
-     * Перегружаем стандартное поведение выполнения действия контроллера
-     * Если текущий модуль наследует другой <code>ModuleConnector</code>
-     * то тогда сначала выполняется действие контроллера в данном модуле,
-     * а потом в его родителе. Это дает возможность выполнять наследование
-     * контроллеров модулей.
-     *
-     * @param string $methodName Controller action name
-     * @return bool|mixed
-     */
-    public function action($methodName = null)
-    {
-        // Выполним стандартное действие
-        $result = parent::action($methodName);
-
-        // Если мы не смогли выполнить действие для текущего модуля
-        // и задан родительский модуль
-        if ($result === false && isset($this->parent)) {
-            // Выполним действие для родительского модуля
-            return $this->parent->action($methodName);
-        }
-
-        // Веренем результат выполнения действия
-        return $result;
     }
 
     /**
