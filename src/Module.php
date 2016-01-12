@@ -297,13 +297,13 @@ class Module implements iModule, \ArrayAccess
         // If view path specified
         if (isset($viewPath{0})) {
             // Временно изменим текущий модуль системы
-            $old = s()->active($this);
+            $old = $this->system->active($this);
 
             // Прорисуем представление модуля
-            $out .= s()->render($this->path . $viewPath, $this->data);
+            $out .= $this->system->render($this->path . $viewPath, $this->data);
 
             // Вернем на место текущий модуль системы
-            s()->active($old);
+            $this->system->active($old);
         } elseif (!isset($out{0})) { // No plain HTML view data is set also
             return e('Cannot render view for module ## - No view path or data has been set', E_SAMSON_CORE_ERROR, $this->id);
         }
