@@ -12,6 +12,7 @@ tools:
 filter:
     excluded_paths:
         - 'tests/*'
+        - 'src/deprecated/*'
 
 build:
     environment:

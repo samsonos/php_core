@@ -1,7 +1,6 @@
 <?php
 namespace samson\core;
 
-use samsonframework\core\RequestInterface;
 use samsonframework\core\ResourcesInterface;
 use samsonframework\core\SystemInterface;
 use samsonphp\event\Event;
