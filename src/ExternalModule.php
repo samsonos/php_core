@@ -32,7 +32,7 @@ class ExternalModule extends Module implements iExternalModule
         if (!isset($this->id{0})) {
             // Generate identifier from module class
             //$this->id = AutoLoader::oldClassName(get_class($this));
-            $this->id = str_replace('/', '',$path);
+            $this->id = str_replace('/', '', $path);
         }
 
         // Subscribe to an config ready core event
