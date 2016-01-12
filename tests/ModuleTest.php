@@ -106,6 +106,9 @@ class ModuleTest extends \PHPUnit_Framework_TestCase
 
     public function testDifferent()
     {
+        $this->setExpectedException('\samsonphp\core\exception\ViewVariableNotFound');
+        $this->module->titlesadasd;
+
         $title = 'TESTTITLE';
         $this->module->title($title);
         $this->assertEquals($title, $this->module['title']);

@@ -20,7 +20,8 @@ class TestingModule extends Module
     public function __testAction($param)
     {
         $file = 'test.php';
-        $this->cache_path($file);
+        $this->cache_refresh($file);
+        $this->cache_refresh($file);
         $this->view('path/inner/parametrizedView')->set('param', $param);
     }
 }

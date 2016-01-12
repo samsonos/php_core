@@ -6,6 +6,7 @@ use samsonframework\core\ResourcesInterface;
 use samsonframework\core\SystemInterface;
 use samsonphp\core\exception\ControllerActionNotFound;
 use samsonphp\core\exception\ViewPathNotFound;
+use samsonphp\core\exception\ViewVariableNotFound;
 
 /**
  * Модуль системы
@@ -395,9 +396,11 @@ class Module implements iModule, \ArrayAccess
         $result = null;
 
         // Если указанная переменная представления существует - получим её значение
-        if (isset($this->data[$field])) $result = &$this->data[$field];
-        // Выведем ошибку
-        else return e('Ошибка получения данных модуля(##) - Требуемые данные(##) не найдены', E_SAMSON_CORE_ERROR, array($this->id, $field));
+        if (isset($this->data[$field])) {
+            $result = &$this->data[$field];
+        } else {
+            throw(new ViewVariableNotFound($field));
+        }
 
         // Иначе вернем пустышку
         return $result;
