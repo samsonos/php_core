@@ -15,8 +15,8 @@ use samson\core\Module;
  */
 class TestingModule extends Module
 {
-    public function __testAction($param = null)
+    public function __testAction($param)
     {
-        $this->view('path/inner/index');
+        $this->view('path/inner/parametrizedView')->set('param', $param);
     }
 }

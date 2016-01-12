@@ -48,11 +48,13 @@ class ModuleTest extends \PHPUnit_Framework_TestCase
 
     public function testRender()
     {
-        $test = '<h1>Test</h1>';
+        $param = 'tset';
+        $test = '<h1>Test' . $param . '</h1>';
+
 
         // Начать вывод в буффер
         ob_start();
-        $this->module->render('testAction');
+        $this->module->render('testAction', $param);
         $output = ob_get_contents();
         ob_end_clean();
 
