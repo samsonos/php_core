@@ -307,8 +307,6 @@ class Module implements iModule, \ArrayAccess
 
             // Вернем на место текущий модуль системы
             $this->system->active($old);
-        } elseif (!isset($out{0})) { // No plain HTML view data is set also
-            return e('Cannot render view for module ## - No view path or data has been set', E_SAMSON_CORE_ERROR, $this->id);
         }
 
         // Clear currently outputted view context from VCS

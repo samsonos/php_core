@@ -44,6 +44,8 @@ class ModuleTest extends \PHPUnit_Framework_TestCase
     {
         $test = '<h1>Test</h1>';
         $this->assertEquals($test, $this->module->html($test)->output());
+        // Render empty
+        $this->assertEquals('', $this->module->html('')->output());
     }
 
     public function testRender()
