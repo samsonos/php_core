@@ -5,6 +5,7 @@ namespace samson\core;
 use samsonframework\core\ResourcesInterface;
 use samsonframework\core\SystemInterface;
 use samsonphp\core\exception\ControllerActionNotFound;
+use samsonphp\core\exception\ViewPathNotFound;
 
 /**
  * Модуль системы
@@ -166,20 +167,24 @@ class Module implements iModule, \ArrayAccess
         // Find full path to view file
         $viewPath = $this->findView($viewPath);
 
-        //elapsed($this->id.' - Changing current view to '.$view_path);
+        // We could not find view
+        if ($viewPath !== false) {
+            // Switch view context to founded module view
+            $this->viewContext($viewPath);
 
-        // Switch view context to founded module view
-        $this->viewContext($viewPath);
-
-        // Set current view path
-        $this->view_path = $viewPath;
+            // Set current view path
+            $this->view_path = $viewPath;
+        } else {
+            throw(new ViewPathNotFound($viewPath));
+        }
 
         // Продолжим цепирование
         return $this;
     }
 
     /**
-     * Find view file by its part in module view resources and return full path to it
+     * Find view file by its part in module view resources and return full path to it.
+     *
      * @param string $viewPath Part of path to module view file
      * @return string Full path to view file
      */

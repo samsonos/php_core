@@ -89,11 +89,6 @@ class ExternalModule extends Module implements iExternalModule
             // Call default module behaviour
             parent::view($this->view_path);
 
-            // If view has not been set at final stage - trigger error
-            if ($this->view_path === false) {
-                e('[##] Cannot find view "##"', E_SAMSON_FATAL_ERROR, array($this->id, $viewPath));
-            }
-
             return $this;
         }
     }

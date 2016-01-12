@@ -18,7 +18,9 @@ use samsonframework\resource\ResourceMap;
 
 class ModuleTest extends \PHPUnit_Framework_TestCase
 {
-    public function testView()
+    protected $module;
+
+    public function setUp()
     {
         $path = __DIR__;
 
@@ -27,8 +29,20 @@ class ModuleTest extends \PHPUnit_Framework_TestCase
         // Create core
         $core = new Core($map);
         // Create module
-        $module = new Module('test', $path, $map, $core);
+        $this->module = new Module('test', $path, $map, $core);
+    }
 
-        $this->assertEquals('<h1>Test</h1>', $module->view('path/inner/index')->output());
+    public function testView()
+    {
+        $this->setExpectedException('\samsonphp\core\exception\ViewPathNotFound');
+
+        $this->assertEquals('<h1>Test</h1>', $this->module->view('path/inner/index')->output());
+        $this->assertNotEquals('<h1>Test</h1>', $this->module->view('path/inner/NotFoundIndex')->output());
+    }
+
+    public function testHtml()
+    {
+        $test = '<h1>Test</h1>';
+        $this->assertEquals($test, $this->module->html($test)->output());
     }
 }
