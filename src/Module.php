@@ -329,12 +329,6 @@ class Module implements iModule, \ArrayAccess
         return $out;
     }
 
-    /** Обработчик уничтожения объекта */
-    public function __destruct()
-    {
-        unset(Module::$instances[$this->id]);
-    }
-
     /** Magic method for calling un existing object methods */
     public function __call($method, $arguments)
     {
