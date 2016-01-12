@@ -254,8 +254,12 @@ class Module implements iModule, \ArrayAccess
 
             // If this controller action is present
             if (is_callable($callback)) {
-                // Perform controller action
-                call_user_func($callback);
+                // Get passed arguments
+                $parameters = func_get_args();
+                // Remove first as its a controller action name
+                array_shift($parameters);
+                // Perform controller action with passed parameters
+                call_user_func($callback, $parameters);
             } else {
                 throw(new ControllerActionNotFound($this->id . '#' . $controller));
             }
