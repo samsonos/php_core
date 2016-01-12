@@ -57,13 +57,21 @@ class ModuleTest extends \PHPUnit_Framework_TestCase
         ob_end_clean();
 
         $this->assertEquals($test, $output);
+
+        $this->setExpectedException('\samsonphp\core\exception\ControllerActionNotFound');
+        $this->module->render('notFoundAction', $param);
     }
 
     public function testArrayAccess()
     {
+        $this->module->view('path/inner/index');
         $this->module['testVar'] = 'testVar';
 
         $this->assertEquals('testVar', $this->module['testVar']);
         $this->assertArrayHasKey('testVar', $this->module);
+
+        unset($this->module['testVar']);
+
+        $this->assertArrayNotHasKey('testVar', $this->module);
     }
 }

@@ -249,11 +249,19 @@ class Module implements iModule, \ArrayAccess
 
         // If specific controller action should be run
         if (isset($controller)) {
+            /**
+             * TODO: This would be removed in next major version, here should be
+             * passed real controller method for execution.
+             */
+            $controller = method_exists($this, iModule::OBJ_PREFIX . $controller)
+                ? iModule::OBJ_PREFIX . $controller
+                : $controller;
+
             // Define if this is a procedural controller or OOP
-            $callback = array($this, iModule::OBJ_PREFIX . $controller);
+            $callback = array($this, $controller);
 
             // If this controller action is present
-            if (is_callable($callback)) {
+            if (method_exists($this, $controller)) {
                 // Get passed arguments
                 $parameters = func_get_args();
                 // Remove first as its a controller action name
@@ -417,7 +425,7 @@ class Module implements iModule, \ArrayAccess
 
     public function offsetUnset($offset)
     {
-        $this->data[$offset] = '';
+        unset($this->data[$offset]);
     }
 
     public function offsetExists($offset)
