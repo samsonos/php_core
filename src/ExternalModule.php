@@ -15,9 +15,6 @@ class ExternalModule extends Module implements iExternalModule
     /** @var Module Pointer to parent module */
     public $parent = null;
 
-    /** Коллекция связанных модулей с текущим */
-    protected $requirements = array();
-
     /**
      * ExternalModule constructor.
      *
