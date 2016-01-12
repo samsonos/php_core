@@ -51,13 +51,19 @@ class ModuleTest extends \PHPUnit_Framework_TestCase
         $param = 'tset';
         $test = '<h1>Test' . $param . '</h1>';
 
-
-        // Начать вывод в буффер
         ob_start();
         $this->module->render('testAction', $param);
         $output = ob_get_contents();
         ob_end_clean();
 
         $this->assertEquals($test, $output);
+    }
+
+    public function testArrayAccess()
+    {
+        $this->module['testVar'] = 'testVar';
+
+        $this->assertEquals('testVar', $this->module['testVar']);
+        $this->assertArrayHasKey('testVar', $this->module);
     }
 }

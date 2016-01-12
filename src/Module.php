@@ -259,7 +259,7 @@ class Module implements iModule, \ArrayAccess
                 // Remove first as its a controller action name
                 array_shift($parameters);
                 // Perform controller action with passed parameters
-                call_user_func($callback, $parameters);
+                call_user_func_array($callback, $parameters);
             } else {
                 throw(new ControllerActionNotFound($this->id . '#' . $controller));
             }
@@ -273,15 +273,10 @@ class Module implements iModule, \ArrayAccess
     }
 
     /**    @see iModule::output() */
-    public function output($viewPath = null)
+    public function output()
     {
         // If view path not specified - use current correct view path
-        if (!isset($viewPath)) {
-            $viewPath = $this->view_path;
-        } elseif (isset($viewPath{0})) { // Direct rendering of specific view, not default view data entry
-            elapsed('Outputting to a view is deprecated, split your rendering chain into ->view(..)->output()');
-            $viewPath = $this->findView($viewPath);
-        }
+        $viewPath = $this->view_path;
 
         //elapsed('['.$this->id.'] Rendering view context: ['.$viewPath.'] with ['.$renderer->id.']');
 
@@ -330,9 +325,6 @@ class Module implements iModule, \ArrayAccess
     /** Обработчик уничтожения объекта */
     public function __destruct()
     {
-        //trace('Уничтожение модуля:'.$this->id );
-
-        // Очистим коллекцию загруженых модулей
         unset(Module::$instances[$this->id]);
     }
 

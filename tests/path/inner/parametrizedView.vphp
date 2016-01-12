@@ -1,1 +1,1 @@
-<h1>Test<?php iv('param') ?></h1>
+<h1>Test<?php echo $param ?></h1>
