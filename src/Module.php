@@ -334,7 +334,7 @@ class Module implements iModule, \ArrayAccess
         unset(Module::$instances[$this->id]);
     }
 
-    /** Magic method for calling unexisting object methods */
+    /** Magic method for calling un existing object methods */
     public function __call($method, $arguments)
     {
         //elapsed($this->id.' - __Call '.$method);
@@ -342,9 +342,11 @@ class Module implements iModule, \ArrayAccess
         // If value is passed - set it
         if (sizeof($arguments)) {
             // If first argument is object or array - pass method name as second parameter
-            if (is_object($arguments[0]) || is_array($arguments[0])) $this->__set($arguments[0], $method);
-            // Standard logic
-            else  $this->__set($method, $arguments[0]);
+            if (is_object($arguments[0]) || is_array($arguments[0])) {
+                $this->__set($arguments[0], $method);
+            } else { // Standard logic
+                $this->__set($method, $arguments[0]);
+            }
         }
 
         // Chaining
@@ -438,29 +440,34 @@ class Module implements iModule, \ArrayAccess
     }
 
     /**
-     * Create unique module cache folder structure in local web-application
+     * Create unique module cache folder structure in local web-application.
+     *
      * @param string $file Path to file relative to module cache location
      * @param boolean $clear Flag to perform generic cache folder clearence
      * @return boolean TRUE if cache file has to be regenerated
      */
-    protected function cache_refresh(& $file, $clear = true)
+    protected function cache_refresh(&$file, $clear = true)
     {
         // If module cache folder does not exists - create it
-        if (!file_exists($this->cache_path)) mkdir($this->cache_path, 0777, TRUE);
+        if (!file_exists($this->cache_path)) {
+            mkdir($this->cache_path, 0777, true);
+        }
 
         // Build full path to cached file
         $file = $this->cache_path . $file;
 
         // If cached file does not exsits
-        if (file_exists($file)) return false;
-        // Needed file does not exists
-        else {
+        if (!file_exists($file)) {
             // If clearence flag set to true - clear all files in module cache directory with same extension
-            if ($clear) File::clear($this->cache_path, pathinfo($file, PATHINFO_EXTENSION));
+            if ($clear) {
+                File::clear($this->cache_path, pathinfo($file, PATHINFO_EXTENSION));
+            }
 
-            // Singal for cache file regeneration
+            // Signal for cache file regeneration
             return true;
         }
+
+        return false;
     }
 
     /**

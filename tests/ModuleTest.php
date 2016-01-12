@@ -38,7 +38,7 @@ class ModuleTest extends \PHPUnit_Framework_TestCase
     {
         $this->setExpectedException('\samsonphp\core\exception\ViewPathNotFound');
 
-        $this->assertEquals('<h1>Test</h1>', $this->module->view('path/inner/index')->output());
+        $this->assertEquals('<h1>Test</h1>', $this->module->view('index')->output());
         $this->assertNotEquals('<h1>Test</h1>', $this->module->view('path/inner/NotFoundIndex')->output());
     }
 
@@ -102,5 +102,20 @@ class ModuleTest extends \PHPUnit_Framework_TestCase
 
         $this->assertEquals($this->module->path(), $unserialized->path());
         $this->assertEquals($this->module->id(), $unserialized->id());
+    }
+
+    public function testDifferent()
+    {
+        $title = 'TESTTITLE';
+        $this->module->title($title);
+        $this->assertEquals($title, $this->module['title']);
+
+        $this->module->title($title);
+        $this->assertEquals($title, $this->module['title']);
+
+        $this->module->testVar2('module');
+        $this->assertArrayHasKey('testVar2', $this->module->toView('module'));
+
+        unset($this->module);
     }
 }

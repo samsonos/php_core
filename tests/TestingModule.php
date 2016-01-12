@@ -15,8 +15,12 @@ use samson\core\Module;
  */
 class TestingModule extends Module
 {
+    public $testVar = '1';
+
     public function __testAction($param)
     {
+        $file = 'test.php';
+        $this->cache_path($file);
         $this->view('path/inner/parametrizedView')->set('param', $param);
     }
 }
