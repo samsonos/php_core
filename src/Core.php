@@ -51,9 +51,6 @@ class Core implements SystemInterface
     /** @deprecated Modules to be loaded stack */
     public $load_module_stack = array();
 
-    /** @deprecated Render handlers stack, With new event system we don't need any kind of stack anymore */
-    public $render_stack = array();
-
     /** @var  ResourceMap Current web-application resource map */
     public $map;
 
@@ -100,6 +97,23 @@ class Core implements SystemInterface
 
         // Signal core configure event
         \samsonphp\event\Event::signal('core.configure', array($this->system_path . __SAMSON_CONFIG_PATH));
+    }
+
+    /**
+     * Generic wrap for Event system subscription
+     * @see \samson\core\\samsonphp\event\Event::subscribe()
+     *
+     * @param string   $key     Event identifier
+     * @param callable $handler Event handler
+     * @param array    $params  Event parameters
+     *
+     * @return $this Chaining
+     */
+    public function subscribe($key, $handler, $params = array())
+    {
+        \samsonphp\event\Event::subscribe($key, $handler, $params);
+
+        return $this;
     }
 
     /**
@@ -160,6 +174,8 @@ class Core implements SystemInterface
         return false;
     }
 
+    //[PHPCOMPRESSOR(remove,start)]
+
     /**    @see iCore::async() */
     public function async($async = NULL)
     {
@@ -170,8 +186,7 @@ class Core implements SystemInterface
         } // Аргументы не переданы - вернем статус ассинхронности вывода ядра системы
         else return $this->async;
     }
-
-    //[PHPCOMPRESSOR(remove,start)]
+    //[PHPCOMPRESSOR(remove,end)]
 
     /** @see iCore::path() */
     public function path($path = NULL)
@@ -191,7 +206,6 @@ class Core implements SystemInterface
         // Вернем текущее значение
         return $this->system_path;
     }
-    //[PHPCOMPRESSOR(remove,end)]
 
     /**    @see iModule::active() */
     public function &active(iModule &$module = null)
@@ -287,23 +301,6 @@ class Core implements SystemInterface
             // Chaining
             return $this;
         }
-    }
-
-    /**
-     * Generic wrap for Event system subscription
-     * @see \samson\core\\samsonphp\event\Event::subscribe()
-     *
-     * @param string $key Event identifier
-     * @param callable $handler Event handler
-     * @param array $params Event parameters
-     *
-     * @return $this Chaining
-     */
-    public function subscribe($key, $handler, $params = array())
-    {
-        \samsonphp\event\Event::subscribe($key, $handler, $params);
-
-        return $this;
     }
 
     //[PHPCOMPRESSOR(remove,start)]
@@ -444,12 +441,6 @@ class Core implements SystemInterface
 
         // Fire core render event
         \samsonphp\event\Event::fire('core.render', array(&$html, &$__data, &$this->active));
-
-        // Iterating throw render stack, with one way template processing
-        foreach ($this->render_stack as &$renderer) {
-            // Выполним одностороннюю обработку шаблона
-            $html = call_user_func($renderer, $html, $__data, $this->active);
-        }
 
         ////elapsed('End rendering '.$__view);
         return $html;
