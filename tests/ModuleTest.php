@@ -12,12 +12,14 @@ require('src/Utils2.php');
 require('src/shortcuts.php');
 require('src/View.php');
 require('TestingModule.php');
+require('RenderableObject.php');
 
 use samson\core\Core;
 use samsonframework\resource\ResourceMap;
 
 class ModuleTest extends \PHPUnit_Framework_TestCase
 {
+    /** @var Module */
     protected $module;
 
     public function setUp()
@@ -75,5 +77,29 @@ class ModuleTest extends \PHPUnit_Framework_TestCase
         unset($this->module['testVar']);
 
         $this->assertArrayNotHasKey('testVar', $this->module);
+    }
+
+    public function testViewSetting()
+    {
+        $var = 'testvar';
+        $this->module->testVar($var);
+        $this->assertEquals($var, $this->module['testVar']);
+
+        $this->module->testArray(array('1', 'testArrayKey' => '2', '3'));
+        $this->assertArrayHasKey('testArray', $this->module);
+        $this->assertEquals(3, sizeof($this->module['testArray']));
+        $this->assertArrayHasKey('testArrayKey', $this->module);
+
+        $this->module->testObject(new RenderableObject());
+        $this->assertArrayHasKey('testObject', $this->module);
+        $this->assertArrayHasKey('testObject_testVar', $this->module);
+    }
+
+    public function testSerialization()
+    {
+        $serialized = serialize($this->module);
+        $unserialized = unserialize($serialized);
+
+        $this->assertEquals($this->module->path(), $unserialized->path());
     }
 }
