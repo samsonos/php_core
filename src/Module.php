@@ -148,16 +148,9 @@ class Module implements iModule, \ArrayAccess
     }
 
     /** @see iModule::html() */
-    public function html($value = null)
+    public function html($value)
     {
-        //elapsed($this->id.' - Setting HTML for '.array_search(  $this->data, $this->view_data ).'('.strlen($value).')');
-
-        // Если передан параметр то установим его
-        if (func_num_args()) {
-            $this->data[self::VD_HTML] = $value;
-        } else {
-            return $this->data['html'];
-        }
+        $this->data[self::VD_HTML] = $value;
 
         return $this;
     }
@@ -257,14 +250,12 @@ class Module implements iModule, \ArrayAccess
         // If specific controller action should be run
         if (isset($controller)) {
             // Define if this is a procedural controller or OOP
-            $callback = function_exists($controller)
-                ? $controller
-                : array($this, iModule::OBJ_PREFIX . $controller);
+            $callback = array($this, iModule::OBJ_PREFIX . $controller);
 
             // If this controller action is present
             if (is_callable($callback)) {
                 // Perform controller action
-                call_user_func_array($callback, url()->parameters);
+                call_user_func($callback);
             } else {
                 throw(new ControllerActionNotFound($this->id . '#' . $controller));
             }

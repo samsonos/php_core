@@ -11,9 +11,9 @@ require('src/constants.php');
 require('src/Utils2.php');
 require('src/shortcuts.php');
 require('src/View.php');
+require('TestingModule.php');
 
 use samson\core\Core;
-use samson\core\Module;
 use samsonframework\resource\ResourceMap;
 
 class ModuleTest extends \PHPUnit_Framework_TestCase
@@ -29,7 +29,7 @@ class ModuleTest extends \PHPUnit_Framework_TestCase
         // Create core
         $core = new Core($map);
         // Create module
-        $this->module = new Module('test', $path, $map, $core);
+        $this->module = new TestingModule('test', $path, $map, $core);
     }
 
     public function testView()
@@ -44,5 +44,18 @@ class ModuleTest extends \PHPUnit_Framework_TestCase
     {
         $test = '<h1>Test</h1>';
         $this->assertEquals($test, $this->module->html($test)->output());
+    }
+
+    public function testRender()
+    {
+        $test = '<h1>Test</h1>';
+
+        // Начать вывод в буффер
+        ob_start();
+        $this->module->render('testAction');
+        $output = ob_get_contents();
+        ob_end_clean();
+
+        $this->assertEquals($test, $output);
     }
 }
