@@ -183,7 +183,7 @@ class Core implements SystemInterface
      *
      * @return null|Module Found or active module
      */
-    public function &module(&$module = null)
+    public function &module($module = null)
     {
         $return = null;
 
