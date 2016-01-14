@@ -7,7 +7,7 @@ use samsonframework\core\CompressInterface;
  * Сервис системы поддерживающий сжатие
  *
  * @author Vitaly Iegorov <vitalyiegorov@gmail.com>
- * @version 0.1
+ * @deprecated Just implement samsonframework\core\CompressInterface
  */
 class CompressableService extends Service implements CompressInterface
 {
