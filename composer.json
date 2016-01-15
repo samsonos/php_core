@@ -22,9 +22,6 @@
       "samsonos\\core\\": "src/",
       "samson\\core\\": "src/"
     },
-    "psr-4":{
-      "samsonphp\\core\\": "src/"
-    },
     "files": ["src/samson.php"]
   },
   "require": {
@@ -36,7 +33,7 @@
     "samsonos/php_url": "*"
   },
   "require-dev": {
-    "phpunit/phpunit": "4.*"
+    "phpunit/phpunit": "4.2.*"
   },
   "config":{
     "github-protocols":["https"]

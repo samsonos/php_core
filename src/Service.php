@@ -1,6 +1,8 @@
 <?php
 namespace samson\core;
 
+use samson\core\AutoLoader;
+use samsonframework\core\RequestInterface;
 use samsonframework\core\ResourcesInterface;
 use samsonframework\core\SystemInterface;
 
@@ -27,31 +29,30 @@ class Service extends ExternalModule
     public $gatherAncestorData = true;
 
     /**
-     * ExternalModule constructor.
+     * Get unique service instance. If service has not yet been created
+     * new instance will be created.
      *
-     * @param string             $path   Path to module
-     * @param ResourcesInterface $resources
-     * @param SystemInterface    $system Framework instance
+     * @param string $className Class name for getting service instance
+     * @return Service Service instance
      */
-    public function  __construct($path, ResourcesInterface $resources, SystemInterface $system)
+    public static function &getInstance($className)
     {
-        // Получим имя класса
-        $class = self::getName(get_class($this));
+        // Check service class existence
+        if (class_exists($className)) {
+            // Convert class name to avoid misspelling
+            $class = self::getName($className);
 
-        // Search instance
-        if (!isset(self::$factory[$class])) {
-            self::$factory[$class] = $this;
-
-            // If service is configured to gather ancestors data
-            if ($this->gatherAncestorData) {
-                $this->gatherAncestorsData($this, $this);
+            // Check if service exists
+            if (isset(self::$factory[$class])) {
+                // Return service instance
+                return self::$factory[$class];
+            } else { // Create service instance
+                $service = new $className('');
+                return $service;
             }
         } else {
-            e('Attempt to create another instance of Factory class: ##', E_SAMSON_FATAL_ERROR, $class);
+            return e('Service class [##] does not exists', E_SAMSON_FATAL_ERROR, $className);
         }
-
-        // Вызовем родительский конструктор
-        parent::__construct($path, $resources, $system);
     }
 
     /**
@@ -91,45 +92,43 @@ class Service extends ExternalModule
     }
 
     /**
-     * Get unique service instance. If service has not yet been created
-     * new instance will be created.
-     *
-     * @param string $className Class name for getting service instance
-     *
-     * @return Service Service instance
-     */
-    public static function &getInstance($className)
-    {
-        // Check service class existence
-        if (class_exists($className)) {
-            // Convert class name to avoid misspelling
-            $class = self::getName($className);
-
-            // Check if service exists
-            if (isset(self::$factory[$class])) {
-                // Return service instance
-                return self::$factory[$class];
-            } else { // Create service instance
-                $service = new $className('');
-                return $service;
-            }
-        } else {
-            return e('Service class [##] does not exists', E_SAMSON_FATAL_ERROR, $className);
-        }
-    }
-
-    /**
      * Convert class name to correct service name
-     * @var string   $class Class name to convert
-     *
+     * @var string $class Class name to convert
      * @param string $class
-     *
      * @return string Get correct service name
      */
     public static function getName($class)
     {
         // Generate correct service name
         return AutoLoader::oldClassName($class);
+    }
+
+    /**
+     * ExternalModule constructor.
+     *
+     * @param string $path Path to module
+     * @param ResourcesInterface $resources
+     * @param SystemInterface $system Framework instance
+     */
+    public function  __construct($path, ResourcesInterface $resources, SystemInterface $system)
+    {
+        // Получим имя класса
+        $class = self::getName(get_class($this));
+
+        // Search instance
+        if (!isset(self::$factory[$class])) {
+            self::$factory[$class] = $this;
+
+            // If service is configured to gather ancestors data
+            if ($this->gatherAncestorData) {
+                $this->gatherAncestorsData($this, $this);
+            }
+        } else {
+            e('Attempt to create another instance of Factory class: ##', E_SAMSON_FATAL_ERROR, $class);
+        }
+
+        // Вызовем родительский конструктор
+        parent::__construct($path, $resources, $system);
     }
 
     /** Deserialization */
