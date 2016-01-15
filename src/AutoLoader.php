@@ -27,23 +27,6 @@ class AutoLoader
     protected static $nameSpaces = array();
 
     /**
-     * Convert class name to old PHP format not supporting name spaces
-     *
-     * @param string $className Class name to convert
-     * @return string Class name in old format where "\" replaced with "_"
-     */
-    public static function oldClassName($className)
-    {
-        // If class name has first symbol as NS_SEPARATOR - remove it to avoid ugly classes _samson_core_...
-        if ($className{0} == self::NS_SEPARATOR) {
-            $className = substr($className, 1);
-        }
-
-        // Convert NS_SEPARATOR to namespace
-        return strtolower(str_replace(self::NS_SEPARATOR, '_', $className));
-    }
-
-    /**
      * Generate "correct" class name dependently on the current PHP version,
      * if PHP version is lower 5.3.0 it does not supports namespaces and function
      * will convert class name with namespace to class name
@@ -65,6 +48,63 @@ class AutoLoader
 
         // If this is an old PHP version - remove namespaces
         return __SAMSON_PHP_OLD ? self::oldClassName($className) : $className;
+    }
+
+    /**
+     * Convert class name to old PHP format not supporting name spaces
+     *
+     * @param string $className Class name to convert
+     *
+     * @return string Class name in old format where "\" replaced with "_"
+     */
+    public static function oldClassName($className)
+    {
+        // If class name has first symbol as NS_SEPARATOR - remove it to avoid ugly classes _samson_core_...
+        if ($className{0} == self::NS_SEPARATOR) {
+            $className = substr($className, 1);
+        }
+
+        // Convert NS_SEPARATOR to namespace
+        return strtolower(str_replace(self::NS_SEPARATOR, '_', $className));
+    }
+
+    /**
+     * Auto loader main logic
+     *
+     * @param string $class Full class name with namespace
+     *
+     * @return bool False if something went wrong
+     */
+    public static function load($class)
+    {
+        // Get just class name without ns
+        $className = self::getOnlyClass($class);
+        // Get just ns without class name
+        $nameSpace = self::getOnlyNameSpace($class);
+
+        // If this is not core class
+        if ($nameSpace != __NAMESPACE__) {
+            // Convert namespace to base directory add class
+            $path = __SAMSON_VENDOR_PATH . str_replace('\\', DIRECTORY_SEPARATOR, $nameSpace) . DIRECTORY_SEPARATOR . $className . '.php';
+
+            // Load class by file name
+            if (file_exists($path)) {
+                //elapsed('Autoloading class '.$class.' at '.$path);
+                require_once($path);
+                // old school compatibility will be removed when old modules will be updated
+            } else if (self::oldModule($className, $nameSpace, $path)) {
+                //elapsed('Autoloading(old style) class '.$class.' at '.$path);
+                require_once($path);
+                // Handle old module loading
+            } else { // Signal error
+                return e('Class name ## not found', E_SAMSON_CORE_ERROR, $class);
+            }
+
+        } else { // Load core classes separately using this class location
+            require_once(__DIR__ . '/' . $className . '.php');
+        }
+
+        return true;
     }
 
     /**
@@ -107,7 +147,8 @@ class AutoLoader
      *
      * @param string $className Class name without namespace
      * @param string $nameSpace Namespace name without class name
-     * @param string $file Variable to return path to class file location on success
+     * @param string $file      Variable to return path to class file location on success
+     *
      * @deprecated Should be removed after all modules will be moved to PSR class naming and locating standard
      * @return bool True if class file is found
      */
@@ -181,45 +222,6 @@ class AutoLoader
         // If we are here - signal error
         //return e('Cannot autoload class(##), class file not found in ##', D_SAMSON_DEBUG, array($className,$path));
         return false;
-    }
-
-    /**
-     * Auto loader main logic
-     *
-     * @param string $class Full class name with namespace
-     *
-     * @return bool False if something went wrong
-     */
-    public static function load($class)
-    {
-        // Get just class name without ns
-        $className = self::getOnlyClass($class);
-        // Get just ns without class name
-        $nameSpace = self::getOnlyNameSpace($class);
-
-        // If this is not core class
-        if ($nameSpace != __NAMESPACE__) {
-            // Convert namespace to base directory add class
-            $path = __SAMSON_VENDOR_PATH . str_replace('\\', DIRECTORY_SEPARATOR, $nameSpace) . DIRECTORY_SEPARATOR . $className . '.php';
-
-            // Load class by file name
-            if (file_exists($path)) {
-                //elapsed('Autoloading class '.$class.' at '.$path);
-                require_once($path);
-                // old school compatibility will be removed when old modules will be updated
-            } else if (self::oldModule($className, $nameSpace, $path)) {
-                //elapsed('Autoloading(old style) class '.$class.' at '.$path);
-                require_once($path);
-                // Handle old module loading
-            } else { // Signal error
-                return e('Class name ## not found', E_SAMSON_CORE_ERROR, $class);
-            }
-
-        } else { // Load core classes separately using this class location
-            require_once(__DIR__ . '/' . $className . '.php');
-        }
-
-        return true;
     }
 }
 // TODO: This class must be depreated and removed

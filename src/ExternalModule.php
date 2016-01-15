@@ -1,7 +1,6 @@
 <?php
 namespace samson\core;
 
-use samsonframework\core\RequestInterface;
 use samsonframework\core\ResourcesInterface;
 use samsonframework\core\SystemInterface;
 use samsonphp\event\Event;
@@ -10,15 +9,11 @@ use samsonphp\event\Event;
  * SamsonPHP external module
  *
  * @author Vitaly Iegorov <egorov@samsonos.com>
- * @version 0.1
  */
 class ExternalModule extends Module implements iExternalModule
 {
     /** @var Module Pointer to parent module */
     public $parent = null;
-
-    /** Коллекция связанных модулей с текущим */
-    protected $requirements = array();
 
     /**
      * ExternalModule constructor.
@@ -29,9 +24,6 @@ class ExternalModule extends Module implements iExternalModule
      */
     public function __construct($path, ResourcesInterface $resources, SystemInterface $system)
     {
-        // Inject generic module dependencies
-        $this->system = $system;
-
         // Module identifier not specified - set it to NameSpace\Classname
         if (!isset($this->id{0})) {
             // Generate identifier from module class
@@ -42,13 +34,9 @@ class ExternalModule extends Module implements iExternalModule
         Event::subscribe('core.started', array(& $this, 'init'));
 
         // Call parent constructor
-        parent::__construct($this->id, $path, $resources);
+        parent::__construct($this->id, $path, $resources, $system);
     }
 
-    public function setId($id)
-    {
-        $this->id = $id;
-    }
     /** @see \samson\core\iExternalModule::copy() */
     public function &copy()
     {
@@ -59,7 +47,6 @@ class ExternalModule extends Module implements iExternalModule
         $clone = new $classname($this->path, $this->resourceMap, $this->system);
         $clone->views = &$this->views;
         $clone->parent = &$this->parent;
-        $clone->controllers = &$this->controllers;
         $clone->path = $this->path;
 
         return $clone;
@@ -70,32 +57,6 @@ class ExternalModule extends Module implements iExternalModule
     {
         // Remove all unnecessary fields from serialization
         return array_diff(array_keys(get_object_vars($this)), array('view_path', 'view_html', 'view_data'));
-    }
-
-    /**
-     * Перегружаем стандартное поведение выполнения действия контроллера
-     * Если текущий модуль наследует другой <code>ModuleConnector</code>
-     * то тогда сначала выполняется действие контроллера в данном модуле,
-     * а потом в его родителе. Это дает возможность выполнять наследование
-     * контроллеров модулей.
-     *
-     * @param string $methodName Controller action name
-     * @return bool|mixed
-     */
-    public function action($methodName = null)
-    {
-        // Выполним стандартное действие
-        $result = parent::action($methodName);
-
-        // Если мы не смогли выполнить действие для текущего модуля
-        // и задан родительский модуль
-        if ($result === false && isset($this->parent)) {
-            // Выполним действие для родительского модуля
-            return $this->parent->action($methodName);
-        }
-
-        // Веренем результат выполнения действия
-        return $result;
     }
 
     /**
@@ -123,11 +84,6 @@ class ExternalModule extends Module implements iExternalModule
             // Call default module behaviour
             parent::view($this->view_path);
 
-            // If view has not been set at final stage - trigger error
-            if ($this->view_path === false) {
-                e('[##] Cannot find view "##"', E_SAMSON_FATAL_ERROR, array($this->id, $viewPath));
-            }
-
             return $this;
         }
     }
@@ -152,6 +108,11 @@ class ExternalModule extends Module implements iExternalModule
         } else { // Call default module behaviour
             parent::render($controller);
         }
+    }
+
+    public function setId($id)
+    {
+        $this->id = $id;
     }
 
     /**

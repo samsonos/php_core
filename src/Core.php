@@ -16,10 +16,10 @@ use samsonphp\event\Event;
 
 /**
  * Core of SamsonPHP
- *
- * @package   SamsonPHP
- * @author    Vitaly Iegorov <vitalyiegorov@gmail.com>
- * @version   @version@
+ * 
+ * @package SamsonPHP
+ * @author 	Vitaly Iegorov <vitalyiegorov@gmail.com>
+ * @version @version@
  */
 class Core implements SystemInterface
 {
@@ -28,18 +28,6 @@ class Core implements SystemInterface
     const RENDER_STANDART = 1;
     /** View rendering algorithm from array of view variables */
     const RENDER_VARIABLE = 3;
-
-    const EVENT_CREATED = 'core.created';
-    const EVENT_CONFIGURE = 'core.configure';
-    const EVENT_MODULE_LOADED = 'core.module.loaded';
-    const EVENT_MODULE_CONFIGURE = 'core.module.configure';
-    const EVENT_START = 'core.started';
-    const EVENT_SECURITY = 'core.security';
-    const EVENT_ROUTING = 'core.routing';
-    const EVENT_E404 = 'core.e404';
-    const EVENT_RENDER = 'core.render';
-    const EVENT_RENDERED = 'core.rendered';
-    const EVENT_END = 'core.end';
 
     /** @var  ResourceMap Current web-application resource map */
     public $map;
@@ -110,7 +98,7 @@ class Core implements SystemInterface
      *
      * @param string $environment Environment identifier
      *
-     * @return self Chaining
+*@return self Chaining
      */
     public function environment($environment = Scheme::BASE)
     {
@@ -122,8 +110,7 @@ class Core implements SystemInterface
 
     /**
      * Generate special response header triggering caching mechanisms
-     *
-     * @param int    $cacheLife     Amount of seconds for cache(default 3600 - 1 hour)
+     * @param int $cacheLife Amount of seconds for cache(default 3600 - 1 hour)
      * @param string $accessibility Cache-control accessibility value(default public)
      */
     public function cached($cacheLife = 3600, $accessibility = 'public')
@@ -319,12 +306,12 @@ class Core implements SystemInterface
         Event::fire('core.ended', array(&$output));
     }
 
-    /**    @see iCore::template() */
-    public function template($template = null)
+    /**	@see iCore::template() */
+    public function template( $template = NULL, $absolutePath = false )
     {
         // Если передан аргумент
-        if (func_num_args()) {
-            $this->template_path = $this->active->path() . $template;
+        if( func_num_args() ){
+            $this->template_path = ($absolutePath)?$template:$this->active->path().$template;
         }
 
         // Аргументы не переданы - вернем текущий путь к шаблону системы
@@ -409,9 +396,7 @@ class Core implements SystemInterface
 
     /**
      * Load system from composer.json
-     *
      * @param string $dependencyFilePath Path to dependencies file
-     *
      * @return $this Chaining
      */
     public function composer($dependencyFilePath = null)
@@ -534,10 +519,7 @@ class Core implements SystemInterface
             } elseif (is_array($parameters) && isset($parameters['samsonphp_package_compressable']) && ($parameters['samsonphp_package_compressable'] == 1)) {
                 /** @var \samson\core\ExternalModule $connector Create module controller instance */
                 $connector = new CompressableExternalModule($path, $resourceMap, $this);
-				
-				// Define default module identifier if it is not passed
-                $connector->setId(str_replace('/','',$parameters['module_id']));
-
+                $connector->setId(str_replace('/', '', $path));
                 // Set composer parameters
                 $connector->composerParameters = $parameters;
             } else { // Signal error

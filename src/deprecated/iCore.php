@@ -46,10 +46,9 @@ interface iCore
      * Установить/Получить путь к основному шаблону системы
      *
      * @param string $template Путь к основному шаблону системы
-     * @param $isAbsolutePath is $template absolute path
      * @return iCore/string Указатель на ядро системы для цепирования / Путь к основному шаблону системы
      */
-    public function template($template = NULL, $isAbsolutePath = false);
+    public function template($template = NULL);
 
     /**
      * Установить относительный путь к файлам и ресурсам данного Веб-приложения
