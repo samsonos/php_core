@@ -482,7 +482,7 @@ class Core implements SystemInterface
                 foreach ($resourceMap->controllers as $controller) {
                     require_once($controller);
                 }
-                elapsed($moduleClass);
+
                 /** @var ExternalModule $connector Create module controller instance */
                 $connector = new $moduleClass($path, $resourceMap, $this);
 
