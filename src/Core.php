@@ -482,7 +482,7 @@ class Core implements SystemInterface
                 foreach ($resourceMap->controllers as $controller) {
                     require_once($controller);
                 }
-
+                elapsed($moduleClass);
                 /** @var ExternalModule $connector Create module controller instance */
                 $connector = new $moduleClass($path, $resourceMap, $this);
 
@@ -518,8 +518,8 @@ class Core implements SystemInterface
                 }
             } elseif (is_array($parameters) && isset($parameters['samsonphp_package_compressable']) && ($parameters['samsonphp_package_compressable'] == 1)) {
                 /** @var \samson\core\ExternalModule $connector Create module controller instance */
-                $connector = new CompressableExternalModule($path, $resourceMap, $this);
-                $connector->setId(str_replace('/', '', $path));
+                $connector = new VirtualExternalModule($path, $resourceMap, $this, str_replace('/','',$parameters['module_id']));
+
                 // Set composer parameters
                 $connector->composerParameters = $parameters;
             } else { // Signal error
