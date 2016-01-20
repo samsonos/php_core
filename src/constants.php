@@ -16,16 +16,15 @@ if (!defined('__DIR__')) {
     define('__DIR__', dirname(__FILE__));
 }
 
-/** @deprecated Define path to SamsonPHP framework */
-define('__SAMSON_PATH__', __DIR__.'/../');
-
 /** Namespace separator */
 define('__NS_SEPARATOR__', '\\');
 
 /** Get HTTP protocol **/
 define('__SAMSON_PROTOCOL', (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' || (isset($_SERVER['SERVER_PORT']) && $_SERVER['SERVER_PORT']== 443)) ? "https://" : "http://" );
 
-if (strpos($_SERVER['SCRIPT_NAME'],'.php') === false) $_SERVER['SCRIPT_NAME'] = '/index.php';
+if (strpos($_SERVER['SCRIPT_NAME'],'.php') === false) {
+    $_SERVER['SCRIPT_NAME'] = '/index.php';
+}
 /** Apache2 mod_vhost_alias fix - makes $_SERVER['DOCUMENT_ROOT'] always correct */
 $_SERVER['DOCUMENT_ROOT'] = str_replace($_SERVER['SCRIPT_NAME'], '', $_SERVER['SCRIPT_FILENAME']);
 
@@ -42,11 +41,6 @@ if (!defined('__SAMSON_CACHE_PATH')) {
 /** Default path to web-application tests folder */
 if (!defined('__SAMSON_TEST_PATH')) {
     define('__SAMSON_TEST_PATH', 'tests/');
-}
-
-/** @deprecated Default path to install/update bash scripts folder */
-if (!defined('__SAMSON_CONTRIB_PATH')) {
-    define('__SAMSON_CONTRIB_PATH', 'contrib/');
 }
 
 /** If no specific vendor path is defined */
@@ -112,12 +106,8 @@ if(!defined('__SAMSON_BASE__')) {
     );
 }
 
-
 /** Максимальное время выполнения скрипта */
 define( '__SAMSON_MAX_EXECUTION__', 120 );
-
-/** @deprecated Путь к файлу с глобальными данными модуля */
-define( '__SAMSON_GLOBAL_FILE', 'global.php' );
 
 //[PHPCOMPRESSOR(remove,start)]
 
