@@ -18,11 +18,9 @@ function &s()
     static $_v;
 
     // Если переменная не определена - получим единственный экземпляр ядра
-    if( ! isset($_v) )
-    {
+    if (!isset($_v)) {
         // Load instance from global snapshot
-        if( isset( $GLOBALS["__CORE_SNAPSHOT"]) )
-        {
+        if (isset($GLOBALS["__CORE_SNAPSHOT"])) {
             $_v = unserialize(base64_decode($GLOBALS["__CORE_SNAPSHOT"]));
 
         } else { // Create new instance
@@ -36,44 +34,46 @@ function &s()
 
 /**
  * Module(Модуль) - Получить Текущий модуль / Модуль по имени из стека модулей системы
- * @see iCore::module();
+ * @see        iCore::module();
  *
  * @param mixed $module Указатель на модуль системы *
+ *
  * @return \samson\core\Module Текущую / Модель по её имени / или FALSE если модель не найдена
  * @deprecated Use $this->system->module() in module context
  */
-function &m( $module = NULL )
+function &m($module = NULL)
 {
     // т.к. эта функция вызывается очень часто - создадим статическую переменную
     static $_s;
 
     // Если переменная не определена - получим единственный экземпляр ядра
-    if( !isset($_s)) $_s = & s();
+    if (!isset($_s)) $_s = &s();
 
     // Вернем указатель на модуль системы
-    return $_s->module( $module );
+    return $_s->module($module);
 }
 
 /**
  * Error(Ошибка) - Зафиксировать ошибку работы системы
  *
- * @param string 	$error_msg	Текст ошибки
- * @param integer 	$error_code	Код ошибки
- * @param mixed 	$args		Специальные "жетоны" для вставки в текст ошибки
- * @param mixed 	$ret_val	Value that must be returned by the function
- * @return boolean FALSE для остановки работы функции или условия
+ * @param string $error_msg  Текст ошибки
+ * @param int    $error_code Код ошибки
+ * @param mixed  $args       Специальные "жетоны" для вставки в текст ошибки
+ * @param mixed  $ret_val    Value that must be returned by the function
+ *
+ * @return bool FALSE для остановки работы функции или условия
+ * @throws Exception
  * @deprecated Use custom exceptions
  */
-function e( $error_msg = '', $error_code = E_USER_NOTICE, $args = NULL, & $ret_val = false )
+function e($error_msg = '', $error_code = E_USER_NOTICE, $args = NULL, & $ret_val = false)
 {
-    // Получим ошибку
-    $_e = isset( $_e ) ? $_e : error();
-
     // Если передан только один аргумент то сделаем из него массив для совместимости
-    $args = is_array( $args ) ? $args : array( $args );
+    $args = is_array($args) ? $args : array($args);
 
     // "Украсим" сообщение об ошибке используя переданные аргументы, если они есть
-    if( isset( $args ) ) $error_msg = debug_parse_markers( $error_msg, $args );
+    if (isset($args)) {
+        $error_msg = debug_parse_markers($error_msg, $args);
+    }
 
     throw new \Exception($error_msg);
 
@@ -91,7 +91,8 @@ function e( $error_msg = '', $error_code = E_USER_NOTICE, $args = NULL, & $ret_v
  *
  * @see SamsonLocale::set()
  */
-function setlocales(){
+function setlocales()
+{
     $args = func_get_args();
     \samson\core\SamsonLocale::set($args);
 }
@@ -100,31 +101,47 @@ function setlocales(){
  * Установить/Получить текущую локализацию сайта
  *
  * @see SamsonLocale::current()
+ *
  * @param string $locale Значение локали
+ *
  * @return string Возвращает текущее значение локали сайта до момента вызова метода
  */
-function locale( $locale = NULL ){ return \samson\core\SamsonLocale::current( $locale ); }
+function locale($locale = NULL)
+{
+    return \samson\core\SamsonLocale::current($locale);
+}
 
 /**
  * Check if passed locale alias matches current locale and output in success
+ *
  * @param string $locale Locale alias to compare with current locale
  * @param string $output Output string on success
+ *
  * @return boolean True if passed locale alias matches current locale
  */
-function islocale( $locale, $output = '' ){ if( \samson\core\SamsonLocale::$current_locale == $locale) { echo $output; return true; } return false; }
+function islocale($locale, $output = '')
+{
+    if (\samson\core\SamsonLocale::$current_locale == $locale) {
+        echo $output;
+        return true;
+    }
+    return false;
+}
 
 /**
  * Build string with locale to use in URL and file path
+ *
  * @param string $l Locale name to use, if not passed - current locale is used
+ *
  * @return string locale path if current locale is not default locale
  */
-function locale_path( $l = null )
+function locale_path($l = null)
 {
     // If no locale is passed - get current locale
     $l = !isset($l) ? locale() : $l;
 
     // Build path starting with locale
-    return ($l != \samson\core\SamsonLocale::DEF)? $l.'/' : '';
+    return ($l != \samson\core\SamsonLocale::DEF) ? $l . '/' : '';
 }
 
 /**
@@ -154,7 +171,7 @@ function url_build()
     }
 
     // Call URL builder with parameters
-    return call_user_func_array( array( $_v, 'build' ), $args );
+    return call_user_func_array(array($_v, 'build'), $args);
 }
 
 /**
