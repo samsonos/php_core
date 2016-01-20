@@ -10,8 +10,9 @@
 /**
  * System(Система) - Получить объект для работы с ядром системы
  * @return samson\core\Core Ядро системы
+ * @deprecated Use $this->system in module context
  */
-function & s()
+function &s()
 {
     // т.к. эта функция вызывается очень часто - создадим статическую переменную
     static $_v;
@@ -39,8 +40,9 @@ function & s()
  *
  * @param mixed $module Указатель на модуль системы *
  * @return \samson\core\Module Текущую / Модель по её имени / или FALSE если модель не найдена
+ * @deprecated Use $this->system->module() in module context
  */
-function & m( $module = NULL )
+function &m( $module = NULL )
 {
     // т.к. эта функция вызывается очень часто - создадим статическую переменную
     static $_s;
@@ -56,8 +58,9 @@ function & m( $module = NULL )
  * Error(Ошибка) - Получить класс для работы с ошибками и отладкой системы
  *
  * @return \samson\core\Error Класс для работы с ошибками и отладкой системы
+ * @deprecated Use custom exceptions
  */
-function & error(){
+function &error(){
     static $_error;
     $_error = isset($_error) ? $_error : new \samson\core\Error();
     return $_error;
@@ -71,6 +74,7 @@ function & error(){
  * @param mixed 	$args		Специальные "жетоны" для вставки в текст ошибки
  * @param mixed 	$ret_val	Value that must be returned by the function
  * @return boolean FALSE для остановки работы функции или условия
+ * @deprecated Use custom exceptions
  */
 function e( $error_msg = '', $error_code = E_USER_NOTICE, $args = NULL, & $ret_val = false )
 {
