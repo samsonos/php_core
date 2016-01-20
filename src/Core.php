@@ -522,7 +522,7 @@ class Core implements SystemInterface
                 }
             } elseif (is_array($parameters) && isset($parameters['samsonphp_package_compressable']) && ($parameters['samsonphp_package_compressable'] == 1)) {
                 /** @var \samson\core\ExternalModule $connector Create module controller instance */
-                $connector = new VirtualExternalModule($path, $resourceMap, $this, str_replace('/','',$parameters['module_id']));
+                $connector = new VirtualModule($path, $resourceMap, $this, str_replace('/','',$parameters['module_id']));
 
                 // Set composer parameters
                 $connector->composerParameters = $parameters;
