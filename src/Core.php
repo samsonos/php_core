@@ -69,6 +69,10 @@ class Core implements SystemInterface
         // Temporary add template worker
         $this->subscribe('core.rendered', array($this, 'generateTemplate'));
 
+        $whoops = new \Whoops\Run;
+        $whoops->pushHandler(new \Whoops\Handler\PrettyPageHandler);
+        $whoops->register();
+
         // Fire core creation event
         Event::fire('core.created', array(&$this));
 

@@ -56,6 +56,7 @@ define( 'D_SAMSON_AUTH_DEBUG', 10003 );
  * @package SamsonPHP
  * @author Vitaly Iegorov <vitalyiegorov@gmail.com> 
  * @version 1.6
+ * @deprecated
  */
 class Error
 {
