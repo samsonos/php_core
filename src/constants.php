@@ -58,7 +58,7 @@ if (!defined('__SAMSON_APP_PATH')) {
     define('__SAMSON_APP_PATH', 'app/');
 }
 
-/** Default path to tests folder */
+/** Default path to config folder */
 if (!defined('__SAMSON_CONFIG_PATH')) {
     define('__SAMSON_CONFIG_PATH', __SAMSON_APP_PATH.'config/');
 }

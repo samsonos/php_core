@@ -55,18 +55,6 @@ function &m( $module = NULL )
 }
 
 /**
- * Error(Ошибка) - Получить класс для работы с ошибками и отладкой системы
- *
- * @return \samson\core\Error Класс для работы с ошибками и отладкой системы
- * @deprecated Use custom exceptions
- */
-function &error(){
-    static $_error;
-    $_error = isset($_error) ? $_error : new \samson\core\Error();
-    return $_error;
-}
-
-/**
  * Error(Ошибка) - Зафиксировать ошибку работы системы
  *
  * @param string 	$error_msg	Текст ошибки
@@ -78,9 +66,6 @@ function &error(){
  */
 function e( $error_msg = '', $error_code = E_USER_NOTICE, $args = NULL, & $ret_val = false )
 {
-    // Сохраним указатель на класс в память
-    static $_e;
-
     // Получим ошибку
     $_e = isset( $_e ) ? $_e : error();
 
@@ -90,14 +75,10 @@ function e( $error_msg = '', $error_code = E_USER_NOTICE, $args = NULL, & $ret_v
     // "Украсим" сообщение об ошибке используя переданные аргументы, если они есть
     if( isset( $args ) ) $error_msg = debug_parse_markers( $error_msg, $args );
 
-    // Вызовем обработчик ошибки, передадим правильный указатель
-    error()->handler( $error_code, $error_msg, NULL, NULL, NULL, debug_backtrace() );
+    throw new \Exception($error_msg);
 
     return $ret_val;
 }
-
-// Создадим экземпляр класса
-error();
 
 /**
  * Установить все доступные локализации для текущего веб-приложения.
