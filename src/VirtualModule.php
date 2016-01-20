@@ -11,13 +11,26 @@ use samsonframework\core\CompressInterface;
 use samsonframework\core\ResourcesInterface;
 use samsonframework\core\SystemInterface;
 
-
+/**
+ * Virtual SamsonPHP module needed to imitate 3rd party packages
+ * as they are SamsonPHP modules for internal seamless usage.
+ *
+ * @package samson\core
+ */
 class VirtualModule extends ExternalModule implements CompressInterface
 {
-
+    /**
+     * VirtualModule constructor.
+     *
+     * @param string             $path
+     * @param ResourcesInterface $resources
+     * @param SystemInterface    $system
+     * @param null               $moduleId
+     */
     public function __construct($path, ResourcesInterface $resources, SystemInterface $system, $moduleId = null)
     {
         $this->id = $moduleId;
+
         parent::__construct($path, $resources, $system);
     }
 

@@ -112,8 +112,6 @@ if(!defined('__SAMSON_BASE__')) {
     );
 }
 
-/** @deprecated Flag that this script runs from remote app */
-define('__SAMSON_REMOTE_APP', __SAMSON_BASE__ !== '/');
 
 /** Максимальное время выполнения скрипта */
 define( '__SAMSON_MAX_EXECUTION__', 120 );
