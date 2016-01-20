@@ -224,7 +224,7 @@ class AutoLoader
         return false;
     }
 }
-// TODO: This class must be depreated and removed
+// TODO: This class must be deprecated and removed
 //[PHPCOMPRESSOR(remove,start)]
 // Add SamsonPHP default autoloader
 spl_autoload_register(array('\samson\core\AutoLoader','load'));
