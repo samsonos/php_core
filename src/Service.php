@@ -129,7 +129,7 @@ class Service extends ExternalModule
     public static function getName($class)
     {
         // Generate correct service name
-        return AutoLoader::oldClassName($class);
+        return strtolower(str_replace(__NS_SEPARATOR__, '_', $class));
     }
 
     /** Deserialization */

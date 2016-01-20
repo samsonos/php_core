@@ -406,12 +406,7 @@ class Module implements iModule, \ArrayAccess
         if (is_object($field)) {
             $implements = class_implements($field);
             // If iModuleViewable implements is passed
-            if (
-                // TODO: Remove old interface support in future
-                in_array(ns_classname('iModuleViewable', 'samson\core'), $implements)
-                || in_array(AutoLoader::className('IViewSettable', 'samson\core'), $implements)
-                || in_array('samsonframework\core\RenderInterface', $implements)
-            ) {
+            if (in_array('samsonframework\core\RenderInterface', $implements)) {
                 $this->_setObject($field, $value);
             }
         } // If array is passed

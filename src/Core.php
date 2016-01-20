@@ -510,7 +510,7 @@ class Core implements SystemInterface
 
                 // Trying to find parent class for connecting to it to use View/Controller inheritance
                 $parentClass = get_parent_class($connector);
-                if (!in_array($parentClass, array(AutoLoader::className('samson\core\ExternalModule'), AutoLoader::className('samson\core\CompressableExternalModule')))) {
+                if (!in_array($parentClass, array('samson\core\ExternalModule', 'samson\core\CompressableExternalModule'))) {
                     // Переберем загруженные в систему модули
                     foreach ($this->module_stack as &$m) {
                         // Если в систему был загружен модуль с родительским классом

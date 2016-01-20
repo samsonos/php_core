@@ -27,7 +27,7 @@ class ExternalModule extends Module implements iExternalModule
         // Module identifier not specified - set it to NameSpace\Classname
         if (!isset($this->id{0})) {
             // Generate identifier from module class
-            $this->id = AutoLoader::oldClassName(get_class($this));
+            $this->id = strtolower(str_replace(__NS_SEPARATOR__, '_', get_class($this)));
         }
 
         // Subscribe to an config ready core event
