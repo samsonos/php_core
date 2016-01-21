@@ -27,11 +27,12 @@ if (php_sapi_name() !== 'cli') {
     // Remove unnecessary files umask
     $old_umask = umask(0);
 
-    require('AutoLoader.php');
     require('Utils2.php');
     require('shortcuts.php');
     require('View.php');
 
     // deprecated
-    new \samson\core\Error();
+    require('deprecated/AutoLoader.php');
+    require('deprecated/constants.php');
+    require('deprecated/Error.php');
 }
