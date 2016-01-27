@@ -375,9 +375,9 @@ function elapsed($text = '')
 
     // Получим текущую отметку времени
     $c = microtime(TRUE);
-    //trace(number_format($c-__SAMSON_T_STARTED__,5).' - '.number_format($c-$l,5).' -- '.print_a($text,TRUE));
+    trace(number_format($c-__SAMSON_T_STARTED__,5).' - '.number_format($c-$l,5).' -- '.print_a($text,TRUE));
     // Выведем сообщение про текущую отметку времени и время прошедшее с последнего времени
-    e(number_format($c - __SAMSON_T_STARTED__, 5) . ' - ' . number_format($c - $l, 5) . ' -- ' . print_a($text, TRUE), D_SAMSON_DEBUG);
+    //e(number_format($c - __SAMSON_T_STARTED__, 5) . ' - ' . number_format($c - $l, 5) . ' -- ' . print_a($text, TRUE), D_SAMSON_DEBUG);
 
     // Сохраним отметку времени последнего вызова данной функции
     $l = $c;
