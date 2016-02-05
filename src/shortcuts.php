@@ -187,6 +187,21 @@ function url_base()
 }
 
 /**
+ * Echo builded URL from passed parameters
+ * @see url_build
+ */
+function url_hash()
+{
+    $args = func_get_args();
+
+    // Call URL builder and echo its result
+    $returnUrl = call_user_func_array('url_build', $args);
+
+    // Return url with hash
+    echo substr($returnUrl, 0, -1);
+}
+
+/**
  * Echo builded URL from passed parameters, prepending first parameter as current module identifier
  * @see url_build()
  */
