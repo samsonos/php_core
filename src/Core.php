@@ -451,6 +451,17 @@ class Core implements SystemInterface
             new CompressableLocalModule(basename($controller, '.php'), $this->system_path, $this->map, $this);
         }
 
+        $modulesPath = '../src';
+
+        $resourceMap = ResourceMap::get($modulesPath);
+
+        foreach ($resourceMap->modules as $moduleFile) {
+            $modulePath = str_replace(realpath($modulesPath), '', $moduleFile[1]);
+            $modulePath = explode('/', $modulePath);
+            $modulePath = $modulesPath.'/'.$modulePath[1];
+            $this->load($modulePath);
+        }
+
         return $this;
     }
 
