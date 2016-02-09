@@ -446,7 +446,7 @@ class Core implements SystemInterface
         }
 
         // Create local module and set it as active
-        $this->active = new CompressableLocalModule('local', $this->system_path, $this->map, $this);
+        $this->active = new VirtualModule($this->system_path, $this->map, $this, 'local');
 
         // TODO: This should be changed to one single logic
         // Require all local module model files
@@ -461,7 +461,7 @@ class Core implements SystemInterface
             require($controller);
 
             // Create module connector instance
-            new CompressableLocalModule(basename($controller, '.php'), $this->system_path, $this->map, $this);
+            new VirtualModule($this->system_path, $this->map, $this, basename($controller, '.php'));
         }
 
         return $this;
