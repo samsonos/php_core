@@ -420,16 +420,29 @@ class Core implements SystemInterface
             )
         );
 
+        $modulesToLoad = array();
+
         // Iterate requirements
         foreach ($composerModules as $requirement => $parameters) {
-            // Load module
-            $this->load(
-                __SAMSON_CWD__ . __SAMSON_VENDOR_PATH . $requirement,
-                array_merge(
-                    is_array($parameters) ? $parameters : array($parameters),
-                    array('module_id' => $requirement)
-                )
+            $modulesToLoad[__SAMSON_CWD__ . __SAMSON_VENDOR_PATH . $requirement] = array_merge(
+                is_array($parameters) ? $parameters : array($parameters),
+                array('module_id' => $requirement)
             );
+        }
+
+        $localModulesPath = '../src';
+
+        $resourceMap = ResourceMap::get($localModulesPath);
+
+        foreach ($resourceMap->modules as $moduleFile) {
+            $modulePath = str_replace(realpath($localModulesPath), '', $moduleFile[1]);
+            $modulePath = explode('/', $modulePath);
+            $modulePath = $localModulesPath.'/'.$modulePath[1];
+            $modulesToLoad[$modulePath] = array();
+        }
+
+        foreach($modulesToLoad as $path => $parameters) {
+            $this->load($path, $parameters);
         }
 
         // Create local module and set it as active
@@ -489,6 +502,16 @@ class Core implements SystemInterface
 
                 /** @var ExternalModule $connector Create module controller instance */
                 $connector = new $moduleClass($path, $resourceMap, $this);
+            } elseif (is_array($parameters) && isset($parameters['samsonphp_package_compressable']) && ($parameters['samsonphp_package_compressable'] == 1)) {
+                /** @var \samson\core\ExternalModule $connector Create module controller instance */
+                $connector = new VirtualModule($path, $resourceMap, $this,
+                    str_replace('/', '', $parameters['module_id']));
+
+                // Set composer parameters
+                $connector->composerParameters = $parameters;
+            }
+
+            if (is_object($connector)) {
 
                 // Set composer parameters
                 $connector->composerParameters = $parameters;
@@ -504,13 +527,15 @@ class Core implements SystemInterface
 
                 // TODO: Think how to decouple this
                 // Call module preparation handler
-                if (!$connector->prepare()) {
+                if ( ! $connector->prepare()) {
                     // Handle module failed preparing
                 }
 
                 // Trying to find parent class for connecting to it to use View/Controller inheritance
                 $parentClass = get_parent_class($connector);
-                if (!in_array($parentClass, array('samson\core\ExternalModule', 'samson\core\CompressableExternalModule'))) {
+                if ( ! in_array($parentClass,
+                    array('samson\core\ExternalModule', 'samson\core\CompressableExternalModule'))
+                ) {
                     // Переберем загруженные в систему модули
                     foreach ($this->module_stack as &$m) {
                         // Если в систему был загружен модуль с родительским классом
@@ -520,13 +545,8 @@ class Core implements SystemInterface
                         }
                     }
                 }
-            } elseif (is_array($parameters) && isset($parameters['samsonphp_package_compressable']) && ($parameters['samsonphp_package_compressable'] == 1)) {
-                /** @var \samson\core\ExternalModule $connector Create module controller instance */
-                $connector = new VirtualModule($path, $resourceMap, $this, str_replace('/','',$parameters['module_id']));
-
-                // Set composer parameters
-                $connector->composerParameters = $parameters;
-            } else { // Signal error
+            }
+            else { // Signal error
                 return e('Cannot load module from: "##"', E_SAMSON_FATAL_ERROR, $path);
             }
 
