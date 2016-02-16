@@ -44,6 +44,8 @@ class Core implements SystemInterface
     protected $async = false;
     /** @var string Path to main system template */
     protected $template_path = __SAMSON_DEFAULT_TEMPLATE;
+    /** @var string Current system environment */
+    protected $environment;
 
     /**
      * Core constructor.
@@ -98,18 +100,25 @@ class Core implements SystemInterface
     }
 
     /**
-     * Change current system working environment.
+     * Change current system working environment or receive
+     * current system enviroment if no arguments are passed.
      *
      * @param string $environment Environment identifier
      *
-*@return self Chaining
+     * TODO: Function has two different logics - needs to be changed!
+     * @return $this|string Chaining or current system environment
      */
     public function environment($environment = Scheme::BASE)
     {
-        // Signal core environment change
-        Event::signal('core.environment.change', array($environment, &$this));
+        if (func_num_args() !== 0) {
+            $this->environment = $environment;
 
-        return $this;
+            // Signal core environment change
+            Event::signal('core.environment.change', array($environment, &$this));
+            return $this;
+        }
+
+        return $this->environment;
     }
 
     /**

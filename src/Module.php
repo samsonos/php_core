@@ -123,7 +123,7 @@ class Module implements iModule, \ArrayAccess
     }
 
     /** @see iModule::set() */
-    public function set($field, $value = null)
+    public function set($value, $field = null)
     {
         $this->__set($field, $value);
 
@@ -410,7 +410,9 @@ class Module implements iModule, \ArrayAccess
                 $this->_setObject($field, $value);
             }
         } // If array is passed
-        else if (is_array($field)) $this->_setArray($field, $value);
+        else if (is_array($field)) {
+            $this->_setArray($field, $value);
+        }
         // Set view variable
         else $this->data[$field] = $value;
     }
@@ -475,7 +477,7 @@ class Module implements iModule, \ArrayAccess
     private function _setObject($object, $viewprefix = null)
     {
         // Generate viewprefix as only lowercase classname without NS if it is not specified
-        $class_name = is_string($viewprefix) ? $viewprefix : '' . mb_strtolower(\samson\core\AutoLoader::className(get_class($object)), 'UTF-8');
+        $class_name = is_string($viewprefix) ? $viewprefix : '' . mb_strtolower(classname(get_class($object)), 'UTF-8');
 
         // Save object to view data
         $this->data[$class_name] = $object;
