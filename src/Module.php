@@ -125,7 +125,7 @@ class Module implements iModule, \ArrayAccess
     /** @see iModule::set() */
     public function set($value, $field = null)
     {
-        $this->__set($field, $value);
+        $this->__set($value, $field);
 
         return $this;
     }
