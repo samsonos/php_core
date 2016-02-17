@@ -477,7 +477,7 @@ class Module implements iModule, \ArrayAccess
     private function _setObject($object, $viewprefix = null)
     {
         // Generate viewprefix as only lowercase classname without NS if it is not specified
-        $class_name = is_string($viewprefix) ? $viewprefix : '' . mb_strtolower(classname(get_class($object)), 'UTF-8');
+        $class_name = is_string($viewprefix) ? $viewprefix : '' . mb_strtolower(ns_classname(get_class($object)), 'UTF-8');
 
         // Save object to view data
         $this->data[$class_name] = $object;
