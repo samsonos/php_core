@@ -82,7 +82,7 @@ class ExternalModule extends Module implements iExternalModule
             return $this->parent->view($viewPath);
         } else { // Call default module behaviour
             // Call default module behaviour
-            parent::view($this->view_path);
+            parent::view($viewPath);
 
             return $this;
         }
