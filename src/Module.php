@@ -7,6 +7,7 @@ use samsonframework\core\SystemInterface;
 use samsonphp\core\exception\ControllerActionNotFound;
 use samsonphp\core\exception\ViewPathNotFound;
 use samsonphp\core\exception\ViewVariableNotFound;
+use Symfony\Component\Config\Definition\Exception\Exception;
 
 /**
  * Модуль системы
@@ -119,7 +120,7 @@ class Module implements iModule, \ArrayAccess
     /**    @see iModule::title() */
     public function title($title = null)
     {
-        return $this->set('title', $title);
+        return $this->set($title, 'title');
     }
 
     /** @see iModule::set() */
@@ -335,12 +336,12 @@ class Module implements iModule, \ArrayAccess
         //elapsed($this->id.' - __Call '.$method);
 
         // If value is passed - set it
-        if (sizeof($arguments)) {
+        if (count($arguments)) {
             // If first argument is object or array - pass method name as second parameter
             if (is_object($arguments[0]) || is_array($arguments[0])) {
                 $this->__set($arguments[0], $method);
             } else { // Standard logic
-                $this->__set($method, $arguments[0]);
+                $this->__set($arguments[0], $method);
             }
         }
 
@@ -374,7 +375,7 @@ class Module implements iModule, \ArrayAccess
     /** Группа методов для доступа к аттрибутам в виде массива */
     public function offsetSet($offset, $value)
     {
-        $this->__set($offset, $value);
+        $this->__set($value, $offset);
     }
 
     public function offsetGet($offset)
@@ -400,21 +401,25 @@ class Module implements iModule, \ArrayAccess
         return $result;
     }
 
-    public function __set($field, $value = null)
+    public function __set($value, $field = null)
     {
-        // This is object
-        if (is_object($field)) {
-            $implements = class_implements($field);
-            // If iModuleViewable implements is passed
-            if (in_array('samsonframework\core\RenderInterface', $implements)) {
-                $this->_setObject($field, $value);
-            }
-        } // If array is passed
-        else if (is_array($field)) {
-            $this->_setArray($field, $value);
+        if (is_object($field) || is_array($field)) {
+            $tempValue = $field;
+            $field = $value;
+            $value = $tempValue;
+
+            // TODO: Will be added in next major version
+            //throw new \Exception('ViewInterface::set($value, $name) has changed, first arg is variable second is name or prefix');
         }
-        // Set view variable
-        else $this->data[$field] = $value;
+
+        // This is object
+        if (is_object($value) && is_a($value, 'samsonframework\core\RenderInterface')) {
+            $this->_setObject($value, $field);
+        } elseif (is_array($value)) { // If array is passed
+            $this->_setArray($value, $field);
+        } else { // Set view variable
+            $this->data[$field] = $value;
+        }
     }
 
     public function offsetUnset($offset)
