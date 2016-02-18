@@ -404,7 +404,12 @@ class Module implements iModule, \ArrayAccess
     public function __set($value, $field = null)
     {
         if (is_object($field) || is_array($field)) {
-            throw new Exception('ViewInterface::set($value, $name) has changed, first arg is variable second is name or prefix');
+            $tempValue = $field;
+            $field = $value;
+            $value = $tempValue;
+
+            // TODO: Will be added in next major version
+            //throw new \Exception('ViewInterface::set($value, $name) has changed, first arg is variable second is name or prefix');
         }
 
         // This is object
