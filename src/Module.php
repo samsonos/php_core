@@ -120,7 +120,7 @@ class Module implements iModule, \ArrayAccess
     /**    @see iModule::title() */
     public function title($title = null)
     {
-        return $this->set('title', $title);
+        return $this->set($title, 'title');
     }
 
     /** @see iModule::set() */
@@ -336,12 +336,12 @@ class Module implements iModule, \ArrayAccess
         //elapsed($this->id.' - __Call '.$method);
 
         // If value is passed - set it
-        if (sizeof($arguments)) {
+        if (count($arguments)) {
             // If first argument is object or array - pass method name as second parameter
             if (is_object($arguments[0]) || is_array($arguments[0])) {
                 $this->__set($arguments[0], $method);
             } else { // Standard logic
-                $this->__set($method, $arguments[0]);
+                $this->__set($arguments[0], $method);
             }
         }
 
