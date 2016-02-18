@@ -160,15 +160,15 @@ class Module implements iModule, \ArrayAccess
     public function view($viewPath)
     {
         // Find full path to view file
-        $viewPath = $this->findView($viewPath);
+        $foundViewPath = $this->findView($viewPath);
 
         // We could not find view
-        if ($viewPath !== false) {
+        if ($foundViewPath !== false) {
             // Switch view context to founded module view
-            $this->viewContext($viewPath);
+            $this->viewContext($foundViewPath);
 
             // Set current view path
-            $this->view_path = $viewPath;
+            $this->view_path = $foundViewPath;
         } else {
             throw(new ViewPathNotFound($viewPath));
         }
@@ -341,7 +341,7 @@ class Module implements iModule, \ArrayAccess
             if (is_object($arguments[0]) || is_array($arguments[0])) {
                 $this->__set($arguments[0], $method);
             } else { // Standard logic
-                $this->__set($arguments[0], $method);
+                $this->__set($method, $arguments[0]);
             }
         }
 
@@ -373,9 +373,9 @@ class Module implements iModule, \ArrayAccess
     // TODO: Переделать обработчик в одинаковый вид для объектов и простых
 
     /** Группа методов для доступа к аттрибутам в виде массива */
-    public function offsetSet($offset, $value)
+    public function offsetSet($value, $offset)
     {
-        $this->__set($value, $offset);
+        $this->__set($offset, $value);
     }
 
     public function offsetGet($offset)
@@ -412,14 +412,14 @@ class Module implements iModule, \ArrayAccess
             //throw new \Exception('ViewInterface::set($value, $name) has changed, first arg is variable second is name or prefix');
         }
 
-        // This is object
-        if (is_object($value) && is_a($value, 'samsonframework\core\RenderInterface')) {
-            $this->_setObject($value, $field);
-        } elseif (is_array($value)) { // If array is passed
-            $this->_setArray($value, $field);
-        } else { // Set view variable
+		// This is object
+		if (is_object($value) && is_a($value, 'samsonframework\core\RenderInterface')) {
+			$this->_setObject($value, $field);
+		} elseif (is_array($value)) { // If array is passed
+			$this->_setArray($value, $field);
+		} else { // Set view variable
             $this->data[$field] = $value;
-        }
+		}
     }
 
     public function offsetUnset($offset)
