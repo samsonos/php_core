@@ -341,7 +341,7 @@ class Module implements iModule, \ArrayAccess
             if (is_object($arguments[0]) || is_array($arguments[0])) {
                 $this->__set($arguments[0], $method);
             } else { // Standard logic
-                $this->__set($method, $arguments[0]);
+                $this->__set($arguments[0], $method);
             }
         }
 
