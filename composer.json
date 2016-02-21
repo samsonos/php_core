@@ -30,6 +30,7 @@
   "require": {
     "samsonframework/base": "*",
     "samsonframework/resource": "*",
+    "samsonphp/view": "*",
     "samsonphp/event": "1.*",
     "samsonphp/composer": "1.*",
     "samsonphp/config": "1.*",
