@@ -10,6 +10,7 @@ namespace samson\core;
 
 use samsonframework\core\SystemInterface;
 use samsonframework\resource\ResourceMap;
+use samsonframework\view\Generator;
 use samsonphp\config\Scheme;
 use samsonphp\core\exception\ViewPathNotFound;
 use samsonphp\event\Event;

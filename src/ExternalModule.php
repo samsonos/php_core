@@ -3,6 +3,7 @@ namespace samson\core;
 
 use samsonframework\core\ResourcesInterface;
 use samsonframework\core\SystemInterface;
+use samsonframework\core\ViewInterface;
 use samsonphp\event\Event;
 
 /**
@@ -59,6 +60,7 @@ class ExternalModule extends Module implements iExternalModule
         return array_diff(array_keys(get_object_vars($this)), array('view_path', 'view_html', 'view_data'));
     }
 
+
     /**
      * Set current view for rendering.
      *
@@ -67,24 +69,30 @@ class ExternalModule extends Module implements iExternalModule
      */
     public function view($viewPath)
     {
-        //elapsed('['.$this->id.'] Setting view context: ['.$viewPath.']');
-        // Find full path to view file
-        $this->view_path = $this->findView($viewPath);
-
-        // If we have not found view in current module but we have parent module
-        if (isset($this->parent) && $this->view_path === false) {
-            //elapsed('['.$this->id.'] Cannot set view['.$viewPath.'] - passing it to parent['.$this->parent->id.']');
-
-            /*
-             * Call parent module view setting and return PARENT module to chain
-             * actually switching current module in chain
-             */
-            return $this->parent->view($viewPath);
-        } else { // Call default module behaviour
-            // Call default module behaviour
-            parent::view($viewPath);
-
+        if (is_a($viewPath, ViewInterface::class)) {
+            $this->view_path = $viewPath;
             return $this;
+            // Old string approach - will be deprecated soon
+        } elseif (is_string($viewPath)) {
+            //elapsed('['.$this->id.'] Setting view context: ['.$viewPath.']');
+            // Find full path to view file
+            $this->view_path = $this->findView($viewPath);
+
+            // If we have not found view in current module but we have parent module
+            if (isset($this->parent) && $this->view_path === false) {
+                //elapsed('['.$this->id.'] Cannot set view['.$viewPath.'] - passing it to parent['.$this->parent->id.']');
+
+                /*
+                 * Call parent module view setting and return PARENT module to chain
+                 * actually switching current module in chain
+                 */
+                return $this->parent->view($viewPath);
+            } else { // Call default module behaviour
+                // Call default module behaviour
+                parent::view($this->view_path);
+
+                return $this;
+            }
         }
     }
 

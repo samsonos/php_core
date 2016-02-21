@@ -2,8 +2,10 @@
 namespace samson\core;
 
 // TODO: Разобраться почему с вызовом m()->render() во вьюхе, и почему не передаются параметры
+use samsonframework\core\RenderInterface;
 use samsonframework\core\ResourcesInterface;
 use samsonframework\core\SystemInterface;
+use samsonframework\core\ViewInterface;
 use samsonphp\core\exception\ControllerActionNotFound;
 use samsonphp\core\exception\ViewPathNotFound;
 use samsonphp\core\exception\ViewVariableNotFound;
@@ -159,18 +161,22 @@ class Module implements iModule, \ArrayAccess
 
     public function view($viewPath)
     {
-        // Find full path to view file
-        $foundViewPath = $this->findView($viewPath);
+        if (is_a($viewPath, ViewInterface::class)) {
+            $this->view_path = $viewPath;
+        } elseif (is_string($viewPath)) {
+            // Find full path to view file
+            $foundViewPath = $this->findView($viewPath);
 
-        // We could not find view
-        if ($foundViewPath !== false) {
-            // Switch view context to founded module view
-            $this->viewContext($foundViewPath);
+            // We could not find view
+            if ($foundViewPath !== false) {
+                // Switch view context to founded module view
+                $this->viewContext($foundViewPath);
 
-            // Set current view path
-            $this->view_path = $foundViewPath;
-        } else {
-            throw(new ViewPathNotFound($viewPath));
+                // Set current view path
+                $this->view_path = $foundViewPath;
+            } else {
+                throw(new ViewPathNotFound($viewPath));
+            }
         }
 
         // Продолжим цепирование
@@ -243,7 +249,11 @@ class Module implements iModule, \ArrayAccess
         //else elapsed( $this->id.' - NO need to switch view context from '.$this->view_context.' to '.$view_path );
     }
 
-    /**    @see iModule::render() */
+    /**
+     * @param null $controller
+     *
+     * @throws ControllerActionNotFound
+     */
     public function render($controller = null)
     {
         // Switch current system active module
@@ -271,7 +281,7 @@ class Module implements iModule, \ArrayAccess
                 // Perform controller action with passed parameters
                 call_user_func_array($callback, $parameters);
             } else {
-                throw(new ControllerActionNotFound($this->id . '#' . $controller));
+                throw new ControllerActionNotFound($this->id . '#' . $controller);
             }
         }
 
@@ -288,27 +298,33 @@ class Module implements iModule, \ArrayAccess
         // If view path not specified - use current correct view path
         $viewPath = $this->view_path;
 
-        //elapsed('['.$this->id.'] Rendering view context: ['.$viewPath.'] with ['.$renderer->id.']');
+        if (is_string($viewPath)) {
 
-        // Switch view context to new module view
-        $this->viewContext($viewPath);
+            //elapsed('['.$this->id.'] Rendering view context: ['.$viewPath.'] with ['.$renderer->id.']');
 
-        //elapsed($this->id.' - Outputing '.$view_path.'-'.sizeof($this->data));
-        //elapsed(array_keys($this->view_data));
+            // Switch view context to new module view
+            $this->viewContext($viewPath);
 
-        // Get current view context plain HTML
-        $out = $this->data[self::VD_HTML];
+            //elapsed($this->id.' - Outputing '.$view_path.'-'.sizeof($this->data));
+            //elapsed(array_keys($this->view_data));
 
-        // If view path specified
-        if (isset($viewPath{0})) {
-            // Временно изменим текущий модуль системы
-            $old = $this->system->active($this);
+            // Get current view context plain HTML
+            $out = $this->data[self::VD_HTML];
 
-            // Прорисуем представление модуля
-            $out .= $this->system->render($this->path . $viewPath, $this->data);
+            // If view path specified
+            if (isset($viewPath{0})) {
+                // Временно изменим текущий модуль системы
+                $old = $this->system->active($this);
 
-            // Вернем на место текущий модуль системы
-            $this->system->active($old);
+                // Прорисуем представление модуля
+                $out .= $this->system->render($this->path . $viewPath, $this->data);
+
+                // Вернем на место текущий модуль системы
+                $this->system->active($old);
+            }
+        } elseif (is_a($viewPath, ViewInterface::class)) {
+            /** @var ViewInterface $viewPath */
+            $out .= $viewPath->output();
         }
 
         // Clear currently outputted view context from VCS
