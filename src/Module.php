@@ -324,7 +324,7 @@ class Module implements iModule, \ArrayAccess
             }
         } elseif (is_a($viewPath, ViewInterface::class)) {
             /** @var ViewInterface $viewPath */
-            $out .= $viewPath->output();
+            $out = $viewPath->output();
         }
 
         // Clear currently outputted view context from VCS
