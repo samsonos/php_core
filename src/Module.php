@@ -322,28 +322,29 @@ class Module implements iModule, \ArrayAccess
                 // Вернем на место текущий модуль системы
                 $this->system->active($old);
             }
+
+            // Clear currently outputted view context from VCS
+            unset($this->view_data[$viewPath]);
+
+            // Get last element from VCS
+            end($this->view_data);
+
+            // Get last element from VCS name
+            $this->view_context = key($this->view_data);
+
+            // Set internal view data pointer to last VCS entry
+            $this->data = &$this->view_data[$this->view_context];
+
+            // Return view path to previous state
+            $this->view_path = $this->view_context;
+
+            // Вернем результат прорисовки
+            return $out;
+
         } elseif (is_a($viewPath, ViewInterface::class)) {
             /** @var ViewInterface $viewPath */
-            $out = $viewPath->output();
+            return $viewPath->output();
         }
-
-        // Clear currently outputted view context from VCS
-        unset($this->view_data[$viewPath]);
-
-        // Get last element from VCS
-        end($this->view_data);
-
-        // Get last element from VCS name
-        $this->view_context = key($this->view_data);
-
-        // Set internal view data pointer to last VCS entry
-        $this->data = &$this->view_data[$this->view_context];
-
-        // Return view path to previous state
-        $this->view_path = $this->view_context;
-
-        // Вернем результат прорисовки
-        return $out;
     }
 
     /** Magic method for calling un existing object methods */
