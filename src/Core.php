@@ -521,7 +521,7 @@ class Core implements SystemInterface
                 $connector->composerParameters = $parameters;
             }
 
-            if (is_object($connector)) {
+            if (isset($connector) && is_object($connector)) {
 
                 // Set composer parameters
                 $connector->composerParameters = $parameters;
