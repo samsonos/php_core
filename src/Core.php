@@ -429,29 +429,25 @@ class Core implements SystemInterface
             )
         );
 
-        $modulesToLoad = array();
-
         // Iterate requirements
         foreach ($composerModules as $requirement => $parameters) {
-            $modulesToLoad[__SAMSON_CWD__ . __SAMSON_VENDOR_PATH . $requirement] = array_merge(
-                is_array($parameters) ? $parameters : array($parameters),
-                array('module_id' => $requirement)
+            $this->load(__SAMSON_CWD__ . __SAMSON_VENDOR_PATH . $requirement,
+                array_merge(
+                    is_array($parameters) ? $parameters : array($parameters),
+                    array('module_id' => $requirement)
+                )
             );
         }
 
         $localModulesPath = '../src';
-
+        ResourceMap::get('cache');
         $resourceMap = ResourceMap::get($localModulesPath);
 
         foreach ($resourceMap->modules as $moduleFile) {
             $modulePath = str_replace(realpath($localModulesPath), '', $moduleFile[1]);
             $modulePath = explode('/', $modulePath);
             $modulePath = $localModulesPath.'/'.$modulePath[1];
-            $modulesToLoad[$modulePath] = array();
-        }
-
-        foreach($modulesToLoad as $path => $parameters) {
-            $this->load($path, $parameters);
+            $this->load($modulePath, $parameters);
         }
 
         // Create local module and set it as active
