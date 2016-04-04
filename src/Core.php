@@ -441,13 +441,16 @@ class Core implements SystemInterface
 
         $localModulesPath = '../src';
         ResourceMap::get('cache');
-        $resourceMap = ResourceMap::get($localModulesPath);
+        // TODO: Nested modules relation
+        for ($i = 0; $i < 2; $i++) {
+            $resourceMap = ResourceMap::get($localModulesPath);
 
-        foreach ($resourceMap->modules as $moduleFile) {
-            $modulePath = str_replace(realpath($localModulesPath), '', $moduleFile[1]);
-            $modulePath = explode('/', $modulePath);
-            $modulePath = $localModulesPath.'/'.$modulePath[1];
-            $this->load($modulePath, $parameters);
+            foreach ($resourceMap->modules as $moduleFile) {
+                $modulePath = str_replace(realpath($localModulesPath), '', $moduleFile[1]);
+                $modulePath = explode('/', $modulePath);
+                $modulePath = $localModulesPath . '/' . $modulePath[1];
+                $this->load($modulePath, $parameters);
+            }
         }
 
         // Create local module and set it as active
