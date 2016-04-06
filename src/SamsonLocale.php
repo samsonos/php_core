@@ -38,6 +38,8 @@ class SamsonLocale
     const KO = 'ko';
     /** Немецкая локализация */
     const DE = 'de';
+    /** Испанская локализация */
+    const ES = 'es';
 
     /**
      * Коллекция поддерживаемых локализаций
@@ -54,6 +56,7 @@ class SamsonLocale
         SamsonLocale::FR,
         SamsonLocale::KO,
         SamsonLocale::DE,
+        SamsonLocale::ES,
     );
 
     /**
