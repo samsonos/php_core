@@ -165,7 +165,7 @@ function url_build()
     $args = func_get_args();
 
     // If we have current locale set
-    if (\samson\core\SamsonLocale::current() != \samson\core\SamsonLocale::DEF) {
+    if (\samson\core\SamsonLocale::$leaveDefaultLocale && \samson\core\SamsonLocale::current() != \samson\core\SamsonLocale::DEF) {
         // Add locale as first url parameter
         array_unshift($args, \samson\core\SamsonLocale::current());
     }

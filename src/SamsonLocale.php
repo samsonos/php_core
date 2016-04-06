@@ -75,6 +75,9 @@ class SamsonLocale
      */
     public static $locales = array();
 
+    /** @var bool Flag for leaving default locale as path placeholder */
+    public static $leaveDefaultLocale = true;
+
     /**
      * Проверить текущей значение установленной локали, и если выставлена
      * не поддерживаемая локаль - установим локаль по умолчанию
@@ -155,19 +158,20 @@ class SamsonLocale
     /**
      * Parse URL arguments
      * @param array $args Collection of URL arguments
+     * @param bool $leaveDefaultLocale Leave default locale placeholder
      * @return boolean True if current locale has been changed
      */
-    public static function parseURL(array & $args)
+    public static function parseURL(array &$args, $leaveDefaultLocale = true)
     {
         // Iterate defined site locales
         foreach (self::$locales as $locale) {
             // Search locale string as URL argument
-            if (($key = array_search($locale, $args)) !== FALSE) {
+            if (($key = array_search($locale, $args)) === 0) {
                 // Change current locale
                 self::current($locale);
 
                 // If this is not default locale(empty string) - remove it from URL arguments
-                if ($locale != self::DEF) {
+                if ($leaveDefaultLocale || $locale != self::DEF) {
                     // Remove argument contained locale string
                     unset($args[$key]);
 
