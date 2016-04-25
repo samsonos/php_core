@@ -8,9 +8,11 @@
  */
 namespace samson\core;
 
+use samsonframework\core\LoadableInterface;
 use samsonframework\core\SystemInterface;
 use samsonframework\resource\ResourceMap;
 use samsonphp\config\Scheme;
+use samsonphp\core\exception\CannotLoadModule;
 use samsonphp\core\exception\ViewPathNotFound;
 use samsonphp\event\Event;
 
@@ -476,12 +478,54 @@ class Core implements SystemInterface
     }
 
     /**
+     * Initialize module.
+     *
+     * @param ExternalModule $instance           Module instance for initialization
+     * @param array          $composerParameters Collection of extra parameters from composer.json file
+     */
+    protected function initModule($instance, $composerParameters)
+    {
+        $identifier = $instance->id();
+
+        // Set composer parameters
+        $instance->composerParameters = $composerParameters;
+
+        // TODO: Change event signature to single approach
+        // Fire core module load event
+        Event::fire('core.module_loaded', array($identifier, &$instance));
+
+        // Signal core module configure event
+        Event::signal('core.module.configure', array(&$instance, $identifier));
+
+        // Call module preparation handler
+        if (!$instance->prepare()) {
+            // Handle module failed preparing
+        }
+
+        // Trying to find parent class for connecting to it to use View/Controller inheritance
+        $parentClass = get_parent_class($instance);
+        if (!in_array($parentClass,
+            array('samson\core\ExternalModule', 'samson\core\CompressableExternalModule'))
+        ) {
+            // Переберем загруженные в систему модули
+            foreach ($this->module_stack as &$m) {
+                // Если в систему был загружен модуль с родительским классом
+                if (get_class($m) === $parentClass) {
+                    $instance->parent = &$m;
+                    //elapsed('Parent connection for '.$moduleClass.'('.$connector->uid.') with '.$parent_class.'('.$m->uid.')');
+                }
+            }
+        }
+    }
+
+    /**
      * Load module from path to core.
      *
      * @param string $path       Path for module loading
      * @param array  $parameters Collection of loading parameters
      *
      * @return $this|bool
+     * @throws \samsonphp\core\exception\CannotLoadModule
      */
     public function load($path, $parameters = array())
     {
@@ -508,58 +552,35 @@ class Core implements SystemInterface
                     require_once($controller);
                 }
 
-                /** @var ExternalModule $connector Create module controller instance */
-                $connector = new $moduleClass($path, $resourceMap, $this);
+                $this->initModule(
+                    new $moduleClass($path, $resourceMap, $this),
+                    $parameters
+                );
             } elseif (is_array($parameters) && isset($parameters['samsonphp_package_compressable']) && ($parameters['samsonphp_package_compressable'] == 1)) {
-                /** @var \samson\core\ExternalModule $connector Create module controller instance */
-                $connector = new VirtualModule($path, $resourceMap, $this,
-                    str_replace('/', '', $parameters['module_id']));
-
-                // Set composer parameters
-                $connector->composerParameters = $parameters;
-            }
-
-            if (isset($connector) && is_object($connector)) {
-
-                // Set composer parameters
-                $connector->composerParameters = $parameters;
-
-                // Get module identifier
-                $moduleID = $connector->id();
-
-                // Fire core module load event
-                Event::fire('core.module_loaded', array($moduleID, &$connector));
-
-                // Signal core module configure event
-                Event::signal('core.module.configure', array(&$connector, $moduleID));
-
-                // TODO: Think how to decouple this
-                // Call module preparation handler
-                if ( ! $connector->prepare()) {
-                    // Handle module failed preparing
-                }
-
-                // Trying to find parent class for connecting to it to use View/Controller inheritance
-                $parentClass = get_parent_class($connector);
-                if ( ! in_array($parentClass,
-                    array('samson\core\ExternalModule', 'samson\core\CompressableExternalModule'))
-                ) {
-                    // Переберем загруженные в систему модули
-                    foreach ($this->module_stack as &$m) {
-                        // Если в систему был загружен модуль с родительским классом
-                        if (get_class($m) == $parentClass) {
-                            $connector->parent = &$m;
-                            //elapsed('Parent connection for '.$moduleClass.'('.$connector->uid.') with '.$parent_class.'('.$m->uid.')');
-                        }
+                $this->initModule(
+                    new VirtualModule($path, $resourceMap, $this, str_replace('/', '', $parameters['module_id'])),
+                    $parameters
+                );
+            } elseif (count($resourceMap->classes)) {
+                /** Update for future version: Search classes that implement LoadableInterface */
+                foreach ($resourceMap->classes as $classPath => $class) {
+                    // This class implements LoadableInterface LoadableInterface::class
+                    if (in_array('\samsonframework\core\LoadableInterface', $resourceMap->classData[$classPath]['implements'])) {
+                        $this->initModule(
+                            new VirtualModule(
+                                $path,
+                                $resourceMap,
+                                $this,
+                                str_replace('/', '', $resourceMap->classData[$classPath]['className'])
+                            ),
+                            $parameters
+                        );
                     }
                 }
             }
-            else { // Signal error
-                return e('Cannot load module from: "##"', E_SAMSON_FATAL_ERROR, $path);
-            }
 
         } else {
-            return e('Cannot load module from[##]', E_SAMSON_FATAL_ERROR, $path);
+            throw new CannotLoadModule($path);
         }
 
         // Chaining
