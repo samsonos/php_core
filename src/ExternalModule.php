@@ -4,6 +4,7 @@ namespace samson\core;
 use samsonframework\core\ResourcesInterface;
 use samsonframework\core\SystemInterface;
 use samsonframework\core\ViewInterface;
+use samsonframework\core\PreparableInterface;
 use samsonphp\event\Event;
 
 /**
@@ -11,7 +12,7 @@ use samsonphp\event\Event;
  *
  * @author Vitaly Iegorov <egorov@samsonos.com>
  */
-class ExternalModule extends Module implements iExternalModule
+class ExternalModule extends Module implements iExternalModule, PreparableInterface
 {
     /** @var Module Pointer to parent module */
     public $parent = null;
