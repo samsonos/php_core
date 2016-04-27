@@ -8,3 +8,5 @@
 * I should be able to receive router call parameters throught action signature.
 * I should be able to inject any dependency into controller action for using.
 * System should follow middleware pattern, this will give ability for security and caching. 
+* I should be able to configure my controller class, with support of requirmements.
+
