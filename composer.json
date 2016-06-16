@@ -32,7 +32,7 @@
     "samsonphp/event": "1.*",
     "samsonphp/composer": "1.*",
     "samsonphp/config": "1.*",
-    "samsonos/php_url": "1.*",
+    "samsonos/php_url": "*",
     "filp/whoops": "2.*"
   },
   "require-dev": {
