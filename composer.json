@@ -13,7 +13,6 @@
       "email": "egorov@samsonos.com"
     }
   ],
-  "minimum-stability": "dev",
   "license": "Open Software License (OSL) v 3.0",
   "homepage": "http://samsonphp.com/",
   "autoload": {
@@ -28,12 +27,12 @@
     "files": ["src/samson.php"]
   },
   "require": {
-    "samsonframework/base": "*",
-    "samsonframework/resource": "*",
+    "samsonframework/base": "1.*",
+    "samsonframework/resource": "1.*",
     "samsonphp/event": "1.*",
     "samsonphp/composer": "1.*",
     "samsonphp/config": "1.*",
-    "samsonos/php_url": "*",
+    "samsonos/php_url": "1.*",
     "filp/whoops": "2.*"
   },
   "require-dev": {
