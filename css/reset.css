@@ -119,16 +119,6 @@ option {
 	font-weight: inherit;
 }
 
-/*@purpose To enable resizing for IE */
-/*@branch For IE6-Win, IE7-Win */
-input,
-button,
-textarea,
-select {
-	*font-size: 100%;
-}
-
-
 html { height:100%; }
 
 /* Определим цвет фона и шрифта */
