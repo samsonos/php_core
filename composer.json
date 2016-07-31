@@ -23,9 +23,9 @@
     "files": ["src/bootstrap.php"]
   },
   "require": {
-    "psr/http-message": "1.*",
     "samsonframework/base": "1.*",
     "samsonframework/di": "1.*",
+    "samsonframework/psr": "*",
     "samsonphp/event": "1.*",
     "samsonphp/config": "1.*"
   },

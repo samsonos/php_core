@@ -81,7 +81,17 @@ class Core implements CoreInterface
         return $this;
     }
 
-    public function process(RequestInterface $request, ResponseInterface $response, callable $next)
+    /**
+     * Process request.
+     * Method supports PSR middleware approach.
+     *
+     * @param RequestInterface  $request Request instance
+     * @param ResponseInterface $response Response instance
+     * @param callable|null     $next Next callable middleware
+     *
+     * @return ResponseInterface Processed response instance
+     */
+    public function process(RequestInterface $request, ResponseInterface $response, callable $next = null)
     {
 
     }
