@@ -16,9 +16,9 @@
   "license": "Open Software License (OSL) v 3.0",
   "homepage": "http://samsonphp.com/",
   "autoload": {
-    "classmap": ["src/"],
     "psr-4":{
-      "samsonphp\\core\\": "src/"
+      "samsonphp\\core\\": "src/",
+      "samsonphp\\core\\tests\\": "tests/"
     },
     "files": ["src/bootstrap.php"]
   },
