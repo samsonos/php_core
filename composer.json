@@ -1,5 +1,5 @@
 {
-  "name": "samsonos/php_core",
+  "name": "samsonphp/core",
   "description": "SamsonPHP framework core module",
   "keywords": [
     "php",
@@ -17,10 +17,6 @@
   "homepage": "http://samsonphp.com/",
   "autoload": {
     "classmap": ["src/"],
-    "psr-0": {
-      "samsonos\\core\\": "src/",
-      "samson\\core\\": "src/"
-    },
     "psr-4":{
       "samsonphp\\core\\": "src/"
     },
@@ -36,7 +32,7 @@
     "filp/whoops": "2.*"
   },
   "require-dev": {
-    "phpunit/phpunit": "4.*"
+    "phpunit/phpunit": "5.*"
   },
   "config":{
     "github-protocols":["https"]
