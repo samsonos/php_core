@@ -6,7 +6,7 @@ namespace samsonphp\core;
  *
  * @author Vitaly Iegorov <egorov@samsonos.com>
  */
-abstract class Module
+abstract class Module implements ModuleInterface
 {
     /**
      * Module configuration stage

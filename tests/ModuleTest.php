@@ -23,4 +23,9 @@ class ModuleTest extends \PHPUnit_Framework_TestCase
     {
         $this->core->environment('test');
     }
+    
+    public function testLoad()
+    {
+        $this->core->load(new ModuleTest());
+    }
 }

@@ -48,7 +48,7 @@ class Core implements SystemInterface
     /**
      * Load module.
      *
-     * @param Module $instance Module ancestor for loading
+     * @param ModuleInterface $instance Module ancestor for loading
      *
      * @return $this Chaining
      */
