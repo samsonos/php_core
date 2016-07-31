@@ -16,6 +16,9 @@ class Core implements SystemInterface
     /** @var string Current system environment */
     protected $environment;
 
+    /** @var Module[] Loaded modules collection */
+    protected $modules;
+
     /**
      * Core constructor
      */
@@ -29,6 +32,8 @@ class Core implements SystemInterface
      * Change current system working environment.
      *
      * @param string $environment Environment identifier
+     *
+     * @return $this Chaining
      */
     public function environment($environment = Scheme::BASE)
     {
@@ -36,6 +41,23 @@ class Core implements SystemInterface
 
         // Signal core environment change
         Event::signal('core.environment.change', array($environment, &$this));
+
+        return $this;
+    }
+
+    /**
+     * Load module.
+     *
+     * @param Module $instance Module ancestor for loading
+     *
+     * @return $this Chaining
+     */
+    public function load($instance, $alias = null)
+    {
+        // Store module instance by alias or class name
+        $this->modules[$alias ?: get_class($instance)] = $instance;
+
+        return $this;
     }
 
     /**
