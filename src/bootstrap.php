@@ -19,7 +19,4 @@ if (php_sapi_name() !== 'cli') {
 
     // Start session
     session_start();
-
-    // Remove unnecessary files umask
-    $old_umask = umask(0);
 }
