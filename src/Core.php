@@ -2,7 +2,6 @@
 namespace samsonphp\core;
 
 use samsonframework\core\SystemInterface;
-use samsonframework\resource\ResourceMap;
 use samsonphp\config\Scheme;
 use samsonphp\event\Event;
 
@@ -10,7 +9,7 @@ use samsonphp\event\Event;
  * Core
  *
  * @package samsonphp/core
- * @author 	Vitaly Iegorov <egorov@samsonos.com>
+ * @author Vitaly Iegorov <egorov@samsonos.com>
  */
 class Core implements SystemInterface
 {
@@ -22,11 +21,6 @@ class Core implements SystemInterface
      */
     public function __construct()
     {
-        // TODO: Remove as hard dependency - create bridge/etc
-        $whoops = new \Whoops\Run;
-        $whoops->pushHandler(new \Whoops\Handler\PrettyPageHandler);
-        $whoops->register();
-
         // Fire core creation event
         Event::fire('core.created', array(&$this));
     }
