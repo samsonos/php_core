@@ -63,9 +63,10 @@ class Core implements SystemInterface
         }
 
         // If no one has passed back routing callback
-        if (!isset($result) || $result === false) {
+        if ($result === false) {
+            // TODO: Needs to change
             // Fire core e404 - routing failed event
-            $result = Event::signal('core.e404', array(url()->module, url()->method));
+            $result = Event::signal('core.e404');
         }
 
         // Response
