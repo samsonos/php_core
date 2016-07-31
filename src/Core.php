@@ -40,7 +40,7 @@ class Core implements CoreInterface
         $this->environment = $environment;
 
         // Signal core environment change
-        Event::fire(self::E_ENVIRONMENT, [&$this]);
+        Event::fire(self::E_ENVIRONMENT, [&$this, $environment]);
 
         return $this;
     }
