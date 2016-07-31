@@ -1,9 +1,8 @@
 <?php
 /**
- * SamsonPHP init script
- * @package SamsonPHP
+ * SamsonPHP bootstrap script
+ * @package samsonphp/core
  * @author Vitaly Iegorov <egorov@samsonos.com>
- * @version 0.1.0
  */
 
 /**
