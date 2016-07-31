@@ -7,10 +7,12 @@
  */
 namespace samsonphp\core\tests;
 
+use PHPUnit\Framework\TestCase;
 use samsonphp\core\Core;
+use samsonphp\core\exception\CannotLoadModule;
 use samsonphp\event\Event;
 
-class ModuleTest extends \PHPUnit_Framework_TestCase
+class ModuleTest extends TestCase
 {
     /** @var Core */
     protected $core;
@@ -79,18 +81,40 @@ class ModuleTest extends \PHPUnit_Framework_TestCase
     {
         $changedAlias = 'changedAlias';
         $moduleAlias = 'alias';
-        $loadedAlias = '';
 
-        Event::subscribe(Core::E_AFTER_LOADED, function(&$core, &$module, &$alias) use (&$loadedAlias) {
-            $loadedAlias = $alias;
-        });
-        Event::subscribe(Core::E_BEFORE_LOADED, function(&$core, &$module, &$alias) use ($changedAlias) {
+        $beforeEventID = Event::subscribe(Core::E_BEFORE_LOADED, function(&$core, &$module, &$alias) use ($changedAlias) {
             $alias = $changedAlias;
         });
 
         $this->core->load(new TestModule(), $moduleAlias);
 
         $this->assertArrayHasKey($changedAlias, $this->getProperty('modules', $this->core));
-        $this->assertEquals($changedAlias, $loadedAlias);
+
+        Event::unsubscribe(Core::E_BEFORE_LOADED, $beforeEventID);
+    }
+
+    public function testAfterLoadEventChangedValue()
+    {
+        $moduleAlias = 'alias';
+        $loadedAlias = '';
+
+        $afterEventID = Event::subscribe(Core::E_AFTER_LOADED, function(&$core, &$module, &$alias) use (&$loadedAlias) {
+            $loadedAlias = $alias;
+        });
+
+        $this->core->load(new TestModule(), $moduleAlias);
+
+        $this->assertEquals($moduleAlias, $loadedAlias);
+
+        Event::unsubscribe(Core::E_AFTER_LOADED, $afterEventID);
+    }
+
+    public function testLoadException()
+    {
+        $this->expectException(CannotLoadModule::class);
+
+        $moduleAlias = 'test';
+        $this->core->load(new TestModule(), $moduleAlias);
+        $this->core->load(new TestModule(), $moduleAlias);
     }
 }

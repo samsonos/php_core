@@ -7,6 +7,7 @@ namespace samsonphp\core\exception;
 
 /**
  * Cannot load module exception.
+ * 
  * @package samsonphp\core\exception
  */
 class CannotLoadModule extends \Exception
