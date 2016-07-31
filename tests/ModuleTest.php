@@ -47,10 +47,16 @@ class ModuleTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals($environment, $this->getProperty('environment', $this->core));
     }
     
-    public function testLoad()
+    public function testLoadWithoutAlias()
     {
         $this->core->load(new TestModule());
-
         $this->assertArrayHasKey(TestModule::class, $this->getProperty('modules', $this->core));
+    }
+
+    public function testLoadWithAlias()
+    {
+        $moduleAlias = 'testModule';
+        $this->core->load(new TestModule(), $moduleAlias);
+        $this->assertArrayHasKey($moduleAlias, $this->getProperty('modules', $this->core));
     }
 }
