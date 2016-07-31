@@ -18,4 +18,9 @@ class ModuleTest extends \PHPUnit_Framework_TestCase
     {
         $this->core = new Core();
     }
+
+    public function testEnvironment()
+    {
+        $this->core->environment('test');
+    }
 }

@@ -12,7 +12,4 @@
 if (php_sapi_name() !== 'cli') {
     // Set default timezone
     date_default_timezone_set(date_default_timezone_get());
-
-    // Start session
-    session_start();
 }
