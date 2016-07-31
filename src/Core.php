@@ -11,7 +11,7 @@ use samsonphp\event\Event;
  * @package samsonphp/core
  * @author Vitaly Iegorov <egorov@samsonos.com>
  */
-class Core implements SystemInterface
+class Core implements CoreInterface
 {
     /** @var string Current system environment */
     protected $environment;
@@ -25,7 +25,7 @@ class Core implements SystemInterface
     public function __construct()
     {
         // Fire core creation event
-        Event::fire('core.created', array(&$this));
+        Event::fire(self::E_CREATED, [&$this]);
     }
 
     /**
@@ -40,7 +40,7 @@ class Core implements SystemInterface
         $this->environment = $environment;
 
         // Signal core environment change
-        Event::signal('core.environment.change', array($environment, &$this));
+        Event::fire(self::E_ENVIRONMENT, [&$this]);
 
         return $this;
     }
