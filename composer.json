@@ -20,7 +20,7 @@
     "psr-4":{
       "samsonphp\\core\\": "src/"
     },
-    "files": ["src/samson.php"]
+    "files": ["src/bootstrap.php"]
   },
   "require": {
     "samsonframework/base": "1.*",
