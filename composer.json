@@ -23,6 +23,7 @@
     "files": ["src/bootstrap.php"]
   },
   "require": {
+    "psr/http-message": "1.*",
     "samsonframework/base": "1.*",
     "samsonframework/di": "1.*",
     "samsonphp/event": "1.*",

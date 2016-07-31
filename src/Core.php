@@ -78,4 +78,9 @@ class Core implements CoreInterface
 
         return $this;
     }
+
+    public function handle()
+    {
+
+    }
 }
