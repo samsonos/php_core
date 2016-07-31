@@ -1,6 +1,8 @@
 <?php
 namespace samsonphp\core;
 
+use Psr\Http\Message\RequestInterface;
+use Psr\Http\Message\ResponseInterface;
 use samsonframework\core\SystemInterface;
 use samsonphp\config\Scheme;
 use samsonphp\core\exception\CannotLoadModule;
@@ -55,7 +57,7 @@ class Core implements CoreInterface
      *
      * @return $this Chaining
      *
-     * @throws CannotLoadModule
+     * @throws CannotLoadModule On alias duplication
      */
     public function load($instance, $alias = null)
     {
@@ -79,7 +81,7 @@ class Core implements CoreInterface
         return $this;
     }
 
-    public function handle()
+    public function process(RequestInterface $request, ResponseInterface $response, callable $next)
     {
 
     }
