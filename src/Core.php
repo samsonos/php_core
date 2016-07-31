@@ -29,39 +29,25 @@ class Core implements SystemInterface
 
         // Fire core creation event
         Event::fire('core.created', array(&$this));
-
-        // Signal core configure event
-        Event::signal('core.configure', array($this->system_path . __SAMSON_CONFIG_PATH));
     }
 
     /**
-     * Change current system working environment or receive
-     * current system enviroment if no arguments are passed.
+     * Change current system working environment.
      *
      * @param string $environment Environment identifier
-     *
-     * TODO: Function has two different logics - needs to be changed!
-     * @return $this|string Chaining or current system environment
      */
     public function environment($environment = Scheme::BASE)
     {
-        if (func_num_args() !== 0) {
-            $this->environment = $environment;
+        $this->environment = $environment;
 
-            // Signal core environment change
-            Event::signal('core.environment.change', array($environment, &$this));
-            return $this;
-        }
-
-        return $this->environment;
+        // Signal core environment change
+        Event::signal('core.environment.change', array($environment, &$this));
     }
 
     /**
      * Start SamsonPHP framework.
      *
      * @param string $default Default module identifier
-     *
-     * @throws ViewPathNotFound
      */
     public function start($default)
     {
