@@ -11,9 +11,6 @@
  * because this is usually tests and system commands runs
  */
 if (php_sapi_name() !== 'cli') {
-    // Константы фреймворка SamsonPHP
-    require('constants.php');
-
     // Set default timezone
     date_default_timezone_set(date_default_timezone_get());
 
