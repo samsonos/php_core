@@ -39,7 +39,7 @@ class Core implements CoreInterface
     {
         $this->environment = $environment;
 
-        // Signal core environment change
+        // Fire core environment change
         Event::fire(self::E_ENVIRONMENT, [&$this, $environment]);
 
         return $this;
@@ -54,8 +54,14 @@ class Core implements CoreInterface
      */
     public function load($instance, $alias = null)
     {
+        // Fire core before module loading
+        Event::fire(self::E_BEFORE_LOADED, [&$this, &$instance, $alias]);
+
         // Store module instance by alias or class name
         $this->modules[$alias ?: get_class($instance)] = $instance;
+
+        // Fire core before module loading
+        Event::fire(self::E_AFTER_LOADED, [&$this, &$instance, $alias]);
 
         return $this;
     }
