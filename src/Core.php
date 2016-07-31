@@ -65,7 +65,6 @@ class Core implements SystemInterface
      */
     public function start($default)
     {
-        // TODO: Change ExternalModule::init() signature
         // Fire core started event
         Event::fire('core.started');
 

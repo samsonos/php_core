@@ -5,7 +5,10 @@
  */
 namespace samsonphp\core;
 
-
+/**
+ * Dependency container interface.
+ * @package samsonphp\core
+ */
 interface ContainerInterface
 {
 
