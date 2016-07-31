@@ -37,10 +37,10 @@ class Core implements CoreInterface
      */
     public function environment($environment = Scheme::BASE)
     {
-        $this->environment = $environment;
-
         // Fire core environment change
-        Event::fire(self::E_ENVIRONMENT, [&$this, $environment]);
+        Event::fire(self::E_ENVIRONMENT, [&$this, &$environment]);
+
+        $this->environment = $environment;
 
         return $this;
     }

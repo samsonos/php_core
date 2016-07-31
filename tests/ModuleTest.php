@@ -8,6 +8,7 @@
 namespace samsonphp\core\tests;
 
 use samsonphp\core\Core;
+use samsonphp\event\Event;
 
 class ModuleTest extends \PHPUnit_Framework_TestCase
 {
@@ -42,9 +43,20 @@ class ModuleTest extends \PHPUnit_Framework_TestCase
     public function testEnvironment()
     {
         $environment = 'test';
-        $this->core->environment('test');
+        $this->core->environment($environment);
 
         $this->assertEquals($environment, $this->getProperty('environment', $this->core));
+    }
+
+    public function testEnvironmentEventChangedValue()
+    {
+        $changedEnvironment = 'changedTest';
+        $environment = 'test';
+        Event::subscribe(Core::E_ENVIRONMENT, function(&$core, &$environment) use ($changedEnvironment) {
+            $environment = $changedEnvironment;
+        });
+        $this->core->environment($environment);
+        $this->assertEquals($changedEnvironment, $this->getProperty('environment', $this->core));
     }
     
     public function testLoadWithoutAlias()
