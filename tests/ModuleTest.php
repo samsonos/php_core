@@ -76,10 +76,15 @@ class ModuleTest extends \PHPUnit_Framework_TestCase
     {
         $changedAlias = 'changedAlias';
         $moduleAlias = 'alias';
+        $loadedAlias = '';
+        Event::subscribe(Core::E_AFTER_LOADED, function(&$core, &$module, &$alias) use (&$loadedAlias) {
+            $loadedAlias = $alias;
+        });
         Event::subscribe(Core::E_BEFORE_LOADED, function(&$core, &$module, &$alias) use ($changedAlias) {
             $alias = $changedAlias;
         });
         $this->core->load(new TestModule(), $moduleAlias);
         $this->assertArrayHasKey($changedAlias, $this->getProperty('modules', $this->core));
+        $this->assertEquals($changedAlias, $loadedAlias);
     }
 }
