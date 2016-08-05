@@ -413,7 +413,7 @@ class Core implements SystemInterface
                 &$composerModules,
                 isset($dependencyFilePath) ? $dependencyFilePath : $this->system_path,
                 array(
-                    'vendorsList' => array('samsonphp/', 'samsonos/', 'samsoncms/'),
+                    'vendorsList' => array('samsonphp/', 'samsonos/', 'samsoncms/', 'samsonjavascript/'),
                     'ignoreKey' => 'samson_module_ignore',
                     'includeKey' => 'samson_module_include'
                 )
