@@ -311,7 +311,7 @@ class Core implements SystemInterface
             $output = $this->render($this->template_path, $data);
 
             // Fire after render event
-            Event::fire('core.rendered', array(&$output, &$data, &$this->active));
+            Event::fire('core.rendered', array(&$output));
         }
 
         // Output results to client
