@@ -38,7 +38,7 @@ class Module implements iModule, \ArrayAccess
     protected $path = '';
 
     /** Unique module identifier */
-    protected $id = '';
+    protected $id;
 
     /** Path to view for rendering */
     protected $view_path = self::VD_POINTER_DEF;
@@ -70,6 +70,8 @@ class Module implements iModule, \ArrayAccess
     {
         // Inject generic module dependencies
         $this->system = $system;
+
+        $resourceMap->build($path);
 
         // Store pointer to module resource map
         $this->resourceMap = &$resourceMap;

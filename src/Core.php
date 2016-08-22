@@ -8,13 +8,17 @@
  */
 namespace samson\core;
 
-use samsonframework\core\LoadableInterface;
+use samsonframework\container\Builder;
+use samsonframework\container\metadata\ClassMetadata;
+use samsonframework\container\metadata\MethodMetadata;
 use samsonframework\core\SystemInterface;
+use samsonframework\di\ContainerInterface;
 use samsonframework\resource\ResourceMap;
 use samsonphp\config\Scheme;
 use samsonphp\core\exception\CannotLoadModule;
 use samsonphp\core\exception\ViewPathNotFound;
 use samsonphp\event\Event;
+use samsonphp\generator\Generator;
 
 /**
  * Core of SamsonPHP
@@ -34,8 +38,10 @@ class Core implements SystemInterface
     /** @var  ResourceMap Current web-application resource map */
     public $map;
 
-    /** @var Module[] Collection of loaded modules */
-    public $module_stack = array();
+    /** @var ContainerInterface */
+    protected $container;
+
+   
     /** @var string Path to current web-application */
     public $system_path = __SAMSON_CWD__;
     /** @var string View path loading mode */
@@ -48,6 +54,8 @@ class Core implements SystemInterface
     protected $template_path = __SAMSON_DEFAULT_TEMPLATE;
     /** @var string Current system environment */
     protected $environment;
+
+    protected $metadataCollection = [];
 
     /**
      * Core constructor.
@@ -207,8 +215,8 @@ class Core implements SystemInterface
             $return = &$this->active;
         } elseif (is_object($module)) {
             $return = &$module;
-        } elseif (is_string($module) && isset($this->module_stack[$module])) {
-            $return = &$this->module_stack[$module];
+        } elseif (is_string($module)) {
+            $return = $this->container->get($module);
         }
 
         // Ничего не получилось вернем ошибку
@@ -431,14 +439,17 @@ class Core implements SystemInterface
             )
         );
 
+        $modulesToLoad = [];
+
         // Iterate requirements
         foreach ($composerModules as $requirement => $parameters) {
-            $this->load(__SAMSON_CWD__ . __SAMSON_VENDOR_PATH . $requirement,
-                array_merge(
-                    is_array($parameters) ? $parameters : array($parameters),
-                    array('module_id' => $requirement)
-                )
-            );
+            $moduleName = $this->load(__SAMSON_CWD__ . __SAMSON_VENDOR_PATH . $requirement,
+            array_merge(
+                is_array($parameters) ? $parameters : array($parameters),
+                array('module_id' => $requirement)
+            ));
+
+            $modulesToLoad[$moduleName] = $parameters;
         }
 
         $localModulesPath = '../src';
@@ -451,12 +462,15 @@ class Core implements SystemInterface
                 $modulePath = str_replace(realpath($localModulesPath), '', $moduleFile[1]);
                 $modulePath = explode('/', $modulePath);
                 $modulePath = $localModulesPath . '/' . $modulePath[1];
-                $this->load($modulePath, $parameters);
+                $moduleName = $this->load($modulePath, $parameters);
+                $modulesToLoad[$moduleName] = $parameters;
             }
         }
 
+        //$this->active = new VirtualModule($this->system_path, $this->map, $this, 'local');
+
         // Create local module and set it as active
-        $this->active = new VirtualModule($this->system_path, $this->map, $this, 'local');
+        $this->createMetadata(VirtualModule::class, 'local', $this->system_path);
 
         // TODO: This should be changed to one single logic
         // Require all local module model files
@@ -470,9 +484,51 @@ class Core implements SystemInterface
             // Require class into PHP
             require($controller);
 
-            // Create module connector instance
-            new VirtualModule($this->system_path, $this->map, $this, basename($controller, '.php'));
+            //new VirtualModule($this->system_path, $this->map, $this, basename($controller, '.php'));
+
+            $this->createMetadata(VirtualModule::class, basename($controller, '.php'), $this->system_path);
         }
+
+        $this->createMetadata(get_class($this), get_class($this), $this->system_path);
+
+        $metadata = new ClassMetadata();
+        $metadata->className = get_class($this);
+        $metadata->name = get_class($this);
+        $metadata->scopes[] = Builder::SCOPE_SERVICES;
+        $metadata->methodsMetadata['__construct'] = new MethodMetadata($metadata);
+        $metadata->methodsMetadata['__construct']->dependencies['map'] = ResourceMap::class;
+
+        $this->metadataCollection[$metadata->name] = $metadata;
+
+        $metadata = new ClassMetadata();
+        $metadata->className = ResourceMap::class;
+        $metadata->name = ResourceMap::class;
+        $metadata->scopes[] = Builder::SCOPE_SERVICES;
+
+        $this->metadataCollection[$metadata->name] = $metadata;
+
+        $builder = new Builder(new Generator(), $this->metadataCollection);
+        $containerPath = $this->path().'www/cache/Container.php';
+
+        //file_put_contents($containerPath, $builder->build());
+
+        require_once($containerPath);
+
+        $this->container = new \Container();
+        $containerReflection = new \ReflectionClass(get_class($this->container));
+        $serviceProperty = $containerReflection->getProperty('servicesInstances');
+        $serviceProperty->setAccessible(true);
+        $containerServices = $serviceProperty->getValue($this->container);
+        $containerServices[get_class($this)] = $this;
+        $serviceProperty->setValue(null, $containerServices);
+        $serviceProperty->setAccessible(false);
+
+        foreach ($modulesToLoad as $name => $parameters) {
+            $instance = $this->container->get($name);
+            $this->initModule($instance, $parameters);
+        }
+
+        $this->active = $this->container->getLocal();
 
         return $this;
     }
@@ -524,11 +580,12 @@ class Core implements SystemInterface
      * @param string $path       Path for module loading
      * @param array  $parameters Collection of loading parameters
      *
-     * @return $this|bool
+     * @return string module name
      * @throws \samsonphp\core\exception\CannotLoadModule
      */
     public function load($path, $parameters = array())
     {
+        $name = '';
         // Check path
         if (file_exists($path)) {
             /** @var ResourceMap $resourceMap Gather all resources from path */
@@ -552,21 +609,35 @@ class Core implements SystemInterface
                     require_once($controller);
                 }
 
-                $this->initModule(
+                $reflection = new \ReflectionClass($moduleClass);
+                $name = $reflection->getDefaultProperties();
+                $name = $name['id'] ?? str_replace('/', '', $moduleClass);
+
+                $this->createMetadata($moduleClass, $name, $path);
+
+                /*$this->initModule(
                     new $moduleClass($path, $resourceMap, $this),
                     $parameters
-                );
+                );*/
             } elseif (is_array($parameters) && isset($parameters['samsonphp_package_compressable']) && ($parameters['samsonphp_package_compressable'] == 1)) {
-                $this->initModule(
+                $name = str_replace('/', '', $parameters['module_id']);
+                $this->createMetadata(VirtualModule::class, str_replace('/', '', $parameters['module_id']), $path);
+
+                /*$this->initModule(
                     new VirtualModule($path, $resourceMap, $this, str_replace('/', '', $parameters['module_id'])),
                     $parameters
-                );
+                );*/
             } elseif (count($resourceMap->classes)) {
                 /** Update for future version: Search classes that implement LoadableInterface */
                 foreach ($resourceMap->classes as $classPath => $class) {
                     // This class implements LoadableInterface LoadableInterface::class
                     if (in_array('\samsonframework\core\LoadableInterface', $resourceMap->classData[$classPath]['implements'])) {
-                        $this->initModule(
+
+                        $name =  str_replace('/', '', $parameters['module_id']);
+
+                        $this->createMetadata(VirtualModule::class, str_replace('/', '', $parameters['module_id']), $path);
+
+                        /*$this->initModule(
                             new VirtualModule(
                                 $path,
                                 $resourceMap,
@@ -574,7 +645,7 @@ class Core implements SystemInterface
                                 str_replace('/', '', $resourceMap->classData[$classPath]['className'])
                             ),
                             $parameters
-                        );
+                        );*/
                     }
                 }
             }
@@ -583,8 +654,7 @@ class Core implements SystemInterface
             throw new CannotLoadModule($path);
         }
 
-        // Chaining
-        return $this;
+        return $name;
     }
     //[PHPCOMPRESSOR(remove,end)]
 
@@ -598,5 +668,20 @@ class Core implements SystemInterface
     public function __sleep()
     {
         return array('module_stack', 'render_mode');
+    }
+
+    protected function createMetadata($class, $name, $path)
+    {
+        $metadata = new ClassMetadata();
+        $class = ltrim($class, '\\');
+        $metadata->className = $class;
+        $metadata->name = str_replace('/', '', $name ?? $class);
+        $metadata->scopes[] = Builder::SCOPE_SERVICES;
+        $metadata->methodsMetadata['__construct'] = new MethodMetadata($metadata);
+        $metadata->methodsMetadata['__construct']->dependencies['path'] = $path;
+        $metadata->methodsMetadata['__construct']->dependencies['resources'] = ResourceMap::class;
+        $metadata->methodsMetadata['__construct']->dependencies['system'] = get_class($this);
+
+        $this->metadataCollection[$metadata->name] = $metadata;
     }
 }
