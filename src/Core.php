@@ -9,6 +9,7 @@
 namespace samson\core;
 
 use samsonframework\container\Builder;
+use samsonframework\container\BuilderInterface;
 use samsonframework\container\metadata\ClassMetadata;
 use samsonframework\container\metadata\MethodMetadata;
 use samsonframework\core\SystemInterface;
@@ -18,7 +19,7 @@ use samsonphp\config\Scheme;
 use samsonphp\core\exception\CannotLoadModule;
 use samsonphp\core\exception\ViewPathNotFound;
 use samsonphp\event\Event;
-use samsonphp\generator\Generator;
+use samsonframework\container\ContainerBuilderInterface;
 
 /**
  * Core of SamsonPHP
@@ -57,13 +58,18 @@ class Core implements SystemInterface
 
     protected $metadataCollection = [];
 
+    protected $builder;
+
     /**
      * Core constructor.
      *
      * @param ResourceMap|null $map system resources
+     * @param ContainerBuilderInterface|null $builder Container builder
      */
-    public function __construct(ResourceMap $map = null)
+    public function __construct(ResourceMap $map = null, ContainerBuilderInterface $builder = null)
     {
+        $this->builder = $builder;
+
         if (!isset($map)) {
             // Get correct web-application path
             $this->system_path = __SAMSON_CWD__;
@@ -506,11 +512,9 @@ class Core implements SystemInterface
         $metadata->scopes[] = Builder::SCOPE_SERVICES;
 
         $this->metadataCollection[$metadata->name] = $metadata;
-
-        $builder = new Builder(new Generator(), $this->metadataCollection);
         $containerPath = $this->path().'www/cache/Container.php';
 
-        //file_put_contents($containerPath, $builder->build());
+        file_put_contents($containerPath, $this->builder->build($this->metadataCollection));
 
         require_once($containerPath);
 
