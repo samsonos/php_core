@@ -634,28 +634,29 @@ class Core implements SystemInterface
                     new VirtualModule($path, $resourceMap, $this, str_replace('/', '', $parameters['module_id'])),
                     $parameters
                 );*/
-            } elseif (count($resourceMap->classes)) {
-                /** Update for future version: Search classes that implement LoadableInterface */
-                foreach ($resourceMap->classes as $classPath => $class) {
-                    // This class implements LoadableInterface LoadableInterface::class
-                    if (in_array('\samsonframework\core\LoadableInterface', $resourceMap->classData[$classPath]['implements'])) {
-
-                        $name =  str_replace('/', '', $parameters['module_id']);
-
-                        $this->createMetadata(VirtualModule::class, str_replace('/', '', $parameters['module_id']), $path);
-
-                        /*$this->initModule(
-                            new VirtualModule(
-                                $path,
-                                $resourceMap,
-                                $this,
-                                str_replace('/', '', $resourceMap->classData[$classPath]['className'])
-                            ),
-                            $parameters
-                        );*/
-                    }
-                }
             }
+//            elseif (count($resourceMap->classes)) {
+//                /** Update for future version: Search classes that implement LoadableInterface */
+//                foreach ($resourceMap->classes as $classPath => $class) {
+//                    // This class implements LoadableInterface LoadableInterface::class
+//                    if (in_array('\samsonframework\core\LoadableInterface', $resourceMap->classData[$classPath]['implements'])) {
+//
+//                        $name =  str_replace('/', '', $parameters['module_id']);
+//
+//                        $this->createMetadata(VirtualModule::class, str_replace('/', '', $parameters['module_id']), $path);
+//
+//                        /*$this->initModule(
+//                            new VirtualModule(
+//                                $path,
+//                                $resourceMap,
+//                                $this,
+//                                str_replace('/', '', $resourceMap->classData[$classPath]['className'])
+//                            ),
+//                            $parameters
+//                        );*/
+//                    }
+//                }
+//            }
 
         } else {
             throw new CannotLoadModule($path);

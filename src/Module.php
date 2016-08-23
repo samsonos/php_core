@@ -1,23 +1,21 @@
-<?php
-namespace samson\core;
+<?php declare(strict_types=1);
+namespace samsonphp\core;
 
-// TODO: Разобраться почему с вызовом m()->render() во вьюхе, и почему не передаются параметры
-use samsonframework\core\RenderInterface;
 use samsonframework\core\ResourcesInterface;
 use samsonframework\core\SystemInterface;
 use samsonframework\core\ViewInterface;
+use samsonphp\core\deprecated\iModule;
 use samsonphp\core\exception\ControllerActionNotFound;
 use samsonphp\core\exception\ViewPathNotFound;
 use samsonphp\core\exception\ViewVariableNotFound;
-use Symfony\Component\Config\Definition\Exception\Exception;
 
 /**
  * Модуль системы
  *
  * @author Vitaly Iegorov <vitalyiegorov@gmail.com>
- * @version 1.0
+ * @deprecated Will be merged with ExternalModule
  */
-class Module implements iModule, \ArrayAccess
+class Module implements \ArrayAccess, iModule
 {
     /** Static module instances collection */
     public static $instances = array();

@@ -1,5 +1,5 @@
 <?php
-namespace samson\core;
+namespace samsonphp\core\deprecated;
 
 use samsonframework\core\RenderInterface;
 use samsonframework\core\ViewInterface;
