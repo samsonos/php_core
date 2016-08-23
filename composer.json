@@ -16,10 +16,6 @@
   "license": "Open Software License (OSL) v 3.0",
   "homepage": "http://samsonphp.com/",
   "autoload": {
-    "psr-0": {
-      "samsonos\\core\\": "src/",
-      "samson\\core\\": "src/"
-    },
     "psr-4":{
       "samson\\core\\": "src/",
       "samsonphp\\core\\": "src/"
