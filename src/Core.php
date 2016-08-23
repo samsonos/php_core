@@ -1,4 +1,4 @@
-<?php
+<?php declare(strict_types=1);
 /*
  * This file is part of the SamsonPHP\Core package.
  * (c) 2013 Vitaly Iegorov <egorov@samsonos.com>
@@ -9,7 +9,6 @@
 namespace samson\core;
 
 use samsonframework\container\Builder;
-use samsonframework\container\BuilderInterface;
 use samsonframework\container\metadata\ClassMetadata;
 use samsonframework\container\metadata\MethodMetadata;
 use samsonframework\core\SystemInterface;
@@ -22,30 +21,36 @@ use samsonphp\event\Event;
 use samsonframework\container\ContainerBuilderInterface;
 
 /**
- * Core of SamsonPHP
- * 
- * @package SamsonPHP
- * @author 	Vitaly Iegorov <vitalyiegorov@gmail.com>
- * @version @version@
+ * SamsonPHP Core.
+ *
+ * @author Vitaly Iegorov <egorov@samsonos.com>
  */
 class Core implements SystemInterface
 {
-    /* Rendering models */
-    /** Standard algorithm for view rendering */
-    const RENDER_STANDART = 1;
-    /** View rendering algorithm from array of view variables */
-    const RENDER_VARIABLE = 3;
-
-    /** @var  ResourceMap Current web-application resource map */
-    public $map;
-
     /** @var ContainerInterface */
     protected $container;
 
+    /** @var ClassMetadata[] */
+    protected $metadataCollection = [];
+
+    /** @var ContainerBuilderInterface */
+    protected $builder;
+
+    /** @var string Current system environment */
+    protected $environment;
+
+    /* Rendering models */
+    /** @deprecated Standard algorithm for view rendering */
+    const RENDER_STANDART = 1;
+    /** @deprecated View rendering algorithm from array of view variables */
+    const RENDER_VARIABLE = 3;
+
+    /** @deprecated @var  ResourceMap Current web-application resource map */
+    public $map;
    
-    /** @var string Path to current web-application */
+    /** @deprecated @var string Path to current web-application */
     public $system_path = __SAMSON_CWD__;
-    /** @var string View path loading mode */
+    /** @deprecated @var string View path loading mode */
     public $render_mode = self::RENDER_STANDART;
     /** @var Module Pointer to current active module */
     protected $active = null;
@@ -53,20 +58,14 @@ class Core implements SystemInterface
     protected $async = false;
     /** @var string Path to main system template */
     protected $template_path = __SAMSON_DEFAULT_TEMPLATE;
-    /** @var string Current system environment */
-    protected $environment;
-
-    protected $metadataCollection = [];
-
-    protected $builder;
 
     /**
      * Core constructor.
      *
+     * @param ContainerBuilderInterface $builder Container builder
      * @param ResourceMap|null $map system resources
-     * @param ContainerBuilderInterface|null $builder Container builder
      */
-    public function __construct(ResourceMap $map = null, ContainerBuilderInterface $builder = null)
+    public function __construct(ContainerBuilderInterface $builder, ResourceMap $map = null)
     {
         $this->builder = $builder;
 
@@ -81,12 +80,10 @@ class Core implements SystemInterface
             $this->system_path = $map->entryPoint;
         }
 
-        // Connect static collection with this dynamic field to avoid duplicates
-        $this->module_stack = &Module::$instances;
-
         // Temporary add template worker
         $this->subscribe('core.rendered', array($this, 'generateTemplate'));
 
+        // TODO: Shoud be configurable not fixed integration
         $whoops = new \Whoops\Run;
         $whoops->pushHandler(new \Whoops\Handler\PrettyPageHandler);
         $whoops->register();
@@ -563,19 +560,19 @@ class Core implements SystemInterface
         }
 
         // Trying to find parent class for connecting to it to use View/Controller inheritance
-        $parentClass = get_parent_class($instance);
-        if (!in_array($parentClass,
-            array('samson\core\ExternalModule', 'samson\core\CompressableExternalModule'))
-        ) {
-            // Переберем загруженные в систему модули
-            foreach ($this->module_stack as &$m) {
-                // Если в систему был загружен модуль с родительским классом
-                if (get_class($m) === $parentClass) {
-                    $instance->parent = &$m;
-                    //elapsed('Parent connection for '.$moduleClass.'('.$connector->uid.') with '.$parent_class.'('.$m->uid.')');
-                }
-            }
-        }
+//        $parentClass = get_parent_class($instance);
+//        if (!in_array($parentClass,
+//            array('samson\core\ExternalModule', 'samson\core\CompressableExternalModule'))
+//        ) {
+//            // Переберем загруженные в систему модули
+//            foreach ($this->module_stack as &$m) {
+//                // Если в систему был загружен модуль с родительским классом
+//                if (get_class($m) === $parentClass) {
+//                    $instance->parent = &$m;
+//                    //elapsed('Parent connection for '.$moduleClass.'('.$connector->uid.') with '.$parent_class.'('.$m->uid.')');
+//                }
+//            }
+//        }
     }
 
     /**

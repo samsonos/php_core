@@ -13,7 +13,7 @@ use samsonframework\core\SystemInterface;
  * файла и класса.
  *
  * @author Vitaly Iegorov <vitalyiegorov@gmail.com> 
- * @version 0.1
+ * @deprecated
  */
 class Service extends ExternalModule
 {
