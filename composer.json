@@ -40,10 +40,10 @@
     "phpunit/phpunit": "4.*"
   },
   "extra": {
-        "branch-alias": {
-            "dev-master": "1.x-dev"
-        }
+    "branch-alias": {
+      "dev-master": "1.x-dev"
     }
+  },
   "config":{
     "github-protocols":["https"]
   }
