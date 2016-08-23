@@ -16,7 +16,6 @@
   "license": "Open Software License (OSL) v 3.0",
   "homepage": "http://samsonphp.com/",
   "autoload": {
-    "classmap": ["src/"],
     "psr-0": {
       "samsonos\\core\\": "src/",
       "samson\\core\\": "src/"
@@ -37,7 +36,7 @@
     "samsonframework/container": "*"
   },
   "require-dev": {
-    "phpunit/phpunit": "4.*"
+    "phpunit/phpunit": "5.*"
   },
   "extra": {
     "branch-alias": {

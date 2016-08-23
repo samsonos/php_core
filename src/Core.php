@@ -59,6 +59,12 @@ class Core implements SystemInterface
     /** @var string Path to main system template */
     protected $template_path = __SAMSON_DEFAULT_TEMPLATE;
 
+    /** @return ContainerInterface Get system container */
+    public function getContainer()
+    {
+        return $this->container;
+    }
+
     /**
      * Core constructor.
      *
