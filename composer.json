@@ -21,6 +21,7 @@
       "samson\\core\\": "src/"
     },
     "psr-4":{
+      "samson\\core\\": "src/",
       "samsonphp\\core\\": "src/"
     },
     "files": ["src/samson.php"]
