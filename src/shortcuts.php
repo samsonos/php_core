@@ -24,7 +24,7 @@ function &s()
             $_v = unserialize(base64_decode($GLOBALS["__CORE_SNAPSHOT"]));
 
         } else { // Create new instance
-            $_v = new samson\core\Core();
+            $_v = $GLOBALS['__core'];
         }
     }
 
