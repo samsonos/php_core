@@ -194,7 +194,7 @@ class Core implements SystemInterface
     }
 
     /**    @see iModule::active() */
-    public function &active(iModule &$module = null)
+    public function &active(&$module = null)
     {
         // Сохраним старый текущий модуль
         $old = &$this->active;

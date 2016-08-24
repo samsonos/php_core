@@ -5,6 +5,7 @@ use samson\core\File;
 use samsonframework\core\ResourcesInterface;
 use samsonframework\core\SystemInterface;
 use samsonframework\core\ViewInterface;
+use samsonframework\resource\ResourceMap;
 use samsonphp\core\deprecated\iModule;
 use samsonphp\core\exception\ControllerActionNotFound;
 use samsonphp\core\exception\ViewPathNotFound;
@@ -70,10 +71,9 @@ class Module implements \ArrayAccess, iModule
         // Inject generic module dependencies
         $this->system = $system;
 
-        $resourceMap->build($path);
-
         // Store pointer to module resource map
-        $this->resourceMap = &$resourceMap;
+        // TODO: Should be changed or removed
+        $this->resourceMap = ResourceMap::get($path);
         // Save views list
         $this->views = $resourceMap->views;
 
