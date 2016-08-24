@@ -18,7 +18,6 @@
   "autoload": {
     "psr-4":{
       "samson\\core\\": "src/",
-      "samson\\core\\": "src/deprecated/",
       "samsonphp\\core\\": "src/"
     },
     "files": ["src/samson.php"]
