@@ -1,6 +1,7 @@
 <?php declare(strict_types=1);
 namespace samsonphp\core;
 
+use samson\core\File;
 use samsonframework\core\ResourcesInterface;
 use samsonframework\core\SystemInterface;
 use samsonframework\core\ViewInterface;
