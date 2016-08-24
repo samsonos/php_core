@@ -2,6 +2,7 @@
 namespace samsonphp\core;
 
 use samson\core\File;
+use samson\core\iModuleViewable;
 use samsonframework\core\ResourcesInterface;
 use samsonframework\core\SystemInterface;
 use samsonframework\core\ViewInterface;
@@ -73,7 +74,7 @@ class Module implements \ArrayAccess, iModule
 
         // Store pointer to module resource map
         // TODO: Should be changed or removed
-        $this->resourceMap = ResourceMap::get($path);
+        $this->resourceMap = $resourceMap = ResourceMap::get($path);
         // Save views list
         $this->views = $resourceMap->views;
 
