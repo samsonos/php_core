@@ -59,7 +59,7 @@ class Core implements SystemInterface
     /** @var string Path to main system template */
     protected $template_path = __SAMSON_DEFAULT_TEMPLATE;
 
-    /** @return ContainerInterface Get system container */
+    /** @return \Container Get system container */
     public function getContainer()
     {
         return $this->container;
@@ -88,11 +88,6 @@ class Core implements SystemInterface
 
         // Temporary add template worker
         $this->subscribe('core.rendered', array($this, 'generateTemplate'));
-
-        // TODO: Shoud be configurable not fixed integration
-        $whoops = new \Whoops\Run;
-        $whoops->pushHandler(new \Whoops\Handler\PrettyPageHandler);
-        $whoops->register();
 
         // Fire core creation event
         Event::fire('core.created', array(&$this));
