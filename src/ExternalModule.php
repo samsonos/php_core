@@ -108,7 +108,7 @@ class ExternalModule extends Module implements PreparableInterface
     public function render($controller = null)
     {
         // If we have parent module connection and have no view set
-        if (isset($this->parent) && $this->view_path == false && !method_exists($this, $controller)) {
+        if (isset($this->parent) && $this->view_path == false /*&& !method_exists($this, $controller)*/) {
             // Merge current and parent module view data
             $this->parent->view_data = array_merge($this->parent->view_data, $this->view_data);
             // Set internal view context data pointer

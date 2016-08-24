@@ -548,7 +548,21 @@ class Core implements SystemInterface
             if (!$instance->prepare()) {
                 // Handle module failed preparing
             }
+
+            // Trying to find parent class for connecting to it to use View/Controller inheritance
+            $parentClass = get_parent_class($instance);
+            if (!in_array($parentClass, [ExternalModule::class, CompressableExternalModule::class, Service::class, CompressableService::class], true)) {
+                // Переберем загруженные в систему модули
+                foreach ($this->getContainer()->getServices('module') as $m) {
+                    // Если в систему был загружен модуль с родительским классом
+                    if (get_class($m) === $parentClass) {
+                        $instance->parent = $m;
+                        //elapsed('Parent connection for '.$moduleClass.'('.$connector->uid.') with '.$parent_class.'('.$m->uid.')');
+                    }
+                }
+            }
         }
+
 
         $this->active = $this->container->getLocal();
 
