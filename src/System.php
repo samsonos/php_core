@@ -1,6 +1,7 @@
 <?php declare(strict_types=1);
 namespace samsonphp\core;
 
+use samson\core\ExternalModule;
 use samsonframework\core\CompressInterface;
 
 /**
@@ -9,7 +10,7 @@ use samsonframework\core\CompressInterface;
  * @author Vitaly Iegorov
  * @deprecated
  */
-class System extends CompressInterface
+class System extends ExternalModule implements CompressInterface
 {
 	protected $id = 'core';
 

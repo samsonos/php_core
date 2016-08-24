@@ -30,7 +30,7 @@
     "samsonphp/config": "1.*",
     "samsonos/php_url": "*",
     "samsonframework/container": "*",
-    "samsonframework/container-annotation": "*"
+    "samsonframework/container-annotation": "^1.0"
   },
   "require-dev": {
     "phpunit/phpunit": "5.*"
@@ -38,7 +38,8 @@
   "extra": {
     "branch-alias": {
       "dev-master": "1.x-dev"
-    }
+    },
+    "samson_module_ignore":1
   },
   "config":{
     "github-protocols":["https"]

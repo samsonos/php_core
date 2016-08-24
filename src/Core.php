@@ -8,9 +8,17 @@
  */
 namespace samson\core;
 
+use Doctrine\Common\Annotations\AnnotationReader;
 use samsonframework\container\Builder;
 use samsonframework\container\metadata\ClassMetadata;
 use samsonframework\container\metadata\MethodMetadata;
+use samsonframework\containerannotation\AnnotationClassResolver;
+use samsonframework\containerannotation\AnnotationMetadataCollector;
+use samsonframework\containerannotation\AnnotationMethodResolver;
+use samsonframework\containerannotation\AnnotationPropertyResolver;
+use samsonframework\containerannotation\AnnotationResolver;
+use samsonframework\containerannotation\Inject;
+use samsonframework\containerannotation\Injectable;
 use samsonframework\core\SystemInterface;
 use samsonframework\di\ContainerInterface;
 use samsonframework\resource\ResourceMap;
@@ -508,6 +516,23 @@ class Core implements SystemInterface
         $metadata->scopes[] = Builder::SCOPE_SERVICES;
 
         $this->metadataCollection[$metadata->name] = $metadata;
+
+        // Load annotations
+        $classes = [];
+        foreach ($this->metadataCollection as $metadata) {
+            $classes[] = $metadata->className;
+        }
+
+        new Injectable();
+
+        $reader = new AnnotationReader();
+        $resolver = new AnnotationResolver(
+            new AnnotationClassResolver($reader),
+            new AnnotationPropertyResolver($reader),
+            new AnnotationMethodResolver($reader)
+        );
+        $annotationCollector = new AnnotationMetadataCollector($resolver);
+        $this->metadataCollection = $annotationCollector->collect($classes, $this->metadataCollection);
 
         // Load container class
         $containerPath = $this->path().'www/cache/Container.php';
