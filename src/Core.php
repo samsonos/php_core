@@ -653,13 +653,14 @@ class Core implements SystemInterface
         return array('module_stack', 'render_mode');
     }
 
-    protected function createMetadata($class, $name, $path)
+    protected function createMetadata($class, $name, $path, $scope = 'module')
     {
         $metadata = new ClassMetadata();
         $class = ltrim($class, '\\');
         $metadata->className = $class;
         $metadata->name = str_replace('/', '', $name ?? $class);
         $metadata->scopes[] = Builder::SCOPE_SERVICES;
+        $metadata->scopes[] = $scope;
         $metadata->methodsMetadata['__construct'] = new MethodMetadata($metadata);
         $metadata->methodsMetadata['__construct']->dependencies['path'] = $path;
         $metadata->methodsMetadata['__construct']->dependencies['resources'] = ResourceMap::class;
