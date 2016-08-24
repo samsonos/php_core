@@ -532,53 +532,28 @@ class Core implements SystemInterface
 
         foreach ($modulesToLoad as $name => $parameters) {
             $instance = $this->container->get($name);
-            $this->initModule($instance, $parameters);
+
+            $identifier = $instance->id();
+
+            // Set composer parameters
+            $instance->composerParameters = $parameters;
+
+            // TODO: Change event signature to single approach
+            // Fire core module load event
+            Event::fire('core.module_loaded', [$identifier, &$instance]);
+
+            // Signal core module configure event
+            Event::signal('core.module.configure', [&$instance, $identifier]);
+
+            // Call module preparation handler
+            if (!$instance->prepare()) {
+                // Handle module failed preparing
+            }
         }
 
         $this->active = $this->container->getLocal();
 
         return $this;
-    }
-
-    /**
-     * Initialize module.
-     *
-     * @param ExternalModule $instance           Module instance for initialization
-     * @param array          $composerParameters Collection of extra parameters from composer.json file
-     */
-    protected function initModule($instance, $composerParameters)
-    {
-        $identifier = $instance->id();
-
-        // Set composer parameters
-        $instance->composerParameters = $composerParameters;
-
-        // TODO: Change event signature to single approach
-        // Fire core module load event
-        Event::fire('core.module_loaded', array($identifier, &$instance));
-
-        // Signal core module configure event
-        Event::signal('core.module.configure', array(&$instance, $identifier));
-
-        // Call module preparation handler
-        if (!$instance->prepare()) {
-            // Handle module failed preparing
-        }
-
-        // Trying to find parent class for connecting to it to use View/Controller inheritance
-//        $parentClass = get_parent_class($instance);
-//        if (!in_array($parentClass,
-//            array('samson\core\ExternalModule', 'samson\core\CompressableExternalModule'))
-//        ) {
-//            // Переберем загруженные в систему модули
-//            foreach ($this->module_stack as &$m) {
-//                // Если в систему был загружен модуль с родительским классом
-//                if (get_class($m) === $parentClass) {
-//                    $instance->parent = &$m;
-//                    //elapsed('Parent connection for '.$moduleClass.'('.$connector->uid.') with '.$parent_class.'('.$m->uid.')');
-//                }
-//            }
-//        }
     }
 
     /**
