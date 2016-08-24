@@ -94,7 +94,9 @@ function e($error_msg = '', $error_code = E_USER_NOTICE, $args = NULL, & $ret_va
 function setlocales()
 {
     $args = func_get_args();
-    \samson\core\SamsonLocale::set($args);
+    if (class_exists(\samson\core\SamsonLocale::class)) {
+        \samson\core\SamsonLocale::set($args);
+    }
 }
 
 /**
