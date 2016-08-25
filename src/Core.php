@@ -738,8 +738,10 @@ class Core implements SystemInterface
         $metadata->scopes[] = $scope;
         $metadata->propertiesMetadata['system'] = new PropertyMetadata($metadata);
         $metadata->propertiesMetadata['system']->dependency = 'core';
+        $metadata->propertiesMetadata['system']->isPublic = false;
         $metadata->propertiesMetadata['resourceMap'] = new PropertyMetadata($metadata);
         $metadata->propertiesMetadata['resourceMap']->dependency = 'resource_map';
+        $metadata->propertiesMetadata['resourceMap']->isPublic = false;
 
         // TODO: Now we need to remove and change constructors
         $metadata->methodsMetadata['__construct'] = new MethodMetadata($metadata);
