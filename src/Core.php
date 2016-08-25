@@ -741,6 +741,7 @@ class Core implements SystemInterface
         $metadata->propertiesMetadata['resourceMap'] = new PropertyMetadata($metadata);
         $metadata->propertiesMetadata['resourceMap']->dependency = 'resource_map';
 
+        // TODO: Now we need to remove and change constructors
         $metadata->methodsMetadata['__construct'] = new MethodMetadata($metadata);
         $metadata->methodsMetadata['__construct']->dependencies['path'] = $path;
         $metadata->methodsMetadata['__construct']->dependencies['resources'] = 'resource_map';
