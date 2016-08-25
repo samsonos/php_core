@@ -519,8 +519,8 @@ class Core implements SystemInterface
 
         // Load annotations
         $classes = [];
-        foreach ($this->metadataCollection as $metadata) {
-            $classes[] = $metadata->className;
+        foreach ($this->metadataCollection as $alias => $metadata) {
+            $classes[$alias] = $metadata->className;
         }
 
         new Injectable();
@@ -533,6 +533,27 @@ class Core implements SystemInterface
         );
         $annotationCollector = new AnnotationMetadataCollector($resolver);
         $this->metadataCollection = $annotationCollector->collect($classes, $this->metadataCollection);
+
+        $i18nProperties = $this->metadataCollection['security']->propertiesMetadata['i18n'];
+
+        // Gather all interface implementations
+        $implements = [];
+        foreach (get_declared_interfaces() as $interface) {
+            foreach (get_declared_classes() as $class) {
+                if (in_array($interface, class_implements($class), true)) {
+                    foreach ($this->metadataCollection as $alias => $metadata) {
+                        if ($metadata->className === $class) {
+                            $implements['\\'.$interface][] = $alias;
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+
+        if (array_key_exists($i18nProperties->dependency, $implements)) {
+            $i18nProperties->dependency = $implements[$i18nProperties->dependency][0];
+        }
 
         // Load container class
         $containerPath = $this->path().'www/cache/Container.php';
