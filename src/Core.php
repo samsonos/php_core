@@ -555,6 +555,14 @@ class Core implements SystemInterface
             }
         }
 
+        /**
+         * TODO: now we need to implement not forcing to load fixed dependencies into modules
+         * to give ability to change constructors and inject old variable into properties
+         * and them after refactoring remove them. With this we can only specify needed dependencies
+         * in new modules, and still have old ones working.
+         */
+
+
         foreach ($this->metadataCollection as $alias => $metadata) {
             foreach ($metadata->propertiesMetadata as $property => $propertyMetadata) {
                 if (array_key_exists($propertyMetadata->dependency, $implementsByAlias)) {
