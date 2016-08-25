@@ -19,6 +19,7 @@ use samsonframework\containerannotation\AnnotationPropertyResolver;
 use samsonframework\containerannotation\AnnotationResolver;
 use samsonframework\containerannotation\Inject;
 use samsonframework\containerannotation\Injectable;
+use samsonframework\containerannotation\InjectArgument;
 use samsonframework\core\SystemInterface;
 use samsonframework\di\ContainerInterface;
 use samsonframework\resource\ResourceMap;
@@ -523,7 +524,9 @@ class Core implements SystemInterface
             $classes[$alias] = $metadata->className;
         }
 
+        // Load annotation and parse classes
         new Injectable();
+        new InjectArgument(['var' => 'type']);
 
         $reader = new AnnotationReader();
         $resolver = new AnnotationResolver(
@@ -537,13 +540,14 @@ class Core implements SystemInterface
         $i18nProperties = $this->metadataCollection['security']->propertiesMetadata['i18n'];
 
         // Gather all interface implementations
-        $implements = [];
+        $implementsByAlias = [];
         foreach (get_declared_interfaces() as $interface) {
             foreach (get_declared_classes() as $class) {
                 if (in_array($interface, class_implements($class), true)) {
+                    // TODO: We should already have metadata by classname collection
                     foreach ($this->metadataCollection as $alias => $metadata) {
                         if ($metadata->className === $class) {
-                            $implements['\\'.$interface][] = $alias;
+                            $implementsByAlias['\\'.$interface][] = $alias;
                             break;
                         }
                     }
@@ -551,8 +555,19 @@ class Core implements SystemInterface
             }
         }
 
-        if (array_key_exists($i18nProperties->dependency, $implements)) {
-            $i18nProperties->dependency = $implements[$i18nProperties->dependency][0];
+        foreach ($this->metadataCollection as $alias => $metadata) {
+            foreach ($metadata->propertiesMetadata as $property => $propertyMetadata) {
+                if (array_key_exists($propertyMetadata->dependency, $implementsByAlias)) {
+                    $propertyMetadata->dependency = $implementsByAlias[$propertyMetadata->dependency][0];
+                }
+            }
+            foreach ($metadata->methodsMetadata as $method => $methodMetadata) {
+                foreach ($methodMetadata->dependencies as $argument => $dependency) {
+                    if (array_key_exists($dependency, $implementsByAlias)) {
+                        $methodMetadata->dependencies[$argument] = $implementsByAlias[$dependency][0];
+                    }
+                }
+            }
         }
 
         // Load container class
