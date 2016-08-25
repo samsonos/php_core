@@ -12,6 +12,7 @@ use Doctrine\Common\Annotations\AnnotationReader;
 use samsonframework\container\Builder;
 use samsonframework\container\metadata\ClassMetadata;
 use samsonframework\container\metadata\MethodMetadata;
+use samsonframework\container\metadata\PropertyMetadata;
 use samsonframework\containerannotation\AnnotationClassResolver;
 use samsonframework\containerannotation\AnnotationMetadataCollector;
 use samsonframework\containerannotation\AnnotationMethodResolver;
@@ -562,7 +563,6 @@ class Core implements SystemInterface
          * in new modules, and still have old ones working.
          */
 
-
         foreach ($this->metadataCollection as $alias => $metadata) {
             foreach ($metadata->propertiesMetadata as $property => $propertyMetadata) {
                 if (array_key_exists($propertyMetadata->dependency, $implementsByAlias)) {
@@ -736,6 +736,11 @@ class Core implements SystemInterface
         $metadata->name = str_replace(['\\', '/'], '_', $name ?? $class);
         $metadata->scopes[] = Builder::SCOPE_SERVICES;
         $metadata->scopes[] = $scope;
+        $metadata->propertiesMetadata['system'] = new PropertyMetadata($metadata);
+        $metadata->propertiesMetadata['system']->dependency = 'core';
+        $metadata->propertiesMetadata['resourceMap'] = new PropertyMetadata($metadata);
+        $metadata->propertiesMetadata['resourceMap']->dependency = 'resource_map';
+
         $metadata->methodsMetadata['__construct'] = new MethodMetadata($metadata);
         $metadata->methodsMetadata['__construct']->dependencies['path'] = $path;
         $metadata->methodsMetadata['__construct']->dependencies['resources'] = 'resource_map';
