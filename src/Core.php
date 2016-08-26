@@ -629,6 +629,15 @@ class Core implements SystemInterface
         return $this;
     }
 
+    /**
+     * Build class xml config from class metadata.
+     *
+     * TODO: Scan for existing config and change only not filled values.
+     *
+     * @param ClassMetadata $classMetadata
+     * @param string        $path Path where to store XML files
+     * @param string|null   $alias
+     */
     public function buildXMLConfig(ClassMetadata $classMetadata, string $path, string $alias = null)
     {
         $dom = new \DOMDocument("1.0", "utf-8");
