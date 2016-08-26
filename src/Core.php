@@ -578,6 +578,49 @@ class Core implements SystemInterface
             }
         }
 
+        foreach ($this->metadataCollection as $alias => $classMetadata) {
+            $dom = new \DOMDocument("1.0", "utf-8");
+            $dom->preserveWhiteSpace = false;
+            $dom->formatOutput = true;
+            $root = $dom->createElement("dependencies");
+            $dom->appendChild($root);
+
+            $classData = $dom->createElement('instance');
+            $classData->setAttribute('service', $alias);
+            $classData->setAttribute('class', $classMetadata->className);
+
+            foreach ($classMetadata->scopes as $scope) {
+                $classData->setAttribute('scope', $scope);
+            }
+
+            $methodsData = $dom->createElement('methods');
+            foreach ($classMetadata->methodsMetadata as $method => $methodMetadata) {
+                if (count($methodMetadata->dependencies)) {
+                    $methodData = $dom->createElement($method);
+                    $argumentsData = $dom->createElement('arguments');
+                    foreach ($methodMetadata->dependencies as $argument => $dependency) {
+                        $argumentData = $dom->createElement($argument);
+                        if (array_key_exists($dependency, $this->metadataCollection)) {
+                            $argumentData->setAttribute('service', $dependency);
+                        } elseif (class_exists($dependency)) {
+                            $argumentData->setAttribute('class', $dependency);
+                        } else {
+                            $argumentData->setAttribute('value', $dependency);
+                        }
+                        $argumentsData->appendChild($argumentData);
+                    }
+                    $methodData->appendChild($argumentsData);
+                    $methodsData->appendChild($methodData);
+                }
+            }
+
+            $classData->appendChild($methodsData);
+            $root->appendChild($classData);
+            $dom->save(getcwd().'/cache/config_'.$alias.'.xml');
+        }
+
+
+
         // Load container class
         $containerPath = $this->path().'www/cache/Container.php';
         file_put_contents($containerPath, $this->builder->build($this->metadataCollection));
