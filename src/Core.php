@@ -27,6 +27,7 @@ use samsonframework\resource\ResourceMap;
 use samsonphp\config\Scheme;
 use samsonphp\core\exception\CannotLoadModule;
 use samsonphp\core\exception\ViewPathNotFound;
+use samsonphp\core\Module;
 use samsonphp\event\Event;
 use samsonframework\container\ContainerBuilderInterface;
 
@@ -538,8 +539,6 @@ class Core implements SystemInterface
         $annotationCollector = new AnnotationMetadataCollector($resolver);
         $this->metadataCollection = $annotationCollector->collect($classes, $this->metadataCollection);
 
-        $i18nProperties = $this->metadataCollection['security']->propertiesMetadata['i18n'];
-
         // Gather all interface implementations
         $implementsByAlias = [];
         foreach (get_declared_interfaces() as $interface) {
@@ -610,27 +609,41 @@ class Core implements SystemInterface
 
             // Call module preparation handler
             if (!$instance->prepare()) {
-                // Handle module failed preparing
+                //throw new \Exception($identifier.' - Module preparation stage failed');
             }
 
-            // Trying to find parent class for connecting to it to use View/Controller inheritance
-            $parentClass = get_parent_class($instance);
-            if (!in_array($parentClass, [ExternalModule::class, CompressableExternalModule::class, Service::class, CompressableService::class], true)) {
-                // Переберем загруженные в систему модули
-                foreach ($this->getContainer()->getServices('module') as $m) {
-                    // Если в систему был загружен модуль с родительским классом
-                    if (get_class($m) === $parentClass) {
-                        $instance->parent = $m;
-                        //elapsed('Parent connection for '.$moduleClass.'('.$connector->uid.') with '.$parent_class.'('.$m->uid.')');
-                    }
-                }
-            }
+            // Try to set module parent module
+            $instance->parent = $this->getClassParentModule(get_parent_class($instance));
         }
-
 
         $this->active = $this->container->getLocal();
 
         return $this;
+    }
+
+    /**
+     * Find parent module by OOP class inheritance.
+     *
+     * @param string $className Class name for searching parent modules
+     * @param array  $ignoredClasses Collection of ignored classes
+     *
+     * @return null
+     */
+    protected function getClassParentModule(
+        string $className,
+        array $ignoredClasses = [ExternalModule::class, CompressableExternalModule::class, Service::class, CompressableService::class]
+    ) {
+        // Skip ignored class names
+        if (!in_array($className, $ignoredClasses, true)) {
+            // Iterate loaded services
+            foreach ($this->getContainer()->getServices('module') as $service) {
+                if (get_class($service) === $className) {
+                    return $service;
+                }
+            }
+        }
+
+        return null;
     }
 
     /**
