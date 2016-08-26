@@ -579,10 +579,7 @@ class Core implements SystemInterface
         }
 
         // Generate XML configs
-        $xmlPath = getcwd().'/cache/config_';
-        foreach ($this->metadataCollection as $alias => $classMetadata) {
-            $this->buildXMLConfig($classMetadata, $xmlPath, $alias);
-        }
+        (new XMLBuilder())->buildXMLConfig($this->metadataCollection, getcwd().'/cache/config_');
 
         // Load container class
         $containerPath = $this->path().'www/cache/Container.php';
@@ -628,80 +625,7 @@ class Core implements SystemInterface
         return $this;
     }
 
-    /**
-     * Set XML property or method argument value.
-     *
-     * @param string      $value
-     * @param \DOMElement $node
-     */
-    protected function setXMLAttribute(string $value, \DOMElement $node)
-    {
-        if (array_key_exists($value, $this->metadataCollection)) {
-            $node->setAttribute('service', $value);
-        } elseif (class_exists($value)) {
-            $node->setAttribute('class', $value);
-        } else {
-            $node->setAttribute('value', $value);
-        }
-    }
 
-    /**
-     * Build class xml config from class metadata.
-     *
-     * TODO: Scan for existing config and change only not filled values.
-     *
-     * @param ClassMetadata $classMetadata
-     * @param string        $path Path where to store XML files
-     * @param string|null   $alias
-     */
-    public function buildXMLConfig(ClassMetadata $classMetadata, string $path, string $alias = null)
-    {
-        $dom = new \DOMDocument("1.0", "utf-8");
-        $dom->preserveWhiteSpace = false;
-        $dom->formatOutput = true;
-        $root = $dom->createElement("dependencies");
-        $dom->appendChild($root);
-
-        // Build alias from class name if missing
-        $alias = $alias ?? strtolower(str_replace('\\', '_', $classMetadata->className));
-
-        $classData = $dom->createElement('instance');
-        $classData->setAttribute('service', $alias);
-        $classData->setAttribute('class', $classMetadata->className);
-
-        foreach ($classMetadata->scopes as $scope) {
-            $classData->setAttribute('scope', $scope);
-        }
-
-        $methodsData = $dom->createElement('methods');
-        foreach ($classMetadata->methodsMetadata as $method => $methodMetadata) {
-            if (count($methodMetadata->dependencies)) {
-                $methodData = $dom->createElement($method);
-                $argumentsData = $dom->createElement('arguments');
-                foreach ($methodMetadata->dependencies as $argument => $dependency) {
-                    $argumentData = $dom->createElement($argument);
-                    $this->setXMLAttribute($dependency, $argumentData);
-                    $argumentsData->appendChild($argumentData);
-                }
-                $methodData->appendChild($argumentsData);
-                $methodsData->appendChild($methodData);
-            }
-        }
-        $classData->appendChild($methodsData);
-
-        $propertiesData = $dom->createElement('properties');
-        foreach ($classMetadata->propertiesMetadata as $property => $propertyMetadata) {
-            if ($propertyMetadata->dependency !== null && $propertyMetadata->dependency !== '') {
-                $propertyData = $dom->createElement($property);
-                $this->setXMLAttribute($propertyMetadata->dependency, $propertyData);
-                $propertiesData->appendChild($propertyData);
-            }
-        }
-
-        $classData->appendChild($propertiesData);
-        $root->appendChild($classData);
-        $dom->save($path.$alias.'.xml');
-    }
 
     /**
      * Find parent module by OOP class inheritance.
