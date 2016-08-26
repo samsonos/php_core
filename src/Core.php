@@ -578,63 +578,9 @@ class Core implements SystemInterface
             }
         }
 
+        $xmlPath = getcwd().'/cache/config_';
         foreach ($this->metadataCollection as $alias => $classMetadata) {
-            $dom = new \DOMDocument("1.0", "utf-8");
-            $dom->preserveWhiteSpace = false;
-            $dom->formatOutput = true;
-            $root = $dom->createElement("dependencies");
-            $dom->appendChild($root);
-
-            $classData = $dom->createElement('instance');
-            $classData->setAttribute('service', $alias);
-            $classData->setAttribute('class', $classMetadata->className);
-
-            foreach ($classMetadata->scopes as $scope) {
-                $classData->setAttribute('scope', $scope);
-            }
-
-            $methodsData = $dom->createElement('methods');
-            foreach ($classMetadata->methodsMetadata as $method => $methodMetadata) {
-                if (count($methodMetadata->dependencies)) {
-                    $methodData = $dom->createElement($method);
-                    $argumentsData = $dom->createElement('arguments');
-                    foreach ($methodMetadata->dependencies as $argument => $dependency) {
-                        $argumentData = $dom->createElement($argument);
-                        if (array_key_exists($dependency, $this->metadataCollection)) {
-                            $argumentData->setAttribute('service', $dependency);
-                        } elseif (class_exists($dependency)) {
-                            $argumentData->setAttribute('class', $dependency);
-                        } else {
-                            $argumentData->setAttribute('value', $dependency);
-                        }
-                        $argumentsData->appendChild($argumentData);
-                    }
-                    $methodData->appendChild($argumentsData);
-                    $methodsData->appendChild($methodData);
-                }
-            }
-            $classData->appendChild($methodsData);
-
-            $propertiesData = $dom->createElement('properties');
-            foreach ($classMetadata->propertiesMetadata as $property => $propertyMetadata) {
-                if ($propertyMetadata->dependency !== null && $propertyMetadata->dependency !== '') {
-                    $propertyData = $dom->createElement($property);
-
-                    if (array_key_exists($propertyMetadata->dependency, $this->metadataCollection)) {
-                        $propertyData->setAttribute('service', $propertyMetadata->dependency);
-                    } elseif (class_exists($propertyMetadata->dependency)) {
-                        $propertyData->setAttribute('class', $propertyMetadata->dependency);
-                    } else {
-                        $propertyData->setAttribute('value', $propertyMetadata->dependency);
-                    }
-
-                    $propertiesData->appendChild($propertyData);
-                }
-            }
-
-            $classData->appendChild($propertiesData);
-            $root->appendChild($classData);
-            $dom->save(getcwd().'/cache/config_'.$alias.'.xml');
+            $this->buildXMLConfig($classMetadata, $xmlPath, $alias);
         }
 
 
@@ -681,6 +627,69 @@ class Core implements SystemInterface
         $this->active = $this->container->getLocal();
 
         return $this;
+    }
+
+    public function buildXMLConfig(ClassMetadata $classMetadata, string $path, string $alias = null)
+    {
+        $dom = new \DOMDocument("1.0", "utf-8");
+        $dom->preserveWhiteSpace = false;
+        $dom->formatOutput = true;
+        $root = $dom->createElement("dependencies");
+        $dom->appendChild($root);
+
+        // Build alias from class name if missing
+        $alias = $alias ?? strtolower(str_replace('\\', '_', $classMetadata->className));
+
+        $classData = $dom->createElement('instance');
+        $classData->setAttribute('service', $alias);
+        $classData->setAttribute('class', $classMetadata->className);
+
+        foreach ($classMetadata->scopes as $scope) {
+            $classData->setAttribute('scope', $scope);
+        }
+
+        $methodsData = $dom->createElement('methods');
+        foreach ($classMetadata->methodsMetadata as $method => $methodMetadata) {
+            if (count($methodMetadata->dependencies)) {
+                $methodData = $dom->createElement($method);
+                $argumentsData = $dom->createElement('arguments');
+                foreach ($methodMetadata->dependencies as $argument => $dependency) {
+                    $argumentData = $dom->createElement($argument);
+                    if (array_key_exists($dependency, $this->metadataCollection)) {
+                        $argumentData->setAttribute('service', $dependency);
+                    } elseif (class_exists($dependency)) {
+                        $argumentData->setAttribute('class', $dependency);
+                    } else {
+                        $argumentData->setAttribute('value', $dependency);
+                    }
+                    $argumentsData->appendChild($argumentData);
+                }
+                $methodData->appendChild($argumentsData);
+                $methodsData->appendChild($methodData);
+            }
+        }
+        $classData->appendChild($methodsData);
+
+        $propertiesData = $dom->createElement('properties');
+        foreach ($classMetadata->propertiesMetadata as $property => $propertyMetadata) {
+            if ($propertyMetadata->dependency !== null && $propertyMetadata->dependency !== '') {
+                $propertyData = $dom->createElement($property);
+
+                if (array_key_exists($propertyMetadata->dependency, $this->metadataCollection)) {
+                    $propertyData->setAttribute('service', $propertyMetadata->dependency);
+                } elseif (class_exists($propertyMetadata->dependency)) {
+                    $propertyData->setAttribute('class', $propertyMetadata->dependency);
+                } else {
+                    $propertyData->setAttribute('value', $propertyMetadata->dependency);
+                }
+
+                $propertiesData->appendChild($propertyData);
+            }
+        }
+
+        $classData->appendChild($propertiesData);
+        $root->appendChild($classData);
+        $dom->save($path.$alias.'.xml');
     }
 
     /**
