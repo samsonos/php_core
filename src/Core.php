@@ -21,6 +21,7 @@ use samsonframework\containerannotation\AnnotationResolver;
 use samsonframework\containerannotation\Inject;
 use samsonframework\containerannotation\Injectable;
 use samsonframework\containerannotation\InjectArgument;
+use samsonframework\core\PreparableInterface;
 use samsonframework\core\SystemInterface;
 use samsonframework\di\ContainerInterface;
 use samsonframework\resource\ResourceMap;
@@ -592,10 +593,8 @@ class Core implements SystemInterface
         $serviceProperty->setValue($this->container, $containerServices);
         $serviceProperty->setAccessible(false);
 
-        foreach ($modulesToLoad as $name => $parameters) {
-            $instance = $this->container->get($name);
-
-            $identifier = $instance->id();
+        foreach ($modulesToLoad as $identifier => $parameters) {
+            $instance = $this->container->get($identifier);
 
             // Set composer parameters
             $instance->composerParameters = $parameters;
@@ -607,9 +606,11 @@ class Core implements SystemInterface
             // Signal core module configure event
             Event::signal('core.module.configure', [&$instance, $identifier]);
 
-            // Call module preparation handler
-            if (!$instance->prepare()) {
-                //throw new \Exception($identifier.' - Module preparation stage failed');
+            if ($instance instanceof PreparableInterface) {
+                // Call module preparation handler
+                if (!$instance->prepare()) {
+                    //throw new \Exception($identifier.' - Module preparation stage failed');
+                }
             }
 
             // Try to set module parent module
@@ -627,10 +628,10 @@ class Core implements SystemInterface
      * @param string $className Class name for searching parent modules
      * @param array  $ignoredClasses Collection of ignored classes
      *
-     * @return null
+     * @return null|mixed Parent service instance if present
      */
     protected function getClassParentModule(
-        string $className,
+        $className,
         array $ignoredClasses = [ExternalModule::class, CompressableExternalModule::class, Service::class, CompressableService::class]
     ) {
         // Skip ignored class names
