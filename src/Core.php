@@ -578,12 +578,11 @@ class Core implements SystemInterface
             }
         }
 
+        // Generate XML configs
         $xmlPath = getcwd().'/cache/config_';
         foreach ($this->metadataCollection as $alias => $classMetadata) {
             $this->buildXMLConfig($classMetadata, $xmlPath, $alias);
         }
-
-
 
         // Load container class
         $containerPath = $this->path().'www/cache/Container.php';
@@ -630,6 +629,23 @@ class Core implements SystemInterface
     }
 
     /**
+     * Set XML property or method argument value.
+     *
+     * @param string      $value
+     * @param \DOMElement $node
+     */
+    protected function setXMLAttribute(string $value, \DOMElement $node)
+    {
+        if (array_key_exists($value, $this->metadataCollection)) {
+            $node->setAttribute('service', $value);
+        } elseif (class_exists($value)) {
+            $node->setAttribute('class', $value);
+        } else {
+            $node->setAttribute('value', $value);
+        }
+    }
+
+    /**
      * Build class xml config from class metadata.
      *
      * TODO: Scan for existing config and change only not filled values.
@@ -664,13 +680,7 @@ class Core implements SystemInterface
                 $argumentsData = $dom->createElement('arguments');
                 foreach ($methodMetadata->dependencies as $argument => $dependency) {
                     $argumentData = $dom->createElement($argument);
-                    if (array_key_exists($dependency, $this->metadataCollection)) {
-                        $argumentData->setAttribute('service', $dependency);
-                    } elseif (class_exists($dependency)) {
-                        $argumentData->setAttribute('class', $dependency);
-                    } else {
-                        $argumentData->setAttribute('value', $dependency);
-                    }
+                    $this->setXMLAttribute($dependency, $argumentData);
                     $argumentsData->appendChild($argumentData);
                 }
                 $methodData->appendChild($argumentsData);
@@ -683,15 +693,7 @@ class Core implements SystemInterface
         foreach ($classMetadata->propertiesMetadata as $property => $propertyMetadata) {
             if ($propertyMetadata->dependency !== null && $propertyMetadata->dependency !== '') {
                 $propertyData = $dom->createElement($property);
-
-                if (array_key_exists($propertyMetadata->dependency, $this->metadataCollection)) {
-                    $propertyData->setAttribute('service', $propertyMetadata->dependency);
-                } elseif (class_exists($propertyMetadata->dependency)) {
-                    $propertyData->setAttribute('class', $propertyMetadata->dependency);
-                } else {
-                    $propertyData->setAttribute('value', $propertyMetadata->dependency);
-                }
-
+                $this->setXMLAttribute($propertyMetadata->dependency, $propertyData);
                 $propertiesData->appendChild($propertyData);
             }
         }
