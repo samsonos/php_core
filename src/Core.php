@@ -583,12 +583,6 @@ class Core implements SystemInterface
         $implementsByAlias = [];
         foreach (get_declared_classes() as $class) {
             $classImplements = class_implements($class);
-            foreach ($classImplements as $interface) {
-                if ((new \ReflectionClass($interface))->isInterface()){
-
-                }
-            }
-
             foreach (get_declared_interfaces() as $interface) {
                 if (in_array($interface, $classImplements, true)) {
                     if (array_key_exists($class, $classesMetadata)) {
