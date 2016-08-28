@@ -9,6 +9,9 @@
 namespace samson\core;
 
 use Doctrine\Common\Annotations\AnnotationReader;
+use samson\activerecord\dbMySQL;
+use samson\activerecord\dbQuery;
+use samson\url\URL;
 use samsonframework\container\Builder;
 use samsonframework\container\metadata\ClassMetadata;
 use samsonframework\container\metadata\MethodMetadata;
@@ -24,6 +27,8 @@ use samsonframework\containerannotation\InjectArgument;
 use samsonframework\core\PreparableInterface;
 use samsonframework\core\SystemInterface;
 use samsonframework\di\ContainerInterface;
+use samsonframework\orm\Database;
+use samsonframework\orm\Query;
 use samsonframework\resource\ResourceMap;
 use samsonphp\config\Scheme;
 use samsonphp\core\exception\CannotLoadModule;
@@ -31,6 +36,7 @@ use samsonphp\core\exception\ViewPathNotFound;
 use samsonphp\core\Module;
 use samsonphp\event\Event;
 use samsonframework\container\ContainerBuilderInterface;
+use stylelikeio\config\ActiveRecordConfig;
 
 /**
  * SamsonPHP Core.
@@ -510,14 +516,41 @@ class Core implements SystemInterface
         $metadata->name = 'core';
         $metadata->scopes[] = Builder::SCOPE_SERVICES;
         $metadata->methodsMetadata['__construct'] = new MethodMetadata($metadata);
-        $metadata->methodsMetadata['__construct']->dependencies['map'] = ResourceMap::class;
-
+        $metadata->methodsMetadata['__construct']->dependencies['map'] = 'resource_map';
         $this->metadataCollection[$metadata->name] = $metadata;
 
         $metadata = new ClassMetadata();
         $metadata->className = ResourceMap::class;
         $metadata->name = 'resource_map';
         $metadata->scopes[] = Builder::SCOPE_SERVICES;
+        $this->metadataCollection[$metadata->name] = $metadata;
+
+//        $metadata = new ClassMetadata();
+//        $metadata->className = URL::class;
+//        $metadata->name = URL::class;
+//        $this->metadataCollection[$metadata->name] = $metadata;
+//
+//        $metadata = new ClassMetadata();
+//        $metadata->className = dbMySQL::class;
+//        $metadata->name = dbMySQL::class;
+//        $this->metadataCollection[$metadata->name] = $metadata;
+//
+//        $metadata = new ClassMetadata();
+//        $metadata->className = dbQuery::class;
+//        $metadata->name = dbQuery::class;
+//        $metadata->propertiesMetadata['database'] = new PropertyMetadata($metadata);
+//        $metadata->propertiesMetadata['database']->name = 'database';
+//        $metadata->propertiesMetadata['database']->dependency = dbMySQL::class;
+
+
+        $config = new ActiveRecordConfig();
+        $metadata = new ClassMetadata();
+        $metadata->className = $metadata->name = Database::class;
+
+        $metadata->methodsMetadata['__construct'] = new MethodMetadata($metadata);
+        $metadata->methodsMetadata['__construct']->dependencies['database'] = $config->name;
+        $metadata->methodsMetadata['__construct']->dependencies['username'] = $config->login;
+        $metadata->methodsMetadata['__construct']->dependencies['passwordв'] = $config->pwd;
 
         $this->metadataCollection[$metadata->name] = $metadata;
 
@@ -540,19 +573,36 @@ class Core implements SystemInterface
         $annotationCollector = new AnnotationMetadataCollector($resolver);
         $this->metadataCollection = $annotationCollector->collect($classes, $this->metadataCollection);
 
+        // Regroup classes metadata by class name instead of alias
+        $classesMetadata = [];
+        foreach ($this->metadataCollection as $alias => $classMetadata) {
+            $classesMetadata[$classMetadata->className] = $classMetadata;
+        }
+
         // Gather all interface implementations
         $implementsByAlias = [];
-        foreach (get_declared_interfaces() as $interface) {
-            foreach (get_declared_classes() as $class) {
-                if (in_array($interface, class_implements($class), true)) {
-                    // TODO: We should already have metadata by classname collection
-                    foreach ($this->metadataCollection as $alias => $metadata) {
-                        if ($metadata->className === $class) {
-                            $implementsByAlias['\\'.$interface][] = $alias;
-                            break;
-                        }
+        foreach (get_declared_classes() as $class) {
+            $classImplements = class_implements($class);
+            foreach ($classImplements as $interface) {
+                if ((new \ReflectionClass($interface))->isInterface()){
+
+                }
+            }
+
+            foreach (get_declared_interfaces() as $interface) {
+                if (in_array($interface, $classImplements, true)) {
+                    if (array_key_exists($class, $classesMetadata)) {
+                        $implementsByAlias['\\'.$interface][] = $classesMetadata[$class]->name;
                     }
                 }
+            }
+        }
+
+        // Gather all class implementations
+        $serviceAliasesByClass = [];
+        foreach (get_declared_classes() as $class) {
+            if (array_key_exists($class, $classesMetadata)) {
+                $serviceAliasesByClass['\\' . $class][] = $classesMetadata[$class]->name;
             }
         }
 
@@ -567,16 +617,26 @@ class Core implements SystemInterface
             foreach ($metadata->propertiesMetadata as $property => $propertyMetadata) {
                 if (array_key_exists($propertyMetadata->dependency, $implementsByAlias)) {
                     $propertyMetadata->dependency = $implementsByAlias[$propertyMetadata->dependency][0];
+                } elseif (array_key_exists($propertyMetadata->dependency, $serviceAliasesByClass)) {
+                    $propertyMetadata->dependency = $serviceAliasesByClass[$propertyMetadata->dependency][0];
+                } else {
+
                 }
             }
             foreach ($metadata->methodsMetadata as $method => $methodMetadata) {
                 foreach ($methodMetadata->dependencies as $argument => $dependency) {
                     if (array_key_exists($dependency, $implementsByAlias)) {
                         $methodMetadata->dependencies[$argument] = $implementsByAlias[$dependency][0];
+                    } elseif (array_key_exists($dependency, $serviceAliasesByClass)) {
+                        $methodMetadata->dependencies[$argument] = $serviceAliasesByClass[$dependency][0];
+                    } else {
+
                     }
                 }
             }
         }
+
+        $signingMetadata = $this->metadataCollection['signin']->methodsMetadata['__construct'];
 
         // Generate XML configs
         (new XMLBuilder())->buildXMLConfig($this->metadataCollection, getcwd().'/cache/config_');
@@ -697,34 +757,7 @@ class Core implements SystemInterface
                 );*/
             } elseif (is_array($parameters) && isset($parameters['samsonphp_package_compressable']) && ($parameters['samsonphp_package_compressable'] == 1)) {
                 $name = $this->createMetadata(VirtualModule::class, $parameters['module_id'], $path);
-
-                /*$this->initModule(
-                    new VirtualModule($path, $resourceMap, $this, str_replace('/', '', $parameters['module_id'])),
-                    $parameters
-                );*/
             }
-//            elseif (count($resourceMap->classes)) {
-//                /** Update for future version: Search classes that implement LoadableInterface */
-//                foreach ($resourceMap->classes as $classPath => $class) {
-//                    // This class implements LoadableInterface LoadableInterface::class
-//                    if (in_array('\samsonframework\core\LoadableInterface', $resourceMap->classData[$classPath]['implements'])) {
-//
-//                        $name =  str_replace('/', '', $parameters['module_id']);
-//
-//                        $this->createMetadata(VirtualModule::class, str_replace('/', '', $parameters['module_id']), $path);
-//
-//                        /*$this->initModule(
-//                            new VirtualModule(
-//                                $path,
-//                                $resourceMap,
-//                                $this,
-//                                str_replace('/', '', $resourceMap->classData[$classPath]['className'])
-//                            ),
-//                            $parameters
-//                        );*/
-//                    }
-//                }
-//            }
 
         } else {
             throw new CannotLoadModule($path);
@@ -756,17 +789,31 @@ class Core implements SystemInterface
         $metadata->scopes[] = Builder::SCOPE_SERVICES;
         $metadata->scopes[] = $scope;
         $metadata->propertiesMetadata['system'] = new PropertyMetadata($metadata);
+        $metadata->propertiesMetadata['system']->name = 'system';
         $metadata->propertiesMetadata['system']->dependency = 'core';
         $metadata->propertiesMetadata['system']->isPublic = false;
         $metadata->propertiesMetadata['resourceMap'] = new PropertyMetadata($metadata);
+        $metadata->propertiesMetadata['resourceMap']->name = 'resourceMap';
         $metadata->propertiesMetadata['resourceMap']->dependency = 'resource_map';
         $metadata->propertiesMetadata['resourceMap']->isPublic = false;
 
         // TODO: Now we need to remove and change constructors
         $metadata->methodsMetadata['__construct'] = new MethodMetadata($metadata);
-        $metadata->methodsMetadata['__construct']->dependencies['path'] = $path;
-        $metadata->methodsMetadata['__construct']->dependencies['resources'] = 'resource_map';
-        $metadata->methodsMetadata['__construct']->dependencies['system'] = 'core';
+
+        $methodParameters = [];
+        foreach ((new \ReflectionMethod($class, '__construct'))->getParameters() as $parameter) {
+            $methodParameters[] = $parameter->getName();
+        }
+
+        if (in_array('path', $methodParameters, true)) {
+            $metadata->methodsMetadata['__construct']->dependencies['path'] = $path;
+        }
+        if (in_array('resources', $methodParameters, true)) {
+            $metadata->methodsMetadata['__construct']->dependencies['resources'] = 'resource_map';
+        }
+        if (in_array('system', $methodParameters, true)) {
+            $metadata->methodsMetadata['__construct']->dependencies['system'] = 'core';
+        }
 
         $this->metadataCollection[$metadata->name] = $metadata;
 

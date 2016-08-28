@@ -33,6 +33,9 @@ class ExternalModule extends Module implements PreparableInterface
             $this->id = strtolower(str_replace(__NS_SEPARATOR__, '_', get_class($this)));
         }
 
+        // Generate unique module cache path in local web-application
+        $this->cache_path = __SAMSON_CWD__ . __SAMSON_CACHE_PATH . $this->id . '/';
+
         // Subscribe to an config ready core event
         Event::subscribe('core.started', array(& $this, 'init'));
 
