@@ -581,7 +581,7 @@ class Core implements SystemInterface
             foreach (get_declared_interfaces() as $interface) {
                 if (in_array($interface, $classImplements, true)) {
                     if (array_key_exists($class, $classesMetadata)) {
-                        $implementsByAlias['\\'.$interface][] = $classesMetadata[$class]->name;
+                        $implementsByAlias[strtolower('\\'.$interface)][] = $classesMetadata[$class]->name;
                     }
                 }
             }
@@ -591,7 +591,7 @@ class Core implements SystemInterface
         $serviceAliasesByClass = [];
         foreach (get_declared_classes() as $class) {
             if (array_key_exists($class, $classesMetadata)) {
-                $serviceAliasesByClass['\\' . $class][] = $classesMetadata[$class]->name;
+                $serviceAliasesByClass[strtolower('\\' . $class)][] = $classesMetadata[$class]->name;
             }
         }
 
@@ -604,16 +604,18 @@ class Core implements SystemInterface
 
         foreach ($metadataCollection as $alias => $metadata) {
             foreach ($metadata->propertiesMetadata as $property => $propertyMetadata) {
-                if (array_key_exists($propertyMetadata->dependency, $implementsByAlias)) {
-                    $propertyMetadata->dependency = $implementsByAlias[$propertyMetadata->dependency][0];
-                } elseif (array_key_exists($propertyMetadata->dependency, $serviceAliasesByClass)) {
-                    $propertyMetadata->dependency = $serviceAliasesByClass[$propertyMetadata->dependency][0];
+                $dependency = strtolower($propertyMetadata->dependency);
+                if (array_key_exists($dependency, $implementsByAlias)) {
+                    $propertyMetadata->dependency = $implementsByAlias[$dependency][0];
+                } elseif (array_key_exists($dependency, $serviceAliasesByClass)) {
+                    $propertyMetadata->dependency = $serviceAliasesByClass[$dependency][0];
                 } else {
 
                 }
             }
             foreach ($metadata->methodsMetadata as $method => $methodMetadata) {
                 foreach ($methodMetadata->dependencies as $argument => $dependency) {
+                    $dependency = strtolower($dependency);
                     if (array_key_exists($dependency, $implementsByAlias)) {
                         $methodMetadata->dependencies[$argument] = $implementsByAlias[$dependency][0];
                     } elseif (array_key_exists($dependency, $serviceAliasesByClass)) {
@@ -629,12 +631,13 @@ class Core implements SystemInterface
         (new XMLBuilder())->buildXMLConfig($metadataCollection, getcwd().'/cache/config_');
 
         // Load container class
-        $containerPath = $this->path().'www/cache/Container.php';
-        file_put_contents($containerPath, $this->builder->build($metadataCollection));
+        $containerName = 'Container' . rand(1, 10000);
+        $containerPath = $this->path().'www/cache/' . $containerName . '.php';
+        file_put_contents($containerPath, $this->builder->build($metadataCollection, $containerName));
         require_once($containerPath);
 
         // Inject current core into container
-        $this->container = new \Container();
+        $this->container = new $containerName();
         $containerReflection = new \ReflectionClass(get_class($this->container));
         $serviceProperty = $containerReflection->getProperty(Builder::DI_FUNCTION_SERVICES);
         $serviceProperty->setAccessible(true);
@@ -714,12 +717,11 @@ class Core implements SystemInterface
 
             foreach ($resourceMap->classes as $classPath => $className) {
                 $this->classes[str_replace(['\\', '/'], '_', $className)] = $className;
-                if ($className === '\samsoncms\Dictionary') {
-                    trace($className);
-                }
             }
 
+
             if (isset($resourceMap->module[0])) {
+
 
                 /** @var string $controllerPath Path to module controller file */
                 $controllerPath = $resourceMap->module[1];
@@ -741,6 +743,8 @@ class Core implements SystemInterface
                 $reflection = new \ReflectionClass($moduleClass);
                 $name = $reflection->getDefaultProperties();
                 $name = $this->createMetadata($moduleClass, $name['id'] ?? $moduleClass, $path);
+
+                $this->classes[$name] = $moduleClass;
 
                 /*$this->initModule(
                     new $moduleClass($path, $resourceMap, $this),
