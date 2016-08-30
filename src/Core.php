@@ -472,26 +472,12 @@ class Core implements SystemInterface
             ));
             if (array_key_exists('samsonframework_precontainer', $parameters)) {
                 $preModules[$moduleName] = $parameters;
-                foreach (ResourceMap::get($modulePath)->classes as $className) {
+//                foreach (ResourceMap::get($modulePath)->classes as $className) {
                     //$preClasses[str_replace(['\\', '/'], '_', $className)] = $className;
-                }
+//                }
             }
             $modulesToLoad[$moduleName] = $parameters;
         }
-
-//        $metadata = new ClassMetadata();
-//        $metadata->className = get_class($this);
-//        $metadata->name = 'core';
-//        $metadata->scopes[] = Builder::SCOPE_SERVICES;
-//        $metadata->methodsMetadata['__construct'] = new MethodMetadata($metadata);
-//        $metadata->methodsMetadata['__construct']->dependencies['map'] = 'resource_map';
-//        $this->metadataCollection[$metadata->name] = $metadata;
-
-//        $metadata = new ClassMetadata();
-//        $metadata->className = ResourceMap::class;
-//        $metadata->name = 'resource_map';
-//        $metadata->scopes[] = Builder::SCOPE_SERVICES;
-//        $this->metadataCollection[$metadata->name] = $metadata;
 
         // Create local module and set it as active
         $this->createMetadata(VirtualModule::class, 'local', $this->system_path);
@@ -557,88 +543,97 @@ class Core implements SystemInterface
         static $implementsByAlias;
         static $serviceAliasesByClass;
 
-        // Load annotation and parse classes
-        new Injectable();
-        new InjectArgument(['var' => 'type']);
-        new Service(['value' => '']);
+        $containerPath = $this->path().'www/cache/'.$containerName.'.php';
+//        if (!file_exists($containerPath)) {
 
-        $reader = new AnnotationReader();
-        $resolver = new AnnotationResolver(
-            new AnnotationClassResolver($reader),
-            new AnnotationPropertyResolver($reader),
-            new AnnotationMethodResolver($reader)
-        );
-        $annotationCollector = new AnnotationMetadataCollector($resolver);
-        $metadataCollection = $annotationCollector->collect($classes, $metadataCollection);
 
-        // Regroup classes metadata by class name instead of alias
-        $classesMetadata = [];
-        foreach ($metadataCollection as $alias => $classMetadata) {
-            $classesMetadata[$classMetadata->className] = $classMetadata;
-        }
+            // Load annotation and parse classes
+            new Injectable();
+            new InjectArgument(['var' => 'type']);
+            new Service(['value' => '']);
 
-        // Gather all interface implementations
-        $implementsByAlias = $implementsByAlias ?? [];
-        foreach (get_declared_classes() as $class) {
-            $classImplements = class_implements($class);
-            foreach (get_declared_interfaces() as $interface) {
-                if (in_array($interface, $classImplements, true)) {
-                    if (array_key_exists($class, $classesMetadata)) {
-                        $implementsByAlias[strtolower('\\'.$interface)][] = $classesMetadata[$class]->name;
+            $reader = new AnnotationReader();
+            $resolver = new AnnotationResolver(
+                new AnnotationClassResolver($reader),
+                new AnnotationPropertyResolver($reader),
+                new AnnotationMethodResolver($reader)
+            );
+
+            $annotationCollector = new AnnotationMetadataCollector($resolver);
+            $metadataCollection = $annotationCollector->collect($classes, $metadataCollection);
+
+            // Regroup classes metadata by class name instead of alias
+            $classesMetadata = [];
+            foreach ($metadataCollection as $alias => $classMetadata) {
+                $classesMetadata[$classMetadata->className] = $classMetadata;
+            }
+
+            // Gather all interface implementations
+            $implementsByAlias = $implementsByAlias ?? [];
+            foreach (get_declared_classes() as $class) {
+                $classImplements = class_implements($class);
+                foreach (get_declared_interfaces() as $interface) {
+                    if (in_array($interface, $classImplements, true)) {
+                        if (array_key_exists($class, $classesMetadata)) {
+                            $implementsByAlias[strtolower('\\' . $interface)][] = $classesMetadata[$class]->name;
+                        }
                     }
                 }
             }
-        }
 
-        // Gather all class implementations
-        $serviceAliasesByClass = $serviceAliasesByClass ?? [];
-        foreach (get_declared_classes() as $class) {
-            if (array_key_exists($class, $classesMetadata)) {
-                $serviceAliasesByClass[strtolower('\\' . $class)][] = $classesMetadata[$class]->name;
-            }
-        }
-
-        /**
-         * TODO: now we need to implement not forcing to load fixed dependencies into modules
-         * to give ability to change constructors and inject old variable into properties
-         * and them after refactoring remove them. With this we can only specify needed dependencies
-         * in new modules, and still have old ones working.
-         */
-
-        foreach ($metadataCollection as $alias => $metadata) {
-            foreach ($metadata->propertiesMetadata as $property => $propertyMetadata) {
-                $dependency = strtolower($propertyMetadata->dependency);
-                if (array_key_exists($dependency, $implementsByAlias)) {
-                    $propertyMetadata->dependency = $implementsByAlias[$dependency][0];
-                } elseif (array_key_exists($dependency, $serviceAliasesByClass)) {
-                    $propertyMetadata->dependency = $serviceAliasesByClass[$dependency][0];
-                } else {
-
+            // Gather all class implementations
+            $serviceAliasesByClass = $serviceAliasesByClass ?? [];
+            foreach (get_declared_classes() as $class) {
+                if (array_key_exists($class, $classesMetadata)) {
+                    $serviceAliasesByClass[strtolower('\\' . $class)][] = $classesMetadata[$class]->name;
                 }
             }
-            foreach ($metadata->methodsMetadata as $method => $methodMetadata) {
-                foreach ($methodMetadata->dependencies as $argument => $dependency) {
-                    $dependency = strtolower($dependency);
+
+            /**
+             * TODO: now we need to implement not forcing to load fixed dependencies into modules
+             * to give ability to change constructors and inject old variable into properties
+             * and them after refactoring remove them. With this we can only specify needed dependencies
+             * in new modules, and still have old ones working.
+             */
+
+            foreach ($metadataCollection as $alias => $metadata) {
+                foreach ($metadata->propertiesMetadata as $property => $propertyMetadata) {
+                    $dependency = strtolower($propertyMetadata->dependency);
                     if (array_key_exists($dependency, $implementsByAlias)) {
-                        $methodMetadata->dependencies[$argument] = $implementsByAlias[$dependency][0];
-                        //$methodMetadata->parametersMetadata[$argument]->dependency = $implementsByAlias[$dependency][0];
+                        $propertyMetadata->dependency = $implementsByAlias[$dependency][0];
                     } elseif (array_key_exists($dependency, $serviceAliasesByClass)) {
-                        $methodMetadata->dependencies[$argument] = $serviceAliasesByClass[$dependency][0];
-                        //$methodMetadata->parametersMetadata[$argument]->dependency = $serviceAliasesByClass[$dependency][0];
+                        $propertyMetadata->dependency = $serviceAliasesByClass[$dependency][0];
                     } else {
 
                     }
                 }
+                foreach ($metadata->methodsMetadata as $method => $methodMetadata) {
+                    foreach ($methodMetadata->dependencies as $argument => $dependency) {
+                        $dependency = strtolower($dependency);
+                        if (array_key_exists($dependency, $implementsByAlias)) {
+                            $methodMetadata->dependencies[$argument] = $implementsByAlias[$dependency][0];
+                            //$methodMetadata->parametersMetadata[$argument]->dependency = $implementsByAlias[$dependency][0];
+                        } elseif (array_key_exists($dependency, $serviceAliasesByClass)) {
+                            $methodMetadata->dependencies[$argument] = $serviceAliasesByClass[$dependency][0];
+                            //$methodMetadata->parametersMetadata[$argument]->dependency = $serviceAliasesByClass[$dependency][0];
+                        } else {
+
+                        }
+                    }
+                }
             }
-        }
 
-        // Generate XML configs
-        (new XMLBuilder())->buildXMLConfig($metadataCollection, getcwd().'/cache/config_');
+            // Generate XML configs
+            //(new XMLBuilder())->buildXMLConfig($metadataCollection, getcwd().'/cache/config_');
 
-        // Load container class
-        $containerPath = $this->path().'www/cache/' . $containerName . '.php';
-        file_put_contents($containerPath, $this->builder->build($metadataCollection, $containerName, '', $parentContainer));
+            // Load container class
+            file_put_contents($containerPath,
+                $this->builder->build($metadataCollection, $containerName, '', $parentContainer));
+
+//        }
+
         require_once($containerPath);
+
 
         // Inject current core into container
         /** @var ContainerInterface $container */
