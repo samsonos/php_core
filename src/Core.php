@@ -540,7 +540,7 @@ class Core implements SystemInterface
         $preMetadataCollection['core'] = $this->metadataCollection['core'];
         $preMetadataCollection['resource_map'] = $this->metadataCollection['resource_map'];
 
-        $this->loadMetadata($preMetadataCollection, $preModules, $preClasses);
+        $this->loadMetadata($preMetadataCollection, $preModules, $preClasses, 'ContainerPreLoad');
         $this->loadMetadata($this->metadataCollection, $modulesToLoad, $this->classes);
 
         $this->active = $this->container->getLocal();
@@ -552,8 +552,9 @@ class Core implements SystemInterface
      * @param ClassMetadata[] $metadataCollection
      * @param array $modulesToLoad
      * @param array $classes
+     * @param string $containerName
      */
-    protected function loadMetadata(array $metadataCollection, array $modulesToLoad, array $classes)
+    protected function loadMetadata(array $metadataCollection, array $modulesToLoad, array $classes, $containerName = 'Container')
     {
         // Load annotation and parse classes
         new Injectable();
@@ -631,7 +632,6 @@ class Core implements SystemInterface
         (new XMLBuilder())->buildXMLConfig($metadataCollection, getcwd().'/cache/config_');
 
         // Load container class
-        $containerName = 'Container' . rand(1, 10000);
         $containerPath = $this->path().'www/cache/' . $containerName . '.php';
         file_put_contents($containerPath, $this->builder->build($metadataCollection, $containerName));
         require_once($containerPath);
