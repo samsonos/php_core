@@ -2,7 +2,6 @@
 namespace samsonphp\core;
 
 use samson\core\File;
-use samson\core\iModuleViewable;
 use samsonframework\core\ResourcesInterface;
 use samsonframework\core\SystemInterface;
 use samsonframework\core\ViewInterface;
