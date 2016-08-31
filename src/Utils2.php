@@ -646,7 +646,7 @@ function generate_password($count)
  * @param string $class_name Имя класса для исправления
  * @param string $ns         Пространство имен которому принадлежит класс
  *
- * @deprecated use \samson\core\AutoLoader::className() and pass full class name to it without splitting into class
+ * @deprecated use \samson\core\AutoLoader::value() and pass full class name to it without splitting into class
  *             name and namespace
  * @return string Исправленное имя класса
  */

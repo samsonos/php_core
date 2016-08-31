@@ -154,7 +154,7 @@ class AutoLoader
      */
     protected static function oldModule($className, $nameSpace, & $file = null)
     {
-        //elapsed('++ Autoloading '.$className.' from '.$nameSpace);
+        //elapsed('++ Autoloading '.$value.' from '.$nameSpace);
 
         // Convert to linux path, windows will convert it automatically if necessary
         $ns = str_replace(self::NS_SEPARATOR, '/', $nameSpace);
@@ -220,7 +220,7 @@ class AutoLoader
         }
 
         // If we are here - signal error
-        //return e('Cannot autoload class(##), class file not found in ##', D_SAMSON_DEBUG, array($className,$path));
+        //return e('Cannot autoload class(##), class file not found in ##', D_SAMSON_DEBUG, array($value,$path));
         return false;
     }
 }

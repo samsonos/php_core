@@ -30,6 +30,7 @@
     "samsonphp/config": "1.*",
     "samsonos/php_url": "*",
     "samsonframework/container": "*",
+    "samsonframework/container-xml": "^1.0",
     "samsonframework/container-annotation": "^1.0"
   },
   "require-dev": {

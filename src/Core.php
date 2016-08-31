@@ -10,6 +10,7 @@ namespace samson\core;
 
 use Doctrine\Common\Annotations\AnnotationReader;
 use samsonframework\container\Builder;
+use samsonframework\container\ContainerBuilderInterface;
 use samsonframework\container\ContainerInterface;
 use samsonframework\container\metadata\ClassMetadata;
 use samsonframework\container\metadata\MethodMetadata;
@@ -22,6 +23,15 @@ use samsonframework\containerannotation\AnnotationResolver;
 use samsonframework\containerannotation\Injectable;
 use samsonframework\containerannotation\InjectArgument;
 use samsonframework\containerannotation\Service;
+use samsonframework\containercollection\attribute\ClassName;
+use samsonframework\containercollection\attribute\Name;
+use samsonframework\containercollection\attribute\Value;
+use samsonframework\containercollection\CollectionClassResolver;
+use samsonframework\containercollection\CollectionMethodResolver;
+use samsonframework\containercollection\CollectionParameterResolver;
+use samsonframework\containercollection\CollectionPropertyResolver;
+use samsonframework\containerxml\XmlMetadataCollector;
+use samsonframework\containerxml\XmlResolver;
 use samsonframework\core\PreparableInterface;
 use samsonframework\core\SystemInterface;
 use samsonframework\resource\ResourceMap;
@@ -30,7 +40,6 @@ use samsonphp\core\exception\CannotLoadModule;
 use samsonphp\core\exception\ViewPathNotFound;
 use samsonphp\core\Module;
 use samsonphp\event\Event;
-use samsonframework\container\ContainerBuilderInterface;
 
 /**
  * SamsonPHP Core.
@@ -40,45 +49,33 @@ use samsonframework\container\ContainerBuilderInterface;
  */
 class Core implements SystemInterface
 {
-    /** @var ContainerInterface */
-    protected $container;
-
-    /** @var ClassMetadata[] */
-    protected $metadataCollection = [];
-
-    /** @var ContainerBuilderInterface */
-    protected $builder;
-
-    /** @var string Current system environment */
-    protected $environment;
-
-    /* Rendering models */
     /** @deprecated Standard algorithm for view rendering */
     const RENDER_STANDART = 1;
     /** @deprecated View rendering algorithm from array of view variables */
     const RENDER_VARIABLE = 3;
-
     /** @deprecated @var  ResourceMap Current web-application resource map */
     public $map;
-
-    protected $classes = [];
-   
     /** @deprecated @var string Path to current web-application */
     public $system_path = __SAMSON_CWD__;
+
+    /* Rendering models */
     /** @deprecated @var string View path loading mode */
     public $render_mode = self::RENDER_STANDART;
+    /** @var ContainerInterface */
+    protected $container;
+    /** @var ClassMetadata[] */
+    protected $metadataCollection = [];
+    /** @var ContainerBuilderInterface */
+    protected $builder;
+    /** @var string Current system environment */
+    protected $environment;
+    protected $classes = [];
     /** @var Module Pointer to current active module */
     protected $active = null;
     /** @var bool Flag for outputting layout template, used for asynchronous requests */
     protected $async = false;
     /** @var string Path to main system template */
     protected $template_path = __SAMSON_DEFAULT_TEMPLATE;
-
-    /** @return \Container Get system container */
-    public function getContainer()
-    {
-        return $this->container;
-    }
 
     /**
      * Core constructor.
@@ -178,25 +175,6 @@ class Core implements SystemInterface
         $this->async = $async;
 
         return $this;
-    }
-
-    /** @see iCore::path() */
-    public function path($path = null)
-    {
-        // Если передан аргумент
-        if (func_num_args()) {
-            // Сформируем новый относительный путь к главному шаблону системы
-            $this->template_path = $path . $this->template_path;
-
-            // Сохраним относительный путь к Веб-приложению
-            $this->system_path = $path;
-
-            // Продолжил цепирование
-            return $this;
-        }
-
-        // Вернем текущее значение
-        return $this->system_path;
     }
 
     /**    @see iModule::active() */
@@ -430,8 +408,6 @@ class Core implements SystemInterface
         return $html;
     }
 
-    //[PHPCOMPRESSOR(remove,start)]
-
     /**
      * Load system from composer.json
      * @param string $dependencyFilePath Path to dependencies file
@@ -472,9 +448,9 @@ class Core implements SystemInterface
             ));
             if (array_key_exists('samsonframework_precontainer', $parameters)) {
                 $preModules[$moduleName] = $parameters;
-//                foreach (ResourceMap::get($modulePath)->classes as $className) {
-                    //$preClasses[str_replace(['\\', '/'], '_', $className)] = $className;
-//                }
+                foreach (ResourceMap::get($modulePath)->classes as $className) {
+                    $preClasses[str_replace(['\\', '/'], '_', $className)] = $className;
+                }
             }
             $modulesToLoad[$moduleName] = $parameters;
         }
@@ -518,8 +494,27 @@ class Core implements SystemInterface
         foreach ($preModules as $moduleName => $parameters) {
             $preMetadataCollection[$moduleName] = $this->metadataCollection[$moduleName];
         }
-        //$preMetadataCollection['core'] = $this->metadataCollection['core'];
-        //$preMetadataCollection['resource_map'] = $this->metadataCollection['resource_map'];
+
+        $configPath = $this->path() . 'app/config/config.xml';
+        if (file_exists($configPath)) {
+            $xmlConfigurator = new XmlResolver(new CollectionClassResolver([
+                \samsonframework\containercollection\attribute\Scope::class,
+                Name::class,
+                ClassName::class,
+                \samsonframework\containercollection\attribute\Service::class
+            ]), new CollectionPropertyResolver([
+                ClassName::class,
+                Value::class
+            ]), new CollectionMethodResolver([], new CollectionParameterResolver([
+                ClassName::class,
+                Value::class,
+                \samsonframework\containercollection\attribute\Service::class
+            ])));
+
+            $xmlCollector = new XmlMetadataCollector($xmlConfigurator);
+
+            $preMetadataCollection = $xmlCollector->collect(file_get_contents($configPath), $preMetadataCollection);
+        }
 
         $preContainer = $this->loadMetadata($preMetadataCollection, $preModules, $preClasses, 'ContainerPreLoad');
         /** @var ContainerInterface container */
@@ -528,6 +523,127 @@ class Core implements SystemInterface
         $this->active = $this->container->getLocal();
 
         return $this;
+    }
+
+    /**
+     * Load module from path to core.
+     *
+     * @param string $path       Path for module loading
+     * @param array  $parameters Collection of loading parameters
+     *
+     * @return string module name
+     * @throws \samsonphp\core\exception\CannotLoadModule
+     */
+    public function load($path, $parameters = array())
+    {
+        $name = '';
+        // Check path
+        if (file_exists($path)) {
+
+            /** @var ResourceMap $resourceMap Gather all resources from path */
+            $resourceMap = ResourceMap::get($path);
+
+            foreach ($resourceMap->classes as $classPath => $className) {
+                $this->classes[str_replace(['\\', '/'], '_', $className)] = $className;
+            }
+
+            if (isset($resourceMap->module[0])) {
+                /** @var string $controllerPath Path to module controller file */
+                $controllerPath = $resourceMap->module[1];
+
+                /** @var string $moduleClass Name of module controller class to load */
+                $moduleClass = $resourceMap->module[0];
+
+                // Require module controller class into PHP
+                if (file_exists($controllerPath)) {
+                    require_once($controllerPath);
+                }
+
+                // TODO: this should be done via composer autoload file field
+                // Iterate all function-style controllers and require them
+                foreach ($resourceMap->controllers as $controller) {
+                    require_once($controller);
+                }
+
+                $reflection = new \ReflectionClass($moduleClass);
+                $name = $reflection->getDefaultProperties();
+                $name = $this->createMetadata($moduleClass, $name['id'] ?? $moduleClass, $path);
+
+                $this->classes[$name] = $moduleClass;
+
+                /*$this->initModule(
+                    new $moduleClass($path, $resourceMap, $this),
+                    $parameters
+                );*/
+            } elseif (is_array($parameters) && isset($parameters['samsonphp_package_compressable']) && ($parameters['samsonphp_package_compressable'] == 1)) {
+                $name = $this->createMetadata(VirtualModule::class, $parameters['module_id'], $path);
+            }
+
+        } else {
+            throw new CannotLoadModule($path);
+        }
+
+        return $name;
+    }
+
+    //[PHPCOMPRESSOR(remove,start)]
+
+    protected function createMetadata($class, $name, $path, $scope = 'module')
+    {
+        $metadata = new ClassMetadata();
+        $class = ltrim($class, '\\');
+        $name = strtolower(ltrim($name, '\\'));
+        $metadata->className = $class;
+        $metadata->name = str_replace(['\\', '/'], '_', $name ?? $class);
+        $metadata->scopes[] = Builder::SCOPE_SERVICES;
+        $metadata->scopes[] = $scope;
+        $metadata->propertiesMetadata['system'] = new PropertyMetadata($metadata);
+        $metadata->propertiesMetadata['system']->name = 'system';
+        $metadata->propertiesMetadata['system']->dependency = __CLASS__;
+        $metadata->propertiesMetadata['system']->isPublic = false;
+        $metadata->propertiesMetadata['resourceMap'] = new PropertyMetadata($metadata);
+        $metadata->propertiesMetadata['resourceMap']->name = 'resourceMap';
+        $metadata->propertiesMetadata['resourceMap']->dependency = ResourceMap::class;
+        $metadata->propertiesMetadata['resourceMap']->isPublic = false;
+
+        // TODO: Now we need to remove and change constructors
+        $metadata->methodsMetadata['__construct'] = new MethodMetadata($metadata);
+
+        // Iterate constructor arguments to preserve arguments order and inject dependencies
+        foreach ((new \ReflectionMethod($class, '__construct'))->getParameters() as $parameter) {
+            if ($parameter->getName() === 'path') {
+                $metadata->methodsMetadata['__construct']->dependencies['path'] = $path;
+            } elseif ($parameter->getName() === 'resources') {
+                $metadata->methodsMetadata['__construct']->dependencies['resources'] = ResourceMap::class;
+            } elseif ($parameter->getName() === 'system') {
+                $metadata->methodsMetadata['__construct']->dependencies['system'] = '\\' . SystemInterface::class;
+            } elseif (!$parameter->isOptional()) {
+                $metadata->methodsMetadata['__construct']->dependencies[$parameter->getName()] = '';
+            }
+        }
+
+        $this->metadataCollection[$metadata->name] = $metadata;
+
+        return $metadata->name;
+    }
+
+    /** @see iCore::path() */
+    public function path($path = null)
+    {
+        // Если передан аргумент
+        if (func_num_args()) {
+            // Сформируем новый относительный путь к главному шаблону системы
+            $this->template_path = $path . $this->template_path;
+
+            // Сохраним относительный путь к Веб-приложению
+            $this->system_path = $path;
+
+            // Продолжил цепирование
+            return $this;
+        }
+
+        // Вернем текущее значение
+        return $this->system_path;
     }
 
     /**
@@ -700,68 +816,13 @@ class Core implements SystemInterface
 
         return null;
     }
-
-    /**
-     * Load module from path to core.
-     *
-     * @param string $path       Path for module loading
-     * @param array  $parameters Collection of loading parameters
-     *
-     * @return string module name
-     * @throws \samsonphp\core\exception\CannotLoadModule
-     */
-    public function load($path, $parameters = array())
-    {
-        $name = '';
-        // Check path
-        if (file_exists($path)) {
-
-            /** @var ResourceMap $resourceMap Gather all resources from path */
-            $resourceMap = ResourceMap::get($path);
-
-            foreach ($resourceMap->classes as $classPath => $className) {
-                $this->classes[str_replace(['\\', '/'], '_', $className)] = $className;
-            }
-
-            if (isset($resourceMap->module[0])) {
-                /** @var string $controllerPath Path to module controller file */
-                $controllerPath = $resourceMap->module[1];
-
-                /** @var string $moduleClass Name of module controller class to load */
-                $moduleClass = $resourceMap->module[0];
-
-                // Require module controller class into PHP
-                if (file_exists($controllerPath)) {
-                    require_once($controllerPath);
-                }
-
-                // TODO: this should be done via composer autoload file field
-                // Iterate all function-style controllers and require them
-                foreach ($resourceMap->controllers as $controller) {
-                    require_once($controller);
-                }
-
-                $reflection = new \ReflectionClass($moduleClass);
-                $name = $reflection->getDefaultProperties();
-                $name = $this->createMetadata($moduleClass, $name['id'] ?? $moduleClass, $path);
-
-                $this->classes[$name] = $moduleClass;
-
-                /*$this->initModule(
-                    new $moduleClass($path, $resourceMap, $this),
-                    $parameters
-                );*/
-            } elseif (is_array($parameters) && isset($parameters['samsonphp_package_compressable']) && ($parameters['samsonphp_package_compressable'] == 1)) {
-                $name = $this->createMetadata(VirtualModule::class, $parameters['module_id'], $path);
-            }
-
-        } else {
-            throw new CannotLoadModule($path);
-        }
-
-        return $name;
-    }
     //[PHPCOMPRESSOR(remove,end)]
+
+    /** @return \Container Get system container */
+    public function getContainer()
+    {
+        return $this->container;
+    }
 
     /** Магический метод для десериализации объекта */
     public function __wakeup()
@@ -773,43 +834,5 @@ class Core implements SystemInterface
     public function __sleep()
     {
         return array('module_stack', 'render_mode');
-    }
-
-    protected function createMetadata($class, $name, $path, $scope = 'module')
-    {
-        $metadata = new ClassMetadata();
-        $class = ltrim($class, '\\');
-        $name = strtolower(ltrim($name, '\\'));
-        $metadata->className = $class;
-        $metadata->name = str_replace(['\\', '/'], '_', $name ?? $class);
-        $metadata->scopes[] = Builder::SCOPE_SERVICES;
-        $metadata->scopes[] = $scope;
-        $metadata->propertiesMetadata['system'] = new PropertyMetadata($metadata);
-        $metadata->propertiesMetadata['system']->name = 'system';
-        $metadata->propertiesMetadata['system']->dependency = __CLASS__;
-        $metadata->propertiesMetadata['system']->isPublic = false;
-        $metadata->propertiesMetadata['resourceMap'] = new PropertyMetadata($metadata);
-        $metadata->propertiesMetadata['resourceMap']->name = 'resourceMap';
-        $metadata->propertiesMetadata['resourceMap']->dependency = ResourceMap::class;
-        $metadata->propertiesMetadata['resourceMap']->isPublic = false;
-
-        // TODO: Now we need to remove and change constructors
-        $metadata->methodsMetadata['__construct'] = new MethodMetadata($metadata);
-
-        foreach ((new \ReflectionMethod($class, '__construct'))->getParameters() as $parameter) {
-            if ($parameter->getName() === 'path') {
-                $metadata->methodsMetadata['__construct']->dependencies['path'] = $path;
-            } elseif ($parameter->getName() === 'resources') {
-                $metadata->methodsMetadata['__construct']->dependencies['resources'] = ResourceMap::class;
-            } elseif ($parameter->getName() === 'system') {
-                $metadata->methodsMetadata['__construct']->dependencies['system'] = '\\'.SystemInterface::class;
-            } elseif (!$parameter->isOptional()) {
-                $metadata->methodsMetadata['__construct']->dependencies[$parameter->getName()] = '';
-            }
-        }
-
-        $this->metadataCollection[$metadata->name] = $metadata;
-
-        return $metadata->name;
     }
 }
