@@ -23,6 +23,7 @@ use samsonframework\containerannotation\AnnotationResolver;
 use samsonframework\containerannotation\Injectable;
 use samsonframework\containerannotation\InjectArgument;
 use samsonframework\containerannotation\Service;
+use samsonframework\containercollection\attribute\ArrayValue;
 use samsonframework\containercollection\attribute\ClassName;
 use samsonframework\containercollection\attribute\Name;
 use samsonframework\containercollection\attribute\Value;
@@ -508,6 +509,7 @@ class Core implements SystemInterface
             ]), new CollectionMethodResolver([], new CollectionParameterResolver([
                 ClassName::class,
                 Value::class,
+                ArrayValue::class,
                 \samsonframework\containercollection\attribute\Service::class
             ])));
 
@@ -714,26 +716,30 @@ class Core implements SystemInterface
 
             foreach ($metadataCollection as $alias => $metadata) {
                 foreach ($metadata->propertiesMetadata as $property => $propertyMetadata) {
-                    $dependency = strtolower($propertyMetadata->dependency);
-                    if (array_key_exists($dependency, $implementsByAlias)) {
-                        $propertyMetadata->dependency = $implementsByAlias[$dependency][0];
-                    } elseif (array_key_exists($dependency, $serviceAliasesByClass)) {
-                        $propertyMetadata->dependency = $serviceAliasesByClass[$dependency][0];
-                    } else {
+                    if (is_string($propertyMetadata->dependency)) {
+                        $dependency = strtolower($propertyMetadata->dependency);
+                        if (array_key_exists($dependency, $implementsByAlias)) {
+                            $propertyMetadata->dependency = $implementsByAlias[$dependency][0];
+                        } elseif (array_key_exists($dependency, $serviceAliasesByClass)) {
+                            $propertyMetadata->dependency = $serviceAliasesByClass[$dependency][0];
+                        } else {
 
+                        }
                     }
                 }
                 foreach ($metadata->methodsMetadata as $method => $methodMetadata) {
                     foreach ($methodMetadata->dependencies as $argument => $dependency) {
-                        $dependency = strtolower($dependency);
-                        if (array_key_exists($dependency, $implementsByAlias)) {
-                            $methodMetadata->dependencies[$argument] = $implementsByAlias[$dependency][0];
-                            //$methodMetadata->parametersMetadata[$argument]->dependency = $implementsByAlias[$dependency][0];
-                        } elseif (array_key_exists($dependency, $serviceAliasesByClass)) {
-                            $methodMetadata->dependencies[$argument] = $serviceAliasesByClass[$dependency][0];
-                            //$methodMetadata->parametersMetadata[$argument]->dependency = $serviceAliasesByClass[$dependency][0];
-                        } else {
+                        if (is_string($dependency)) {
+                            $dependency = strtolower($dependency);
+                            if (array_key_exists($dependency, $implementsByAlias)) {
+                                $methodMetadata->dependencies[$argument] = $implementsByAlias[$dependency][0];
+                                //$methodMetadata->parametersMetadata[$argument]->dependency = $implementsByAlias[$dependency][0];
+                            } elseif (array_key_exists($dependency, $serviceAliasesByClass)) {
+                                $methodMetadata->dependencies[$argument] = $serviceAliasesByClass[$dependency][0];
+                                //$methodMetadata->parametersMetadata[$argument]->dependency = $serviceAliasesByClass[$dependency][0];
+                            } else {
 
+                            }
                         }
                     }
                 }
