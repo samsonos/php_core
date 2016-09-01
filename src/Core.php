@@ -662,7 +662,7 @@ class Core implements SystemInterface
         static $serviceAliasesByClass;
 
         $containerPath = $this->path().'www/cache/'.$containerName.'.php';
-//        if (!file_exists($containerPath)) {
+        if (!file_exists($containerPath)) {
 
 
             // Load annotation and parse classes
@@ -752,7 +752,7 @@ class Core implements SystemInterface
             file_put_contents($containerPath,
                 $this->builder->build($metadataCollection, $containerName, '', $parentContainer));
 
-//        }
+        }
 
         require_once($containerPath);
 
