@@ -447,12 +447,23 @@ class Core implements SystemInterface
                 is_array($parameters) ? $parameters : array($parameters),
                 array('module_id' => $requirement)
             ));
+
+            // Gather pre container modules and their classes
             if (array_key_exists('samsonframework_precontainer', $parameters)) {
                 $preModules[$moduleName] = $parameters;
+
+                // Add module classes
+                foreach (ResourceMap::get($modulePath)->modules as $module) {
+                    $preClasses[str_replace(['\\', '/'], '_', $module[0])] = $module[0];
+                }
+
+                // Add other module classes
                 foreach (ResourceMap::get($modulePath)->classes as $className) {
                     $preClasses[str_replace(['\\', '/'], '_', $className)] = $className;
                 }
             }
+
+
             $modulesToLoad[$moduleName] = $parameters;
         }
 
@@ -662,7 +673,7 @@ class Core implements SystemInterface
         static $serviceAliasesByClass;
 
         $containerPath = $this->path().'www/cache/'.$containerName.'.php';
-        if (!file_exists($containerPath)) {
+        //if (!file_exists($containerPath)) {
 
 
             // Load annotation and parse classes
@@ -678,7 +689,14 @@ class Core implements SystemInterface
             );
 
             $annotationCollector = new AnnotationMetadataCollector($resolver);
-            $metadataCollection = $annotationCollector->collect($classes, $metadataCollection);
+
+
+            // Rewrite collection by entity name
+            $newMetadataCollection = [];
+            foreach ($annotationCollector->collect($classes, $metadataCollection) as $metadata) {
+                $newMetadataCollection[$metadata->name] = $metadata;
+            }
+            $metadataCollection = $newMetadataCollection;
 
             // Regroup classes metadata by class name instead of alias
             $classesMetadata = [];
@@ -752,7 +770,7 @@ class Core implements SystemInterface
             file_put_contents($containerPath,
                 $this->builder->build($metadataCollection, $containerName, '', $parentContainer));
 
-        }
+        //}
 
         require_once($containerPath);
 
