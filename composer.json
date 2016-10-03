@@ -39,8 +39,7 @@
   "extra": {
     "branch-alias": {
       "dev-master": "1.x-dev"
-    },
-    "samson_module_ignore":1
+    }
   },
   "config":{
     "github-protocols":["https"]
