@@ -12,6 +12,7 @@ use Doctrine\Common\Annotations\AnnotationReader;
 use samsonframework\container\Builder;
 use samsonframework\container\ContainerBuilderInterface;
 use samsonframework\container\ContainerInterface;
+use samsonframework\container\definition\analyzer\annotation\annotation\InjectService;
 use samsonframework\container\metadata\ClassMetadata;
 use samsonframework\container\metadata\MethodMetadata;
 use samsonframework\container\metadata\PropertyMetadata;
@@ -22,7 +23,6 @@ use samsonframework\containerannotation\AnnotationPropertyResolver;
 use samsonframework\containerannotation\AnnotationResolver;
 use samsonframework\containerannotation\Injectable;
 use samsonframework\containerannotation\InjectArgument;
-use samsonframework\containerannotation\Service;
 use samsonframework\containercollection\attribute\ArrayValue;
 use samsonframework\containercollection\attribute\ClassName;
 use samsonframework\containercollection\attribute\Name;
@@ -41,12 +41,13 @@ use samsonphp\core\exception\CannotLoadModule;
 use samsonphp\core\exception\ViewPathNotFound;
 use samsonphp\core\Module;
 use samsonphp\event\Event;
+use samsonframework\container\definition\analyzer\annotation\annotation\Service as ServiceAnnotation;
 
 /**
  * SamsonPHP Core.
  *
  * @author Vitaly Iegorov <egorov@samsonos.com>
- * @Service("core")
+ * @ServiceAnnotation("core")
  */
 class Core implements SystemInterface
 {
@@ -83,11 +84,13 @@ class Core implements SystemInterface
      *
      * @param ContainerBuilderInterface $builder Container builder
      * @param ResourceMap|null $map system resources
-     * @InjectArgument(builder="\samsonframework\container\ContainerBuilderInterface")
-     * @InjectArgument(builder="\samsonframework\core\ResourceInterface")
+     * @InjectService(container="container")
+     * InjectArgument(builder="samsonframework\container\ContainerBuilderInterface")
+     * InjectArgument(builder="samsonframework\core\ResourceInterface")
      */
-    public function __construct(ContainerBuilderInterface $builder, ResourceMap $map)
+    public function __construct(ContainerInterface $container, ContainerBuilderInterface $builder = null, ResourceMap $map = null)
     {
+        $this->container = $container;
         $this->builder = $builder;
         // Get correct web-application path
         $this->system_path = __SAMSON_CWD__;
@@ -179,14 +182,14 @@ class Core implements SystemInterface
     }
 
     /**    @see iModule::active() */
-    public function &active(&$module = null)
+    public function active($module = null)
     {
         // Сохраним старый текущий модуль
-        $old = &$this->active;
+        $old = $this->active;
 
         // Если передано значение модуля для установки как текущий - проверим и установим его
         if (isset($module)) {
-            $this->active = &$module;
+            $this->active = $module;
         }
 
         // Вернем значение текущего модуля
@@ -200,7 +203,7 @@ class Core implements SystemInterface
      *
      * @return null|Module Found or active module
      */
-    public function &module($module = null)
+    public function module($module = null)
     {
         $return = null;
 
@@ -213,7 +216,7 @@ class Core implements SystemInterface
             $return = $this->container->get($module);
         }
 
-        // Ничего не получилось вернем ошибку
+//        // Ничего не получилось вернем ошибку
         if ($return === null) {
             e('Не возможно получить модуль(##) системы', E_SAMSON_CORE_ERROR, array($module));
         }
@@ -284,7 +287,7 @@ class Core implements SystemInterface
         // Security layer
         $securityResult = true;
         // Fire core security event
-        Event::fire('core.security', array(&$this, &$securityResult));
+//        Event::fire('core.security', array(&$this, &$securityResult));
 
         /** @var mixed $result External route controller action result */
         $result = false;
@@ -324,11 +327,11 @@ class Core implements SystemInterface
     }
 
     /**	@see iCore::template() */
-    public function template( $template = NULL, $absolutePath = false )
+    public function template($template = NULL, $absolutePath = false)
     {
         // Если передан аргумент
         if( func_num_args() ){
-            $this->template_path = ($absolutePath)?$template:$this->active->path().$template;
+            $this->template_path = ($absolutePath)?$template: $this->active->path().$template;
         }
 
         // Аргументы не переданы - вернем текущий путь к шаблону системы
@@ -413,232 +416,18 @@ class Core implements SystemInterface
      * Load system from composer.json
      * @param string $dependencyFilePath Path to dependencies file
      * @return $this Chaining
+     * @deprecated
      */
     public function composer($dependencyFilePath = null)
     {
-        $composerModules = array();
 
-        Event::fire(
-            'core.composer.create',
-            array(
-                &$composerModules,
-                isset($dependencyFilePath) ? $dependencyFilePath : $this->system_path,
-                array(
-                    'vendorsList' => array('samsonphp/', 'samsonos/', 'samsoncms/', 'samsonjavascript/'),
-                    'ignoreKey' => 'samson_module_ignore',
-                    'includeKey' => 'samson_module_include'
-                )
-            )
-        );
-
-        $modulesToLoad = [];
-        $preClasses = [
-            str_replace(['\\', '/'], '_', __CLASS__) => __CLASS__,
-            str_replace(['\\', '/'], '_', ResourceMap::class) => ResourceMap::class
-        ];
-//        $this->classes = array_merge($this->classes, $preClasses);
-        $preModules = [];
-
-        // Iterate requirements
-        foreach ($composerModules as $requirement => $parameters) {
-            $modulePath = __SAMSON_CWD__ . __SAMSON_VENDOR_PATH . $requirement;
-            $moduleName = $this->load($modulePath,
-            array_merge(
-                is_array($parameters) ? $parameters : array($parameters),
-                array('module_id' => $requirement)
-            ));
-
-            // Gather pre container modules and their classes
-            if (array_key_exists('samsonframework_precontainer', $parameters)) {
-                $preModules[$moduleName] = $parameters;
-
-                // Add module classes
-                foreach (ResourceMap::get($modulePath)->modules as $module) {
-                    $preClasses[str_replace(['\\', '/'], '_', $module[0])] = $module[0];
-                }
-
-                // Add other module classes
-                foreach (ResourceMap::get($modulePath)->classes as $className) {
-                    $preClasses[str_replace(['\\', '/'], '_', $className)] = $className;
-                }
-            }
-
-
-            $modulesToLoad[$moduleName] = $parameters;
-        }
-
-        // Create local module and set it as active
-        $this->createMetadata(VirtualModule::class, 'local', $this->system_path);
-
-        // TODO: This should be changed to one single logic
-        // Require all local module model files
-        foreach ($this->map->models as $model) {
-            // TODO: Why have to require once?
-            require_once($model);
-        }
-
-        // Create all local modules
-        foreach ($this->map->controllers as $controller) {
-            // Require class into PHP
-            require($controller);
-
-            //new VirtualModule($this->system_path, $this->map, $this, basename($controller, '.php'));
-
-            $this->createMetadata(VirtualModule::class, basename($controller, '.php'), $this->system_path);
-        }
-
-        $localModulesPath = '../src';
-        ResourceMap::get('cache');
-        // TODO: Nested modules relation
-        for ($i = 0; $i < 2; $i++) {
-            $resourceMap = ResourceMap::get($localModulesPath);
-
-            foreach ($resourceMap->modules as $moduleFile) {
-                $modulePath = str_replace(realpath($localModulesPath), '', $moduleFile[1]);
-                $modulePath = explode('/', $modulePath);
-                $modulePath = $localModulesPath . '/' . $modulePath[1];
-                $moduleName = $this->load($modulePath, $parameters);
-                $modulesToLoad[$moduleName] = $parameters;
-            }
-        }
-
-        $preMetadataCollection = [];
-        foreach ($preModules as $moduleName => $parameters) {
-            $preMetadataCollection[$moduleName] = $this->metadataCollection[$moduleName];
-        }
-
-        $configPath = $this->path() . 'app/config/config.xml';
-        if (file_exists($configPath)) {
-            $xmlConfigurator = new XmlResolver(new CollectionClassResolver([
-                \samsonframework\containercollection\attribute\Scope::class,
-                Name::class,
-                ClassName::class,
-                \samsonframework\containercollection\attribute\Service::class
-            ]), new CollectionPropertyResolver([
-                ClassName::class,
-                Value::class
-            ]), new CollectionMethodResolver([], new CollectionParameterResolver([
-                ClassName::class,
-                Value::class,
-                ArrayValue::class,
-                \samsonframework\containercollection\attribute\Service::class
-            ])));
-
-            $xmlCollector = new XmlMetadataCollector($xmlConfigurator);
-
-            $preMetadataCollection = $xmlCollector->collect(file_get_contents($configPath), $preMetadataCollection);
-        }
-
-        $preContainer = $this->loadMetadata($preMetadataCollection, $preModules, $preClasses, 'ContainerPreLoad');
-        /** @var ContainerInterface container */
-        $this->container = $this->loadMetadata($this->metadataCollection, $modulesToLoad, $this->classes, 'Container', $preContainer);
-
-        $this->active = $this->container->getLocal();
+        $this->active = new VirtualModule($this->system_path, $this->map, $this, 'local');
 
         return $this;
     }
 
-    /**
-     * Load module from path to core.
-     *
-     * @param string $path       Path for module loading
-     * @param array  $parameters Collection of loading parameters
-     *
-     * @return string module name
-     * @throws \samsonphp\core\exception\CannotLoadModule
-     */
-    public function load($path, $parameters = array())
-    {
-        $name = '';
-        // Check path
-        if (file_exists($path)) {
-
-            /** @var ResourceMap $resourceMap Gather all resources from path */
-            $resourceMap = ResourceMap::get($path);
-
-            foreach ($resourceMap->classes as $classPath => $className) {
-                $this->classes[str_replace(['\\', '/'], '_', $className)] = $className;
-            }
-
-            if (isset($resourceMap->module[0])) {
-                /** @var string $controllerPath Path to module controller file */
-                $controllerPath = $resourceMap->module[1];
-
-                /** @var string $moduleClass Name of module controller class to load */
-                $moduleClass = $resourceMap->module[0];
-
-                // Require module controller class into PHP
-                if (file_exists($controllerPath)) {
-                    require_once($controllerPath);
-                }
-
-                // TODO: this should be done via composer autoload file field
-                // Iterate all function-style controllers and require them
-                foreach ($resourceMap->controllers as $controller) {
-                    require_once($controller);
-                }
-
-                $reflection = new \ReflectionClass($moduleClass);
-                $name = $reflection->getDefaultProperties();
-                $name = $this->createMetadata($moduleClass, $name['id'] ?? $moduleClass, $path);
-
-                $this->classes[$name] = $moduleClass;
-
-                /*$this->initModule(
-                    new $moduleClass($path, $resourceMap, $this),
-                    $parameters
-                );*/
-            } elseif (is_array($parameters) && isset($parameters['samsonphp_package_compressable']) && ($parameters['samsonphp_package_compressable'] == 1)) {
-                $name = $this->createMetadata(VirtualModule::class, $parameters['module_id'], $path);
-            }
-
-        } else {
-            throw new CannotLoadModule($path);
-        }
-
-        return $name;
-    }
 
     //[PHPCOMPRESSOR(remove,start)]
-
-    protected function createMetadata($class, $name, $path, $scope = 'module')
-    {
-        $metadata = new ClassMetadata();
-        $class = ltrim($class, '\\');
-        $name = strtolower(ltrim($name, '\\'));
-        $metadata->className = $class;
-        $metadata->name = str_replace(['\\', '/'], '_', $name ?? $class);
-        $metadata->scopes[] = Builder::SCOPE_SERVICES;
-        $metadata->scopes[] = $scope;
-        $metadata->propertiesMetadata['system'] = new PropertyMetadata($metadata);
-        $metadata->propertiesMetadata['system']->name = 'system';
-        $metadata->propertiesMetadata['system']->dependency = __CLASS__;
-        $metadata->propertiesMetadata['system']->isPublic = false;
-        $metadata->propertiesMetadata['resourceMap'] = new PropertyMetadata($metadata);
-        $metadata->propertiesMetadata['resourceMap']->name = 'resourceMap';
-        $metadata->propertiesMetadata['resourceMap']->dependency = ResourceMap::class;
-        $metadata->propertiesMetadata['resourceMap']->isPublic = false;
-
-        // TODO: Now we need to remove and change constructors
-        $metadata->methodsMetadata['__construct'] = new MethodMetadata($metadata);
-
-        // Iterate constructor arguments to preserve arguments order and inject dependencies
-        foreach ((new \ReflectionMethod($class, '__construct'))->getParameters() as $parameter) {
-            if ($parameter->getName() === 'path') {
-                $metadata->methodsMetadata['__construct']->dependencies['path'] = $path;
-            } elseif ($parameter->getName() === 'resources') {
-                $metadata->methodsMetadata['__construct']->dependencies['resources'] = ResourceMap::class;
-            } elseif ($parameter->getName() === 'system') {
-                $metadata->methodsMetadata['__construct']->dependencies['system'] = '\\' . SystemInterface::class;
-            } elseif (!$parameter->isOptional()) {
-                $metadata->methodsMetadata['__construct']->dependencies[$parameter->getName()] = '';
-            }
-        }
-
-        $this->metadataCollection[$metadata->name] = $metadata;
-
-        return $metadata->name;
-    }
 
     /** @see iCore::path() */
     public function path($path = null)
@@ -659,187 +448,6 @@ class Core implements SystemInterface
         return $this->system_path;
     }
 
-    /**
-     * @param ClassMetadata[] $metadataCollection
-     * @param array $modulesToLoad
-     * @param array $classes
-     * @param string $containerName
-     * @param ContainerInterface $parentContainer
-     * @return ContainerInterface
-     */
-    protected function loadMetadata(array $metadataCollection, array $modulesToLoad, array $classes, $containerName = 'Container', ContainerInterface $parentContainer = null) : ContainerInterface
-    {
-        static $implementsByAlias;
-        static $serviceAliasesByClass;
-
-        $containerPath = $this->path().'www/cache/'.$containerName.'.php';
-        //if (!file_exists($containerPath)) {
-
-
-            // Load annotation and parse classes
-            new Injectable();
-            new InjectArgument(['var' => 'type']);
-            new Service(['value' => '']);
-
-            $reader = new AnnotationReader();
-            $resolver = new AnnotationResolver(
-                new AnnotationClassResolver($reader),
-                new AnnotationPropertyResolver($reader),
-                new AnnotationMethodResolver($reader)
-            );
-
-            $annotationCollector = new AnnotationMetadataCollector($resolver);
-
-
-            // Rewrite collection by entity name
-            $newMetadataCollection = [];
-            foreach ($annotationCollector->collect($classes, $metadataCollection) as $metadata) {
-                $newMetadataCollection[$metadata->name] = $metadata;
-            }
-            $metadataCollection = $newMetadataCollection;
-
-            // Regroup classes metadata by class name instead of alias
-            $classesMetadata = [];
-            foreach ($metadataCollection as $alias => $classMetadata) {
-                $classesMetadata[$classMetadata->className] = $classMetadata;
-            }
-
-            // Gather all interface implementations
-            $implementsByAlias = $implementsByAlias ?? [];
-            foreach (get_declared_classes() as $class) {
-                $classImplements = class_implements($class);
-                foreach (get_declared_interfaces() as $interface) {
-                    if (in_array($interface, $classImplements, true)) {
-                        if (array_key_exists($class, $classesMetadata)) {
-                            $implementsByAlias[strtolower('\\' . $interface)][] = $classesMetadata[$class]->name;
-                        }
-                    }
-                }
-            }
-
-            // Gather all class implementations
-            $serviceAliasesByClass = $serviceAliasesByClass ?? [];
-            foreach (get_declared_classes() as $class) {
-                if (array_key_exists($class, $classesMetadata)) {
-                    $serviceAliasesByClass[strtolower('\\' . $class)][] = $classesMetadata[$class]->name;
-                }
-            }
-
-            /**
-             * TODO: now we need to implement not forcing to load fixed dependencies into modules
-             * to give ability to change constructors and inject old variable into properties
-             * and them after refactoring remove them. With this we can only specify needed dependencies
-             * in new modules, and still have old ones working.
-             */
-
-            foreach ($metadataCollection as $alias => $metadata) {
-                foreach ($metadata->propertiesMetadata as $property => $propertyMetadata) {
-                    if (is_string($propertyMetadata->dependency)) {
-                        $dependency = strtolower($propertyMetadata->dependency);
-                        if (array_key_exists($dependency, $implementsByAlias)) {
-                            $propertyMetadata->dependency = $implementsByAlias[$dependency][0];
-                        } elseif (array_key_exists($dependency, $serviceAliasesByClass)) {
-                            $propertyMetadata->dependency = $serviceAliasesByClass[$dependency][0];
-                        } else {
-
-                        }
-                    }
-                }
-                foreach ($metadata->methodsMetadata as $method => $methodMetadata) {
-                    foreach ($methodMetadata->dependencies as $argument => $dependency) {
-                        if (is_string($dependency)) {
-                            $dependency = strtolower($dependency);
-                            if (array_key_exists($dependency, $implementsByAlias)) {
-                                $methodMetadata->dependencies[$argument] = $implementsByAlias[$dependency][0];
-                                //$methodMetadata->parametersMetadata[$argument]->dependency = $implementsByAlias[$dependency][0];
-                            } elseif (array_key_exists($dependency, $serviceAliasesByClass)) {
-                                $methodMetadata->dependencies[$argument] = $serviceAliasesByClass[$dependency][0];
-                                //$methodMetadata->parametersMetadata[$argument]->dependency = $serviceAliasesByClass[$dependency][0];
-                            } else {
-
-                            }
-                        }
-                    }
-                }
-            }
-
-            // Generate XML configs
-            //(new XMLBuilder())->buildXMLConfig($metadataCollection, getcwd().'/cache/config_');
-
-            // Load container class
-            file_put_contents($containerPath,
-                $this->builder->build($metadataCollection, $containerName, '', $parentContainer));
-
-        //}
-
-        require_once($containerPath);
-
-
-        // Inject current core into container
-        /** @var ContainerInterface $container */
-        $this->container = new $containerName();
-        $containerReflection = new \ReflectionClass(get_class($this->container));
-        $serviceProperty = $containerReflection->getProperty(Builder::DI_FUNCTION_SERVICES);
-        $serviceProperty->setAccessible(true);
-        $containerServices = $serviceProperty->getValue($this->container);
-        $containerServices['core'] = $this;
-        $serviceProperty->setValue($this->container, $containerServices);
-        $serviceProperty->setAccessible(false);
-        if ($parentContainer !== null) {
-            $this->container->delegate($parentContainer);
-        }
-
-        foreach ($modulesToLoad as $identifier => $parameters) {
-            $instance = $this->container->get($identifier);
-
-            // Set composer parameters
-            $instance->composerParameters = $parameters;
-
-            // TODO: Change event signature to single approach
-            // Fire core module load event
-            Event::fire('core.module_loaded', [$identifier, &$instance]);
-
-            // Signal core module configure event
-            Event::signal('core.module.configure', [&$instance, $identifier]);
-
-            if ($instance instanceof PreparableInterface) {
-                // Call module preparation handler
-                if (!$instance->prepare()) {
-                    //throw new \Exception($identifier.' - Module preparation stage failed');
-                }
-            }
-
-            // Try to set module parent module
-            $instance->parent = $this->getClassParentModule(get_parent_class($instance));
-        }
-
-        return $this->container;
-    }
-
-    /**
-     * Find parent module by OOP class inheritance.
-     *
-     * @param string $className Class name for searching parent modules
-     * @param array  $ignoredClasses Collection of ignored classes
-     *
-     * @return null|mixed Parent service instance if present
-     */
-    protected function getClassParentModule(
-        $className,
-        array $ignoredClasses = [ExternalModule::class, CompressableExternalModule::class, Service::class, CompressableService::class]
-    ) {
-        // Skip ignored class names
-        if (!in_array($className, $ignoredClasses, true)) {
-            // Iterate loaded services
-            foreach ($this->getContainer()->getServices('module') as $service) {
-                if (get_class($service) === $className) {
-                    return $service;
-                }
-            }
-        }
-
-        return null;
-    }
     //[PHPCOMPRESSOR(remove,end)]
 
     /** @return \Container Get system container */

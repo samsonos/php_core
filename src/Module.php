@@ -258,7 +258,7 @@ class Module implements \ArrayAccess, iModule
     public function render($controller = null)
     {
         // Switch current system active module
-        $old = &$this->system->active($this);
+        $old = $this->system->active($this);
 
         // If specific controller action should be run
         if (isset($controller)) {

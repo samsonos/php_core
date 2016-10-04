@@ -41,7 +41,7 @@ function &s()
  * @return \samson\core\Module Текущую / Модель по её имени / или FALSE если модель не найдена
  * @deprecated Use $this->system->module() in module context
  */
-function &m($module = NULL)
+function m($module = NULL)
 {
     // т.к. эта функция вызывается очень часто - создадим статическую переменную
     static $_s;

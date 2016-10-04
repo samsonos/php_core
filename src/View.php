@@ -26,7 +26,7 @@
 function v($name, $realName = NULL)
 {
     // Получим указатель на текущий модуль
-    $m = &m();
+    $m = m();
 
     // Если передана ПРАВДА - используем первый параметр как имя
     if (is_bool($realName) && ($realName === true)) $realName = '__dm__' . $name;
@@ -47,7 +47,7 @@ function v($name, $realName = NULL)
 function iv($name, $realName = NULL)
 {
     // Cache current module pointer
-    $m = &m();
+    $m = m();
 
     // If view variable is set - echo it
     if (isvalue($m, $name)) echo $m[$name];
@@ -65,7 +65,7 @@ function iv($name, $realName = NULL)
  */
 function vi($name)
 {
-    $m = &m();
+    $m = m();
     if ($m->offsetExists($name)) echo htmlentities($m[$name], ENT_QUOTES, 'UTF-8');
 }
 
@@ -147,7 +147,7 @@ function isvalue($m, $name, $value = null)
 function isval($name, $value = null, $success = null, $failure = null, $inverse = false)
 {
     // Pointer to current module
-    $m = &m();
+    $m = m();
 
     // Flag for checking module value
     $ok = isvalue($m, $name, $value);
@@ -221,7 +221,7 @@ function isnval($name, $value = null, $success = null, $failure = null)
  */
 function vhref($name, $href = null, $class = null, $id = null, $title = null)
 {
-    $m = &m();
+    $m = m();
 
     // If value can be displayed
     if (isvalue($m, $name) || isvalue($m, $href)) {
@@ -245,7 +245,7 @@ function vhref($name, $href = null, $class = null, $id = null, $title = null)
 function vimg($src, $id = '', $class = '', $alt = '', $dummy = null)
 {
     // Закешируем ссылку на текущий модуль
-    $m = &m();
+    $m = m();
 
     // Проверим задана ли указанная переменная представления в текущем модуле
     if ($m->offsetExists($src)) $src = $m[$src];
@@ -270,7 +270,7 @@ function vimg($src, $id = '', $class = '', $alt = '', $dummy = null)
 function vdate($name, $format = 'h:i d.m.y', $function = 'date')
 {
     // Cache current module
-    $m = &m();
+    $m = m();
 
     // If view variable is set - echo with format
     if ($m->offsetExists($name)) echo $function($format, strtotime($m[$name]));
