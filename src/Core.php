@@ -281,8 +281,9 @@ class Core implements SystemInterface
 
         // Security layer
         $securityResult = true;
+        $coreLink = &$this;
         // Fire core security event
-        Event::fire('core.security', array(&$this, &$securityResult));
+        Event::fire('core.security', array(&$coreLink, &$securityResult));
 
         /** @var mixed $result External route controller action result */
         $result = false;
@@ -290,7 +291,7 @@ class Core implements SystemInterface
         // If we have passed security application layer
         if ($securityResult) {
             // Fire core routing event - go to routing application layer
-            Event::signal('core.routing', array(&$this, &$result, $default));
+            Event::signal('core.routing', array(&$coreLink, &$result, $default));
         }
 
         // If no one has passed back routing callback
